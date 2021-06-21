@@ -1,0 +1,39 @@
+===============
+C++ source code
+===============
+
+Explanations of the C++ source.
+
+Macro definitions
+=================
+
+All macro definitions are located in the **macrodef.h** file.
+Through macro definitions we controll the functionality of the whole system. 
+Definitions should be set here before compiling the parfis library.
+
+Global declarations
+===================
+
+These are declarations used commonly in the code, defined in **global.h**.
+
+.. cpp:var:: ELECTRON_MASS
+
+    Electron mass in kg.
+
+
+Data structures and types
+=========================
+
+Data structures and types that are used all over the system are declared
+and defined in the file **datastruct.h/datastruct.cpp**.
+
+.. cpp:type:: state_t
+
+    Type of the particle state variables position and velocity. This can 
+    be set to ``double`` or ``float`` by setting the :cpp:var:`STATE_NUMERIC_TYPE`.
+
+    .. note::
+
+        When set to ``double`` the working application occupies approximately two 
+        times  more RAM, than when ``float`` is set.
+
