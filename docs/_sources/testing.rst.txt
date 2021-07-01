@@ -1,0 +1,22 @@
+=======
+Testing
+=======
+
+If you run tests for the first time see :ref:`howto-preparetest`.
+
+.. _testing-maincpp:
+
+Tests' `main.cpp`
+-----------------
+
+The main function for all tests is ``cpp/test/src/main``:
+
+.. index:: main.cpp (cpp/test/src/main.cpp)
+
+.. literalinclude:: ../../cpp/test/src/main.cpp
+    :caption: cpp/test/src/main.cpp
+    :language: cpp
+    :linenos:
+
+You can run speciffic test by filtering everything else except the desired 
+function.

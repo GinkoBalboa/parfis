@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>C++ source code documentation &mdash; Parfis v0.1.0 documentation</title>
+  <title>C++ source code &mdash; Parfis v0.1.0 documentation</title>
   
 
   
@@ -29,9 +29,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -39,7 +38,6 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Software design and organisation" href="codedesign.html" />
     <link rel="prev" title="Initialization file" href="inifile.html" /> 
 </head>
 
@@ -91,15 +89,12 @@
 <li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="inifile.html">Initialization file</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">C++ source code documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#macrodef-h">macrodef.h</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#global-h">global.h</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#datastruct-h">datastruct.h</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#parfis-h">parfis.h</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">C++ source code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#macro-definitions">Macro definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#global-declarations">Global declarations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#data-structures-and-types">Data structures and types</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="codedesign.html">Software design and organisation</a></li>
 </ul>
 
             
@@ -146,7 +141,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>C++ source code documentation</li>
+      <li>C++ source code</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -187,234 +182,22 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="c-source-code-documentation">
-<h1>C++ source code documentation<a class="headerlink" href="#c-source-code-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="c-source-code">
+<h1>C++ source code<a class="headerlink" href="#c-source-code" title="Permalink to this headline">¶</a></h1>
 <p>Explanations of the C++ source.</p>
-<div class="section" id="macrodef-h">
-<h2>macrodef.h<a class="headerlink" href="#macrodef-h" title="Permalink to this headline">¶</a></h2>
-<p>All macro definitions are located in the <strong>macrodef.h</strong> file. With these macro definitions we control the functionality of the whole system.
+<div class="section" id="macro-definitions">
+<h2>Macro definitions<a class="headerlink" href="#macro-definitions" title="Permalink to this headline">¶</a></h2>
+<p>All macro definitions are located in the <strong>macrodef.h</strong> file.
+Through macro definitions we controll the functionality of the whole system.
 Definitions should be set here before compiling the parfis library.</p>
 </div>
-<div class="section" id="global-h">
-<h2>global.h<a class="headerlink" href="#global-h" title="Permalink to this headline">¶</a></h2>
-<dl class="cpp function">
-<dt id="_CPPv4N6parfis5tostrEi">
-<span class="target" id="global_8h_1ab846cf89ec10e0fc635e44dbb098ec2c"></span>std::string <code class="sig-prename descclassname">parfis<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">tostr</code><span class="sig-paren">(</span>int <em>num</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6parfis5tostrEi" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Functions tostr() convert from a type (given in argument) to string. </p>
-</dd></dl>
-
-<dl class="cpp function">
-<dt id="_CPPv4N6parfis7stovecsERKNSt6stringEccc">
-<span class="target" id="global_8h_1a01a26e16639e3683d0713ee5a216ae60"></span>std::vector&lt;std::string&gt; <code class="sig-prename descclassname">parfis<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">stovecs</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>str</em>, char <em>bra</em> = '{', char <em>ket</em> = '}', char <em>sep</em> = ','<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6parfis7stovecsERKNSt6stringEccc" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Converts string to a vector of strings.</p>
-<p>Function returs vector of strings that is parsed between <em>bra</em> and <em>ket</em> characters, with <em>sep</em> as a separator. Default values for bra and ket are ‘{‘ and ‘}’ characters and the separator is ‘,’. For example stovecs(“{a,b,c}”) returns vector {“a”, “b”, “c”}. </p>
-</dd></dl>
-
-<dl class="cpp function">
-<dt id="_CPPv4N6parfis11cleanStringERKNSt6stringE">
-<span class="target" id="global_8h_1a7b4df4accb693beb41326e5a0fd383af"></span>std::string <code class="sig-prename descclassname">parfis<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">cleanString</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>str</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6parfis11cleanStringERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Removes spaces, tabs and commend lines</p>
-<p>Comment line starts with ‘#’ and ends with newline. </p>
-</dd></dl>
-
-<dl class="cpp function">
-<dt id="_CPPv4N6parfis14getStringValueERKNSt6stringEPKc">
-<span class="target" id="global_8h_1a3d0871a1e3b0418440f260acd48fff96"></span>std::string <code class="sig-prename descclassname">parfis<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">getStringValue</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>data</em>, <em class="property">const</em> char *<em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6parfis14getStringValueERKNSt6stringEPKc" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Function for parsing ‘key=value’ strings.</p>
-<p>If the key doesn’t exist or not properly formated, returns empty string. </p>
-</dd></dl>
-
-<dl class="cpp function">
-<dt id="_CPPv4N6parfis16getStringSectionERKNSt6stringEPKc">
-<span class="target" id="global_8h_1ac004d47d02b27d92224391bfba858a96"></span>std::string <code class="sig-prename descclassname">parfis<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">getStringSection</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>data</em>, <em class="property">const</em> char *<em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6parfis16getStringSectionERKNSt6stringEPKc" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Function for parsing ‘[section]’ strings.</p>
-<p>If the key doesn’t exist or not properly formated, returns empty string. Section strings are used in the initialization files. </p>
-</dd></dl>
-
-<dl class="cpp function">
-<dt id="_CPPv4I0EN6parfis7toValueE1TRKNSt6stringEPKc">
-template&lt;class <code class="sig-name descname">T</code>&gt;<br /><span class="target" id="global_8h_1a967f8d8509b02f71ff4981bd0e74b82c"></span><a class="reference internal" href="#_CPPv4I0EN6parfis7toValueE1TRKNSt6stringEPKc" title="parfis::toValue::T">T</a> <code class="sig-prename descclassname">parfis<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">toValue</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>data</em>, <em class="property">const</em> char *<em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0EN6parfis7toValueE1TRKNSt6stringEPKc" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Template that converts <em>data</em> string to a value</p>
-<p>Implementation of the template specializes for certain types T. The <em>data</em> string is of the format ‘key=value’, and the <em>key</em> is the the name of the ‘key’. Internaly this function calls <a class="reference internal" href="#global_8h_1a3d0871a1e3b0418440f260acd48fff96"><span class="std std-ref">getStringValue()</span></a>. </p>
-</dd></dl>
-
-<dl class="group">
-<dt>
-<span class="target" id="group__physical__constants"></span><em>group</em> <code class="sig-name descname">physical_constants</code></dt>
-<dd><div class="breathe-sectiondef docutils container">
-<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<div class="section" id="global-declarations">
+<h2>Global declarations<a class="headerlink" href="#global-declarations" title="Permalink to this headline">¶</a></h2>
+<p>These are declarations used commonly in the code, defined in <strong>global.h</strong>.</p>
 <dl class="cpp var">
-<dt id="_CPPv49KG_IN_AMU">
-<span class="target" id="group__physical__constants_1gab4ee351932b6671ae32ab1f2c608f71e"></span><em class="property">const</em> double <code class="sig-name descname">KG_IN_AMU</code> = 1.66053906660e-27<a class="headerlink" href="#_CPPv49KG_IN_AMU" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Atomic mass unit [kg] </p>
-</dd></dl>
-
-<dl class="cpp var">
-<dt id="_CPPv413ELECTRON_MASS">
-<span class="target" id="group__physical__constants_1ga2ace5183b6cfd0252ad542858d620c4b"></span><em class="property">const</em> double <code class="sig-name descname">ELECTRON_MASS</code> = 9.1093837015e-31<a class="headerlink" href="#_CPPv413ELECTRON_MASS" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Electron mass [kg] </p>
-</dd></dl>
-
-<dl class="cpp var">
-<dt id="_CPPv417ELEMENTARY_CHARGE">
-<span class="target" id="group__physical__constants_1ga6abebe6ba3e64e26b427c24571c42d96"></span><em class="property">const</em> double <code class="sig-name descname">ELEMENTARY_CHARGE</code> = 1.602176634e-19<a class="headerlink" href="#_CPPv417ELEMENTARY_CHARGE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Elementary charge [C] </p>
-</dd></dl>
-
-<dl class="cpp var">
-<dt id="_CPPv411JOULE_IN_EV">
-<span class="target" id="group__physical__constants_1ga0715eefbf0a9feddc71b0c9d25d5126b"></span><em class="property">const</em> double <code class="sig-name descname">JOULE_IN_EV</code> = 1.602176634e-19<a class="headerlink" href="#_CPPv411JOULE_IN_EV" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>One joule in electronvolts [eV] </p>
-</dd></dl>
-
-<dl class="cpp var">
-<dt id="_CPPv411EV_IN_JOULE">
-<span class="target" id="group__physical__constants_1ga3f4678bc1463847cbe08e583c98cd05d"></span><em class="property">const</em> double <code class="sig-name descname">EV_IN_JOULE</code> = 6.2415090744608e18<a class="headerlink" href="#_CPPv411EV_IN_JOULE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>One electronvolt in joules [J] </p>
-</dd></dl>
-
-</div>
-</dd></dl>
-
-</div>
-<div class="section" id="datastruct-h">
-<h2>datastruct.h<a class="headerlink" href="#datastruct-h" title="Permalink to this headline">¶</a></h2>
-<dl class="cpp struct">
-<dt id="_CPPv4I0EN6parfis3XYZE">
-template&lt;class <code class="sig-name descname">T</code>&gt;<br /><span class="target" id="structparfis_1_1_x_y_z"></span><em class="property">struct </em><code class="sig-prename descclassname">parfis<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">XYZ</code><a class="headerlink" href="#_CPPv4I0EN6parfis3XYZE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Struct that represents a 3d vector with components of type T. </p>
-<p>The struct has three member variables <strong>x</strong>, <strong>y</strong> and <strong>z</strong> of type T. </p>
-<div class="breathe-sectiondef docutils container">
-<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
-<dl class="cpp function">
-<dt id="_CPPv4N6parfis3XYZ3lenEv">
-<span class="target" id="structparfis_1_1_x_y_z_1ae24f3ef873932e517473569d8fa33c18"></span><em class="property">inline</em> <a class="reference internal" href="#_CPPv4I0EN6parfis3XYZE" title="parfis::XYZ::T">T</a> <code class="sig-name descname">len</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6parfis3XYZ3lenEv" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Returns the vector length in Eucledian metric.</p>
-<p>The length is calculated as <span class="math notranslate nohighlight">\( \sqrt{x^2 + y^2 + z^2} \)</span> </p>
-</dd></dl>
-
-<dl class="cpp function">
-<dt id="_CPPv4N6parfis3XYZ10lenSquaredEv">
-<span class="target" id="structparfis_1_1_x_y_z_1a26566546b50fb7429fd21ed6a4548f9e"></span><em class="property">inline</em> <a class="reference internal" href="#_CPPv4I0EN6parfis3XYZE" title="parfis::XYZ::T">T</a> <code class="sig-name descname">lenSquared</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6parfis3XYZ10lenSquaredEv" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Returns the squared vector length in Eucledian metric.</p>
-<p>The length is calculated as <span class="math notranslate nohighlight">\( x^2 + y^2 + z^2 \)</span> </p>
-</dd></dl>
-
-</div>
-<div class="breathe-sectiondef docutils container">
-<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
-<dl class="cpp var">
-<dt id="_CPPv4N6parfis3XYZ1xE">
-<span class="target" id="structparfis_1_1_x_y_z_1a0255ef5fb607082acaeb1942464be4dc"></span><a class="reference internal" href="#_CPPv4I0EN6parfis3XYZE" title="parfis::XYZ::T">T</a> <code class="sig-name descname">x</code><a class="headerlink" href="#_CPPv4N6parfis3XYZ1xE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Variable x </p>
-</dd></dl>
-
-<dl class="cpp var">
-<dt id="_CPPv4N6parfis3XYZ1yE">
-<span class="target" id="structparfis_1_1_x_y_z_1ab12028d22825d9ae8cbe60c89ca71166"></span><a class="reference internal" href="#_CPPv4I0EN6parfis3XYZE" title="parfis::XYZ::T">T</a> <code class="sig-name descname">y</code><a class="headerlink" href="#_CPPv4N6parfis3XYZ1yE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Variable y </p>
-</dd></dl>
-
-<dl class="cpp var">
-<dt id="_CPPv4N6parfis3XYZ1zE">
-<span class="target" id="structparfis_1_1_x_y_z_1a6433080bb116ff731aa6db9cb7048847"></span><a class="reference internal" href="#_CPPv4I0EN6parfis3XYZE" title="parfis::XYZ::T">T</a> <code class="sig-name descname">z</code><a class="headerlink" href="#_CPPv4N6parfis3XYZ1zE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Variable z </p>
-</dd></dl>
-
-</div>
-<div class="breathe-sectiondef docutils container">
-<p class="breathe-sectiondef-title rubric" id="breathe-section-title-friends">Friends</p>
-<dl class="cpp function">
-<dt id="_CPPv4N6parfis3XYZlsERNSt7ostreamERK3XYZI1TE">
-<span class="target" id="structparfis_1_1_x_y_z_1ad8c1620ad3f5972db9582d55e7c90d13"></span><em class="property">inline</em> <em class="property">friend</em> std::ostream &amp;<code class="sig-name descname">operator&lt;&lt;</code><span class="sig-paren">(</span>std::ostream &amp;<em>os</em>, <em class="property">const</em> <a class="reference internal" href="#_CPPv4I0EN6parfis3XYZE" title="parfis::XYZ">XYZ</a>&lt;<a class="reference internal" href="#_CPPv4I0EN6parfis3XYZE" title="parfis::XYZ::T">T</a>&gt; &amp;<em>xyz</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6parfis3XYZlsERNSt7ostreamERK3XYZI1TE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Prints a string representation of the object value</p>
-<p>The string representation is of the form “(x,y,z)” in which a <a class="reference internal" href="#global_8h_1ab846cf89ec10e0fc635e44dbb098ec2c"><span class="std std-ref">tostr()</span></a> function is used for the conversion of the type T to a string. </p>
-</dd></dl>
-
-</div>
-</dd></dl>
-
-<dl class="cpp struct">
-<dt id="_CPPv4I0EN6parfis3VecE">
-template&lt;class <code class="sig-name descname">T</code>&gt;<br /><span class="target" id="structparfis_1_1_vec"></span><em class="property">struct </em><code class="sig-name descname">Vec</code><a class="headerlink" href="#_CPPv4I0EN6parfis3VecE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Structure used as a vector for accessing data.</p>
-<p>This structure is use to access array data from external place. The data is located in the memory space of parfis.dll. </p>
-</dd></dl>
-
-</div>
-<div class="section" id="parfis-h">
-<h2>parfis.h<a class="headerlink" href="#parfis-h" title="Permalink to this headline">¶</a></h2>
-<dl class="cpp struct">
-<dt id="_CPPv4N6parfis9ParfisAPIE">
-<span class="target" id="structparfis_1_1_parfis_a_p_i"></span><em class="property">struct </em><code class="sig-name descname">ParfisAPI</code><a class="headerlink" href="#_CPPv4N6parfis9ParfisAPIE" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Parfis interface class. </p>
-<p>Interface class that is exported in order to be accsessible from outside this library. Since this is a C++ struct, it can be only accessed from another C++ code. </p>
-<p>Subclassed by parfis::Parfis</p>
-</dd></dl>
-
-<dl class="group" id="cppsource-extern-c">
 <dt>
-<span class="target" id="group__extern__c"></span><em>group</em> <code class="sig-name descname">extern_c</code></dt>
-<dd><p>C Functions implementation of the interface class <a class="reference internal" href="#structparfis_1_1_parfis_a_p_i"><span class="std std-ref">ParfisAPI</span></a>. </p>
-<p>Functions are compiled with the <strong>extern “C”</strong> thus forbiding C++ to mangle the function names. This is essential for using these functions with python’s ctypes. </p>
-<div class="breathe-sectiondef docutils container">
-<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1ga1b40c75ec37dccec5f02e9ee4d2929f3"></span><code class="sig-name descname">PARFIS_EXPORT void ParfisAPI_setLogFile (const char *fname)</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1gac9e7188a953345895c6ee5a9d8cf5ae9"></span><code class="sig-name descname">PARFIS_EXPORT ParfisAPI * ParfisAPI_newParfis ()</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1ga13af3155aa12c90ad312e09b4a48d2ff"></span><code class="sig-name descname">PARFIS_EXPORT void ParfisAPI_initialize (ParfisAPI *pfis, const char *fname)</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1gaa6a3935592986854f76103a53b0b49ab"></span><code class="sig-name descname">PARFIS_EXPORT void ParfisAPI_create (ParfisAPI *pfis)</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1gafb780c33e8e492313160a42125845694"></span><code class="sig-name descname">PARFIS_EXPORT const char * ParfisAPI_macroDef ()</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1gac08afb18b89401cc2730c6636ababff5"></span><code class="sig-name descname">PARFIS_EXPORT const char * ParfisAPI_resultMsg (ParfisAPI *pfis)</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1gad0b3efbe78c044349321d96085b16eaa"></span><code class="sig-name descname">PARFIS_EXPORT bool ParfisAPI_isErr (ParfisAPI *pfis)</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1gaf9ec075097209983fbb32e05ef99942e"></span><code class="sig-name descname">PARFIS_EXPORT PtrData ParfisAPI_getPtrData (ParfisAPI *pfis)</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1ga603a279443337eb42c1b6d88eacc17d4"></span><code class="sig-name descname">PARFIS_EXPORT XYZ&lt; double &gt; ParfisAPI_getXYZDouble (ParfisAPI *pfis, const char *key)</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1gaf193148654eab1c928c25560cc13059b"></span><code class="sig-name descname">PARFIS_EXPORT uint32_t ParfisAPI_getUI32 (ParfisAPI *pfis, const char *key)</code></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt>
-<span class="target" id="group__extern__c_1ga071330e93774a8f28aa2c75a814be92b"></span><code class="sig-name descname">PARFIS_EXPORT void ParfisAPI_step (ParfisAPI *pfis, uint32_t numSteps)</code></dt>
-<dd></dd></dl>
-
-</div>
+<code class="sig-name descname">ELECTRON_MASS</code></dt>
+<dd><p>Electron mass in kg.</p>
 </dd></dl>
 
 </div>
@@ -444,8 +227,6 @@ times  more RAM, than when <code class="docutils literal notranslate"><span clas
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="codedesign.html" class="btn btn-neutral float-right" title="Software design and organisation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="inifile.html" class="btn btn-neutral float-left" title="Initialization file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

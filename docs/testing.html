@@ -29,9 +29,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -90,12 +89,11 @@
 <li class="toctree-l1"><a class="reference internal" href="jupyter.html">Jupyter Notebooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Testing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#main-cpp">main.cpp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tests-main-cpp">Tests’ <cite>main.cpp</cite></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="inifile.html">Initialization file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cppsource.html">C++ source code documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="codedesign.html">Software design and organisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cppsource.html">C++ source code</a></li>
 </ul>
 
             
@@ -186,39 +184,9 @@
 <div class="section" id="testing">
 <h1>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h1>
 <p>If you run tests for the first time see <a class="reference internal" href="howto.html#howto-preparetest"><span class="std std-ref">Prepare for running C++ tests</span></a>.</p>
-<div class="section" id="main-cpp">
-<span id="testing-maincpp"></span><h2>main.cpp<a class="headerlink" href="#main-cpp" title="Permalink to this headline">¶</a></h2>
-<p>The main function for all tests is <code class="docutils literal notranslate"><span class="pre">cpp/test/src/main.cpp</span></code>:</p>
-<div class="literal-block-wrapper docutils container" id="id1">
-<span id="index-0"></span><div class="code-block-caption"><span class="caption-number">Listing 1 </span><span class="caption-text">cpp/test/src/main.cpp</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
-<div class="highlight-cpp notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;gtest/gtest.h&quot;</span><span class="cp"></span>
-
-<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
-    <span class="o">::</span><span class="n">testing</span><span class="o">::</span><span class="n">InitGoogleTest</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
-    <span class="c1">// Uncomment line to run a speciffic test</span>
-    <span class="c1">//::testing::GTEST_FLAG(filter) = &quot;System.*&quot;;</span>
-    <span class="c1">//::testing::GTEST_FLAG(filter) = &quot;Space.*&quot;;</span>
-    <span class="c1">//::testing::GTEST_FLAG(filter) = &quot;Particle.*&quot;;</span>
-    <span class="c1">//::testing::GTEST_FLAG(filter) = &quot;System.*:Space.*:Particle.*&quot;;</span>
-    <span class="o">::</span><span class="n">testing</span><span class="o">::</span><span class="n">GTEST_FLAG</span><span class="p">(</span><span class="n">filter</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;System.*:Space.*:Particle.*:API.*&quot;</span><span class="p">;</span>
-    <span class="c1">//::testing::GTEST_FLAG(filter) = &quot;API.ParticlePusherCylindrical&quot;;</span>
-    <span class="k">return</span> <span class="n">RUN_ALL_TESTS</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div>
-</td></tr></table></div>
-</div>
+<div class="section" id="tests-main-cpp">
+<span id="testing-maincpp"></span><h2>Tests’ <cite>main.cpp</cite><a class="headerlink" href="#tests-main-cpp" title="Permalink to this headline">¶</a></h2>
+<p>The main function for all tests is <code class="docutils literal notranslate"><span class="pre">cpp/test/src/main</span></code>:</p>
 <p>You can run speciffic test by filtering everything else except the desired
 function.</p>
 </div>

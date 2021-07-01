@@ -1,0 +1,273 @@
+======
+How To
+======
+
+.. contents::
+
+Build and run C++ project
+=========================
+
+Here we describe the whole process from cloning the repo to running tests.
+
+#.Clone the repo:
+
+  To clone the repo, run the following command from the folder where 
+    you want the ``parfis`` folder to be created:
+
+    .. code-block:: console
+
+        $ git clone https://github.com/GinkoBalboa/parfis.git
+
+#.Clone ``googletest`` repo in ``parfis/cpp/test``:
+
+.. code-block:: console
+
+    $ cd parfis/cpp/test
+    $ git clone https://github.com/google/googletest.git
+
+
+#.We have a few cases now: Visual Studio (VS) under Windows, Visual Studio 
+   Code (VSC) under Windows and Linux.
+
+    a. Create VS project from cmake, call cmake from ``parfis/cpp``:
+
+        .. code-block:: console
+
+            $ cd ..
+            $ cmake -G "Visual Studio 15 2017" -A x64
+    
+       Open ``parfis/cpp/parfis.sln`` and set the properties for the desired 
+       build (release or debug), as is explainted in :ref:`howto-preparetest`. 
+       From now on you can: 
+   
+       - Build ``parfis`` project, and the built ``.dll`` from the selected 
+         configuration will be copied to ``parfis/parfis/cmodule/lib`` 
+         from where it can be used by the Python interface.
+
+       - Run tests (ex. ``testInit``) from the Test Explorer tool bar.
+
+    b. Build from VSC in Windows and Linux is the same. We only use a different
+       compiler kit. You can see detailed settings here
+       `Get started with CMake Tools on Linux <https://code.visualstudio.com/docs/cpp/cmake-linux>`__.
+       Basically it is the following three CMake commands that you can 
+       choose after opening the Command Palette ``Ctrl+Shift+P``:
+
+       - **CMake: Select Kit** (select compiler)
+       - **CMake: Select Variant** (set relase or debug)
+       - **Cmake: Configure** (generates build files in the project's build 
+         folder using the kit and variant you selected
+
+       After successfull compilation you can run tests, and the compiled
+       parfis shared lib will be copied to ``parfis/parfis/cmodule/lib``.
+
+
+PyPI
+====
+
+Generate distribution package for PyPI
+--------------------------------------
+
+These are archives that are uploaded to the Python Package Index and can 
+be installed by pip. Make sure you have the latest versions of ``setuptools`` 
+and wheel installed:
+
+.. code-block:: console
+
+    $ python -m pip install --user --upgrade setuptools wheel
+
+Now run this command from the same directory where setup.py is:
+
+.. code:: console
+
+    $ python setup.py sdist bdist_wheel
+
+This command should output a lot of text and, when completed, should generate 
+two files in the dist directory:
+
+.. code::
+
+    dist/
+    example_pkg_YOUR_USERNAME_HERE-0.0.1-py3-none-any.whl
+    example_pkg_YOUR_USERNAME_HERE-0.0.1.tar.gz
+
+Install package locally
+-----------------------
+
+You can set up and install the package by running from the Command Prompt 
+(from the folder scripts):
+
+.. code-block:: console
+
+    $ install.bat <version>
+
+Where ``<version>`` is the version that corresponds to the version in 
+**setup.py**, the version number is in the standard ``major.minor.release`` 
+format (ex: 1.0.2).
+
+You can install locally and set the symbolic link to the test package in 
+development by running:
+
+.. code:: console
+
+    $ install_local.bat
+
+Upload package to PyPI
+----------------------
+
+Install twine.
+
+.. code-block:: console
+
+    $ pip install twine
+
+Upload package to PyPI.
+
+.. code-block:: console
+
+    $ twine upload dist/*
+
+
+Doxygen
+=======
+
+C++ documentation is created with Doxygen. To generate Doxygen docs go to
+**parfis/docs/doxygen** and run from the console line:
+
+.. code-block:: console
+
+    $ doxygen Doxyfile
+
+Sphinx
+======
+
+You can generate this documentation by running the following command from 
+``docs/sphinx``:
+
+.. code-block:: console
+
+    $ make ./install
+
+Git 
+===
+
+
+Tagging
+-------
+
+Creating an annotated tag in Git is simple. The easiest way is to specify 
+``-a`` when you run the tag command:
+
+.. code-block:: console
+
+    $ git tag -a v0.1.4 -m "my version 0.1.4"
+    $ git tag
+    v0.0.1
+    v0.1.3
+    v0.1.4
+
+By default, the git push command doesn't transfer tags to remote servers. 
+You will have to explicitly push tags to a shared server after you have 
+created them. This process is just like sharing remote branches - you can 
+run git push origin ``<tagname>``.
+
+.. code-block:: console
+
+    $ git push origin v0.1.5
+
+If you have many tags that you wish to push up at once, you can use the 
+``--tags`` option to the git push command. The flag will command to push 
+all of the missing tags to the remote server.
+
+.. code-block:: console
+
+    $ git push origin --tags
+
+Useful configuration lines
+--------------------------
+
+The following lines are in ``.git/config``.
+
+
+.. code-block:: ini
+
+    [alias]
+        tracked = ls-tree -r master --name-only
+        ignored = ls-files . --ignored --exclude-standard --others
+        tree = log --graph --abbrev-commit --decorate --date=relative --all -20 --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)'
+    [core]
+        editor = "'/c/Program Files/Notepad++/notepad++.exe' -multiInst -notabbar -nosession -noPlugin"
+        autocrlf = input
+    [user]
+        name = Ginko Balboa
+        email = ginkobalboa3@gmail.com
+
+For the ``autocrlf`` option check this page 
+`Customizin Git Configuration <https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration>`__.
+
+Set tracking of remote branch
+-----------------------------
+
+In cases when you have local branch, with HEAD, and you want to set it 
+to track a remote branch, you can set (or change) a tracking relationship 
+for your current HEAD branch at any time. First set HEAD to the local branch 
+ex. ``dev`` and set it to track remote branch ``dev`` from ``origin``.
+
+.. code-block:: console
+    $ git checkout dev
+    $ git branch -u origin/dev
+
+CMake
+=====
+
+Run from Visual Studio Code
+---------------------------
+
+You need to open the cpp folder as a separate folder since ``CMakeLists.txt`` 
+needs to be defined in the project root. Then run:
+
+**CMake: Configure**
+**Cmake: Build**
+
+Make Microsoft Visual Studio project from CMakeLists.txt
+--------------------------------------------------------
+
+By running the following command from the folder where CMakeLists.txt lies, 
+you can make a ``.sln`` project files and use it in Visual Studio IDE:
+
+.. code-block:: console
+
+    $ cmake -G "Visual Studio 15 2017" -A x64
+
+.. _howto-preparetest:
+
+Prepare for running C++ tests
+=============================
+
+For testing the cpp codes we use Google test framework. In order to run test 
+you must first go to the folder ``cpp/test`` and clone google test repo from 
+GitHub by running:
+
+.. code-block:: console
+
+    $ git clone https://github.com/google/googletest.git
+
+After successfull clone you will have the following directory 
+``cpp/test/googletest`` with all the src files needed to run tests. In order 
+for Visual Studio to find the tests, and show them in Test Explorer, you 
+should set ``Regex for test discovery`` field to ``.exe`` in 
+`Tools -> Options -> Test Adapter for Google Test -> General`.
+
+There are two settings for each project in order to link them properly 
+between each other:
+
+    1. `Properties -> Configuration Properties -> General -> Project Defaults -> Configuration Type`
+    2. `Properties -> Configuration Properties -> C/C++ -> Code Generation -> Runtime Library`
+
+This is a table for setting a Debug version:
+
+======== ============================ ================================ ============================ ============================
+property gtest                        parfis                           test projects                parfisApp
+======== ============================ ================================ ============================ ============================
+1        Static library (.lib)        Dynamic Library (.dll)           Application (.exe)           Application (.exe)
+2        Multi-threaded Debug (/MTd)  Multi-threaded Debug DLL (/MDd)  Multi-threaded Debug (/MTd)  Multi-threaded Debug (/MTd)
+======== ============================ ================================ ============================ ============================

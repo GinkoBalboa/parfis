@@ -29,9 +29,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -115,8 +114,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="inifile.html">Initialization file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cppsource.html">C++ source code documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="codedesign.html">Software design and organisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cppsource.html">C++ source code</a></li>
 </ul>
 
             
@@ -243,26 +241,23 @@
 <div class="section" id="build-and-run-c-project">
 <h2><a class="toc-backref" href="#id2">Build and run C++ project</a><a class="headerlink" href="#build-and-run-c-project" title="Permalink to this headline">¶</a></h2>
 <p>Here we describe the whole process from cloning the repo to running tests.</p>
-<ol class="arabic">
-<li><dl>
-<dt>Clone the repo:</dt><dd><p>To clone the repo, run the following command from the folder
-where you want the <code class="docutils literal notranslate"><span class="pre">parfis</span></code> folder to be created:</p>
+<p>#.Clone the repo:</p>
+<blockquote>
+<div><dl>
+<dt>To clone the repo, run the following command from the folder where</dt><dd><p>you want the <code class="docutils literal notranslate"><span class="pre">parfis</span></code> folder to be created:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone https://github.com/GinkoBalboa/parfis.git
 </pre></div>
 </div>
 </dd>
 </dl>
-</li>
-<li><dl>
-<dt>Clone <code class="docutils literal notranslate"><span class="pre">googletest</span></code> repo in <code class="docutils literal notranslate"><span class="pre">parfis/cpp/test</span></code>:</dt><dd><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">cd</span> parfis/cpp/test
+</div></blockquote>
+<p>#.Clone <code class="docutils literal notranslate"><span class="pre">googletest</span></code> repo in <code class="docutils literal notranslate"><span class="pre">parfis/cpp/test</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">cd</span> parfis/cpp/test
 <span class="gp">$</span> git clone https://github.com/google/googletest.git
 </pre></div>
 </div>
-</dd>
-</dl>
-</li>
-<li><p>We have a few cases now: Visual Studio (VS) under Windows, Visual Studio
-Code (VSC) under Windows and Linux.</p>
+<dl>
+<dt>#.We have a few cases now: Visual Studio (VS) under Windows, Visual Studio</dt><dd><p>Code (VSC) under Windows and Linux.</p>
 <blockquote>
 <div><ol class="loweralpha">
 <li><p>Create VS project from cmake, call cmake from <code class="docutils literal notranslate"><span class="pre">parfis/cpp</span></code>:</p>
@@ -276,7 +271,7 @@ Code (VSC) under Windows and Linux.</p>
 build (release or debug), as is explainted in <a class="reference internal" href="#howto-preparetest"><span class="std std-ref">Prepare for running C++ tests</span></a>.
 From now on you can:</p>
 <ul class="simple">
-<li><p>Build <code class="docutils literal notranslate"><span class="pre">parfis</span></code> project and the built <code class="docutils literal notranslate"><span class="pre">.dll</span></code> from the selected
+<li><p>Build <code class="docutils literal notranslate"><span class="pre">parfis</span></code> project, and the built <code class="docutils literal notranslate"><span class="pre">.dll</span></code> from the selected
 configuration will be copied to <code class="docutils literal notranslate"><span class="pre">parfis/parfis/cmodule/lib</span></code>
 from where it can be used by the Python interface.</p></li>
 <li><p>Run tests (ex. <code class="docutils literal notranslate"><span class="pre">testInit</span></code>) from the Test Explorer tool bar.</p></li>
@@ -298,8 +293,8 @@ parfis shared lib will be copied to <code class="docutils literal notranslate"><
 </li>
 </ol>
 </div></blockquote>
-</li>
-</ol>
+</dd>
+</dl>
 </div>
 <div class="section" id="pypi">
 <h2><a class="toc-backref" href="#id3">PyPI</a><a class="headerlink" href="#pypi" title="Permalink to this headline">¶</a></h2>
@@ -363,7 +358,7 @@ development by running:</p>
 <h2><a class="toc-backref" href="#id8">Sphinx</a><a class="headerlink" href="#sphinx" title="Permalink to this headline">¶</a></h2>
 <p>You can generate this documentation by running the following command from
 <code class="docutils literal notranslate"><span class="pre">docs/sphinx</span></code>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./make.bat html
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> .<span class="se">\m</span>ake.bat html
 </pre></div>
 </div>
 </div>
@@ -434,9 +429,9 @@ create it.</p></li>
 <li><p>In your conf.py file locate your <strong>html_context section</strong>, if you do not
 already have this, you can create it. And add the template folder.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">html_context</span> <span class="o">=</span> <span class="p">{</span>
-<span class="s2">&quot;display_github&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="c1"># Add &#39;Edit on Github&#39; link instead of &#39;View page source&#39;</span>
-<span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-<span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+<span class="s2">&quot;display_github&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="c1"># Add &#39;Edit on Github&#39; link instead of &#39;View page source&#39;</span>
+<span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">templates_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_templates&#39;</span><span class="p">]</span>
 </pre></div>

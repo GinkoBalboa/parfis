@@ -1,0 +1,9 @@
+=================
+Jupyter Notebooks
+=================
+
+
+.. toctree::
+  :maxdepth: 1
+  
+  ipynb/collision-probability
