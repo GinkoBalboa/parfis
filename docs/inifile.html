@@ -29,8 +29,9 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -38,7 +39,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="C++ source code" href="cppsource.html" />
+    <link rel="next" title="C++ source code documentation" href="cppsource.html" />
     <link rel="prev" title="Testing" href="testing.html" /> 
 </head>
 
@@ -89,8 +90,14 @@
 <li class="toctree-l1"><a class="reference internal" href="jupyter.html">Jupyter Notebooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto.html">How To</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Initialization file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cppsource.html">C++ source code</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Initialization file</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#system"><code class="docutils literal notranslate"><span class="pre">[system]</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#space"><code class="docutils literal notranslate"><span class="pre">[space]</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#particle"><code class="docutils literal notranslate"><span class="pre">[particle]</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cppsource.html">C++ source code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codedesign.html">Software design and organisation</a></li>
 </ul>
 
             
@@ -184,8 +191,48 @@
 options.</p>
 <p>The example of an ini file is given in the test folder. And the file is
 self-explanatory</p>
-<dl>
-<dt><code class="docutils literal notranslate"><span class="pre">[system]</span></code></dt><dd><p>Parameters in this section affect the whole system.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-number">Listing 2 </span><span class="caption-text">cpp/test/data/example.ini</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-ini notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Parfis configuration file</span>
+
+<span class="k">[system]</span>
+<span class="na">geometry</span> <span class="o">=</span> <span class="s">cylindrical</span>
+<span class="na">timestep</span> <span class="o">=</span> <span class="s">1.0e-3</span>
+<span class="na">E_field_type</span> <span class="o">=</span> <span class="s">none</span>
+<span class="na">B_field_type</span> <span class="o">=</span> <span class="s">none</span>
+<span class="s">    </span>
+<span class="k">[space]</span>
+<span class="na">geometry_size</span> <span class="o">=</span> <span class="s">(0.02, 0.02, 0.4)</span>
+<span class="na">unit_cell_size</span> <span class="o">=</span> <span class="s">(2e-3, 2e-3, 2e-3)</span>
+<span class="na">periodic_boundary</span> <span class="o">=</span> <span class="s">(0, 0, 0)</span>
+
+<span class="k">[particle]</span>
+<span class="na">name</span> <span class="o">=</span> <span class="s">{a}</span>
+<span class="na">particles_per_cell</span> <span class="o">=</span> <span class="s">{100}</span>
+<span class="na">timestep_ratio</span> <span class="o">=</span> <span class="s">{1}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="system">
+<h2><code class="docutils literal notranslate"><span class="pre">[system]</span></code><a class="headerlink" href="#system" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Parameters in this section affect the whole system.</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">geometry</span></code>: <em>string</em>, values: [cylindrical, cubical]</dt><dd><p>The geometry of the container.</p>
 </dd>
@@ -194,11 +241,12 @@ or equal to this value. Particle timesteps are given as a integers,
 which is a multiple of this value.</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<hr class="docutils" />
-<dl>
-<dt><code class="docutils literal notranslate"><span class="pre">[space]</span></code></dt><dd><p>Parameters affect the space configuration, mainly concerned with the
+</div></blockquote>
+</div>
+<div class="section" id="space">
+<h2><code class="docutils literal notranslate"><span class="pre">[space]</span></code><a class="headerlink" href="#space" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Parameters affect the space configuration, mainly concerned with the
 <code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">SpaceAPI</span></code> class.</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">geometry_size</span></code>: <em>double xyz tuple</em>, unit: m</dt><dd><p>Size of the simulation space in meters (z is the longitudal axis).
@@ -214,11 +262,12 @@ leaving the top boundary emerge from the bottom boundary. Value is
 boolean.</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<hr class="docutils" />
-<dl>
-<dt><code class="docutils literal notranslate"><span class="pre">[particle]</span></code></dt><dd><p>Parameters affect particle specie configuration, mainly concerned with
+</div></blockquote>
+</div>
+<div class="section" id="particle">
+<h2><code class="docutils literal notranslate"><span class="pre">[particle]</span></code><a class="headerlink" href="#particle" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Parameters affect particle specie configuration, mainly concerned with
 the <code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">ParticleAPI</span></code> class.</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">name</span></code>: <em>string list</em></dt><dd><p>Specie names, can be any string.</p>
@@ -229,8 +278,8 @@ the <code class="xref cpp cpp-class docutils literal notranslate"><span class="p
 given specie.</p>
 </dd>
 </dl>
-</dd>
-</dl>
+</div></blockquote>
+</div>
 </div>
 
 
@@ -241,7 +290,7 @@ given specie.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="cppsource.html" class="btn btn-neutral float-right" title="C++ source code" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="cppsource.html" class="btn btn-neutral float-right" title="C++ source code documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="testing.html" class="btn btn-neutral float-left" title="Testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

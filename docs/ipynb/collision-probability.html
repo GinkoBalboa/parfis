@@ -29,8 +29,9 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -88,7 +89,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../howto.html">How To</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../inifile.html">Initialization file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cppsource.html">C++ source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cppsource.html">C++ source code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codedesign.html">Software design and organisation</a></li>
 </ul>
 
             
@@ -442,9 +444,9 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="k">as</span> <span class="nn">patches</span>
-<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="k">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">interact</span><span class="p">,</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">fixed</span><span class="p">,</span> <span class="n">interact_manual</span>
+<span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="k">import</span> <span class="n">interact</span><span class="p">,</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">fixed</span><span class="p">,</span> <span class="n">interact_manual</span>
 <span class="kn">import</span> <span class="nn">ipywidgets</span> <span class="k">as</span> <span class="nn">widgets</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -556,7 +558,7 @@ P = 1 - \frac{n_T}{n_0} = 1 - \exp{\left(-N X(T)\right)}
     <span class="n">h2a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part_coll_cnt</span><span class="p">)</span>
     <span class="n">h2b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coll_cnt</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Particle collisions in accumulation of </span><span class="si">{</span><span class="n">step_cnt</span><span class="si">}</span><span class="s2"> steps.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Particle collisions in accumulation of </span><span class="si">{step_cnt}</span><span class="s2"> steps.&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Single step&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h2a</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Multi step - particle count&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h2b</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Multi step - collision count&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -613,7 +615,7 @@ Particle collisions in accumulation of 10 steps.
                 <span class="n">part_coll_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="n">h3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part_coll_cnt</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Collisions in accumulation of </span><span class="si">{</span><span class="n">step_cnt</span><span class="si">}</span><span class="s2"> steps, with real probability.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Collisions in accumulation of </span><span class="si">{step_cnt}</span><span class="s2"> steps, with real probability.&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Single step&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h2a</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Multi step - particle cnt (linear)&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h2b</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Multi step - collision cnt (linear)&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -688,9 +690,9 @@ Collisions in accumulation of 10 steps, with real probability.
 <span></span><span class="c1"># Calculate probabilites</span>
 <span class="n">P</span> <span class="o">=</span> <span class="mf">0.01</span>
 <span class="n">step_cnt</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Single step probability: P = </span><span class="si">{</span><span class="n">P</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multi step linear probability: PL = </span><span class="si">{</span><span class="n">P</span><span class="o">*</span><span class="n">step_cnt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multi step real probability: PC = </span><span class="si">{</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">P</span><span class="p">))</span><span class="o">*</span><span class="n">step_cnt</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Single step probability: P = </span><span class="si">{P}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Multi step linear probability: PL = {P*step_cnt}&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Multi step real probability: PC = {1.0 - math.exp(-math.log(1.0/(1.0 - P))*step_cnt)}&quot;</span><span class="p">)</span>
 
 </pre></div>
 </div>
