@@ -1,46 +1,49 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
-# project(parfis LANGUAGES CXX C VERSION )
+include(cmake/utils.cmake)
+project(parfis LANGUAGES CXX C)
 
-execute_process(COMMAND git log --pretty=format:'%h' -n 1
-                OUTPUT_VARIABLE GIT_REV
-                ERROR_QUIET)
+set_version()
 
-# Check whether we got any revision (which isn't
-# always the case, e.g. when someone downloaded a zip
-# file from Github instead of a checkout)
-if ("${GIT_REV}" STREQUAL "")
-    set(GIT_REV "N/A")
-    set(GIT_DIFF "")
-    set(GIT_TAG "N/A")
-    set(GIT_BRANCH "N/A")
-else()
-    execute_process(
-        COMMAND bash -c "git diff --quiet --exit-code || echo +"
-        OUTPUT_VARIABLE GIT_DIFF)
-    execute_process(
-        COMMAND git describe --exact-match --tags
-        OUTPUT_VARIABLE GIT_TAG ERROR_QUIET)
-    execute_process(
-        COMMAND git rev-parse --abbrev-ref HEAD
-        OUTPUT_VARIABLE GIT_BRANCH)
+option(BUILD_STATIC_LIB "Build static library" OFF)
+option(BUILD_PARFISAPP "Build executable application" OFF)
+option(HIDE_CXX_SYMBOLS "Build shared library and hide all C++ symbols" OFF)
+option(STATE_TYPE_DOUBLE "Use double for state data type" OFF)
 
-    string(STRIP "${GIT_REV}" GIT_REV)
-    string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
-    string(STRIP "${GIT_DIFF}" GIT_DIFF)
-    string(STRIP "${GIT_TAG}" GIT_TAG)
-    string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
-endif()
+# core parfis
+file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${parfis_SOURCE_DIR}/src/parfis/*.h)
+if (BUILD_STATIC_LIB)
+    add_library(parfis STATIC)
+else (BUILD_STATIC_LIB)
+    add_library(parfis SHARED)
+endif (BUILD_STATIC_LIB)
+target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
+target_include_directories(parfis PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>  # <prefix>/include
+)
+set_output_directory(parfis ${parfis_SOURCE_DIR}/lib)
 
-set(VERSION "const char* GIT_REV=\"${GIT_REV}${GIT_DIFF}\";
-const char* GIT_TAG=\"${GIT_TAG}\";
-const char* GIT_BRANCH=\"${GIT_BRANCH}\";")
+# parfisApp
+if(BUILD_PARFISAPP)
+    file(GLOB_RECURSE PARFIS_APP_SOURCES ${parfis_SOURCE_DIR}/src/parfisApp/*.cpp ${parfis_SOURCE_DIR}/src/parfisApp/*.h)
+    add_executable(parfisApp)
+    target_sources(parfisApp PRIVATE ${PARFIS_APP_SOURCES})
+    target_include_directories(parfisApp PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>  # <prefix>/include
+    )
+    set_output_directory(parfisApp ${parfis_SOURCE_DIR})
+    target_link_libraries(parfisApp PRIVATE parfis)
+    add_dependencies(parfisApp parfis)
+endif(BUILD_PARFISAPP)
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp)
-    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp VERSION_)
-else()
-    set(VERSION_ "")
-endif()
+add_compile_definitions(PARFIS_SHARED_LIB)
+# Make double state type
+if(STATE_TYPE_DOUBLE)
+    message("Using double for type parfis::state_t")
+    add_compile_definitions(PARFIS_STATE_TYPE_DOUBLE)
+else(STATE_TYPE_DOUBLE)
+    message("Using float for type parfis::state_t")
+endif(STATE_TYPE_DOUBLE)
 
-if (NOT "${VERSION}" STREQUAL "${VERSION_}")
-    file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/version.cpp "${VERSION}")
-endif()
+message("VERSION = ${VERSION}")

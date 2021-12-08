@@ -9,8 +9,17 @@ and currents are computed simultaneously on Eulerian (stationary) mesh points.
 
 ## Build from source
 
-Project is build with CMake. We have the project compiling under Windos and Linux
-distributions
+Build configuration is produced with CMake. After obtaining the source run the 
+following commands corresponding to your OS.
 
-### Building on Linux
+### Building on Linux and other UNIX like systems
 
+For Linux we use the following commands:
+
+``` bash
+$ cd parfis
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make -j$(nproc)
+```
