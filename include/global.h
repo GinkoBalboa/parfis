@@ -10,12 +10,16 @@
 #include <vector>
 #include <map>
 
-#define LOG_LEVEL 15
-
-#if defined(PARFIS_STATE_TYPE_DOUBLE)
-#define PARFIS_STATE_TYPE double
+#if defined(PARFIS_LOG_LEVEL)
+#define LOG_LEVEL PARFIS_LOG_LEVEL
 #else
-#define PARFIS_STATE_TYPE float
+#define LOG_LEVEL 0
+#endif
+
+#if defined(STATE_TYPE_DOUBLE)
+#define STATE_TYPE double
+#else
+#define STATE_TYPE float
 #endif
 
 namespace parfis 
@@ -41,7 +45,7 @@ namespace parfis
     /** @} */ // end of group physical_constants
 
     
-    typedef PARFIS_STATE_TYPE state_t;
+    typedef STATE_TYPE state_t;
 }
 
 #endif // PARFIS_GLOBAL_H

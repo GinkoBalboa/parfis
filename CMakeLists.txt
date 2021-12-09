@@ -5,9 +5,10 @@ project(parfis LANGUAGES CXX C)
 set_version()
 
 option(BUILD_STATIC_LIB "Build static library" OFF)
-option(BUILD_PARFISAPP "Build executable application" OFF)
+option(BUILD_PARFISAPP "Build executable application" ON)
 option(HIDE_CXX_SYMBOLS "Build shared library and hide all C++ symbols" OFF)
 option(STATE_TYPE_DOUBLE "Use double for state data type" OFF)
+option(BUILD_DOXYGEN "Build documentation C++ code using Doxygen." ON)
 
 # core parfis
 file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${parfis_SOURCE_DIR}/src/parfis/*.h)
@@ -38,6 +39,19 @@ if(BUILD_PARFISAPP)
 endif(BUILD_PARFISAPP)
 
 add_compile_definitions(PARFIS_SHARED_LIB)
+
+
+if(NOT PARFIS_LOG_LEVEL)
+    set(PARFIS_LOG_LEVEL 0)
+endif(NOT PARFIS_LOG_LEVEL)
+add_compile_definitions(PARFIS_LOG_LEVEL=${PARFIS_LOG_LEVEL})
+
+# Doxygen
+if(BUILD_DOXYGEN)
+    message("Building doxygen")
+    run_doxygen()
+endif(BUILD_DOXYGEN)
+
 # Make double state type
 if(STATE_TYPE_DOUBLE)
     message("Using double for type parfis::state_t")
@@ -47,3 +61,4 @@ else(STATE_TYPE_DOUBLE)
 endif(STATE_TYPE_DOUBLE)
 
 message("VERSION = ${VERSION}")
+message("PARFIS_LOG_LEVEL = ${PARFIS_LOG_LEVEL}")

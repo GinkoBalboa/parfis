@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 #if defined(_MSC_VER) || defined(WIN64) || defined(_WIN64) || \
     defined(__WIN64__) || defined(WIN32) || defined(_WIN32) || \
@@ -22,11 +23,31 @@
 #endif
 
 namespace parfis {
-    namespace parfisAPI {
+    /** 
+     * @struct Parfis
+     * 
+     * @brief Parfis main class
+     *
+     * @details Class is accessed through cAPI functions and is not exported 
+     *          outside this library.
+     */
+    struct Parfis
+    {
+        Parfis() = default;
+        Parfis(uint32_t id);
+        Parfis(const Parfis&) = default;
+        Parfis& operator=(const Parfis&) = default;
+        ~Parfis() = default;
+
+        /** The static map tracks all created Parfis objects. */
+        static std::map<uint32_t, std::unique_ptr<Parfis>> s_parfisMap;
+    };
+
+    namespace cAPI {
         
-        /** @defgroup parfisAPI
+        /** @defgroup cAPI
          *
-         *  @brief C Functions implementation of the interface class ParfisAPI
+         *  @brief Exported C Functions of the interface class ParfisAPI
          *
          *  @details Functions are compiled with the **extern "C"** thus forbiding
          *           C++ to mangle the function names. This is essential for 
@@ -36,10 +57,11 @@ namespace parfis {
          */
         extern "C" 
         {
-            PARFIS_EXPORT void printLog();
+            PARFIS_EXPORT const char* info();
             PARFIS_EXPORT const char* version();
+            PARFIS_EXPORT Parfis* newParfis();
         };
-        /** @} */ // end of group parfisAPI
+        /** @} */ // end of group cAPI
     }
 }
 
