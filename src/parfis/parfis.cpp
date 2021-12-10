@@ -11,23 +11,85 @@
 
 std::map<uint32_t, std::unique_ptr<parfis::Parfis>> parfis::Parfis::s_parfisMap;
 
+/**
+ * @brief Creates new Parfis object in memory
+ * @details Saves a pointer to the dynamicaly created object in the static 
+ * map Parfis::s_parfisMap.
+ * @return parfis::Parfis* Pointer to the created Parfis object
+ */
+parfis::Parfis* parfis::Parfis::newParfis()
+{
+    uint32_t id = 0;
+    for (auto& pfis : Parfis::s_parfisMap)
+        id = pfis.first > id ? pfis.first : id;
+    if (Parfis::s_parfisMap.size() > 0) id++;
+    Parfis::s_parfisMap[id] = std::unique_ptr<Parfis>(new Parfis(id));
+    return Parfis::s_parfisMap.at(id).get();
+}
+
+/**
+ * @brief Constructor with an id
+ * @param id Id of the created object
+ */
+parfis::Parfis::Parfis(uint32_t id) :
+    m_id(id)
+    // m_pSpace(nullptr),
+    // m_pParticle(nullptr),
+    // m_pData(nullptr)
+{
+    LOGFUNC(Log::Lvl::Code, "constructor with id=" + tostr(m_id));
+}
+
+/**
+ * @brief Returns info about the program settings.
+ * @details These settings are compilation definitions and values
+ * of the current runtime.
+ * @return const char* The info string
+ */
 PARFIS_EXPORT const char* parfis::cAPI::info()
 {
     static std::string str;
-    str = "info:";
-    str += "\nparfis::state_t size: " + std::to_string(sizeof(parfis::state_t));
-    str += "\nLOG_LEVEL: " + std::to_string(LOG_LEVEL);
+    str = "parfis::state_t size = " + std::to_string(sizeof(parfis::state_t));
+    str += "\nLOG_LEVEL = " + std::to_string(LOG_LEVEL);
+    str += "\nVERSION = " + std::string(VERSION);
+    str += "\nGIT_TAG = " + std::string(GIT_TAG);
+    str += "\nParfis object count = " + std::to_string(Parfis::s_parfisMap.size());
+    return str.c_str();
+}
+
+/**
+ * @brief Returns info about the Parfis object.
+ * @param pfis Id of the Parfis object
+ * @return const char* The object's info string
+ */
+PARFIS_EXPORT const char* parfis::cAPI::parfisInfo(uint32_t id)
+{
+    static std::string str;
+    
+    if (Parfis::s_parfisMap.count(id) == 0) {
+        str = "Parfis with id = " + std::to_string(id) + " doesn't exist";
+    }
+    else {
+        str = "Parfis.m_id = " + std::to_string(Parfis::s_parfisMap.at(id)->m_id);
+    }
 
     return str.c_str();
 }
 
+/**
+ * @brief Returns version string
+ * @return const char* The version string
+ */
 PARFIS_EXPORT const char* parfis::cAPI::version()
 {
     return VERSION;
 }
 
-PARFIS_EXPORT parfis::Parfis* parfis::cAPI::newParfis()
+/**
+ * @brief Creates new Parfis object and returns its id.
+ * @return uint32_t Id of the created object
+ */
+PARFIS_EXPORT uint32_t parfis::cAPI::newParfis()
 {
-    static Parfis pfis;
-    return &pfis;
+    return Parfis::newParfis()->m_id;
 }

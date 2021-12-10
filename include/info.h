@@ -4,15 +4,6 @@
 #include <vector>
 #include <map>
 
-#if LOG_LEVEL > 0
-#define LOG(lvl, msg) if(uint32_t(lvl) & LOG_LEVEL) Log::log(lvl, msg);
-#define LOGFUNC(lvl, msg) if(uint32_t(lvl) & LOG_LEVEL) Log::log(lvl, "["+std::string(__FUNCTION__)+"] " + msg);
-#define LOGBLOCK(lvl, header, msg) if(uint32_t(lvl) & LOG_LEVEL) { Log::log(lvl, "---------- START BLOCK: " + header + " ---------\n" + msg); Log::log(lvl, "---------- END BLOCK: " + header + " -----------");}
-#else
-#define LOG(lvl, msg)  
-#define LOGFUNC(lvl, msg)  
-#endif // LOG_LEVEL
-
 #define RETONERR() if (m_result.isErr()) return;
 
 #define RESULT_KEY_NOT_FOUND(x) { 1, "keyword '" + std::string(x) + "' not found" };

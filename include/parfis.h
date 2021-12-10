@@ -25,11 +25,8 @@
 namespace parfis {
     /** 
      * @struct Parfis
-     * 
-     * @brief Parfis main class
-     *
-     * @details Class is accessed through cAPI functions and is not exported 
-     *          outside this library.
+     * @brief The main class in the parfis library
+     * @details Class methods are accessed through the C API functions.
      */
     struct Parfis
     {
@@ -39,29 +36,33 @@ namespace parfis {
         Parfis& operator=(const Parfis&) = default;
         ~Parfis() = default;
 
-        /** The static map tracks all created Parfis objects. */
+        static Parfis* newParfis();
+
+        /** Id of the created object (same as Parfis::s_parfisMap id) */
+        uint32_t m_id;
+
+        /** The static map tracks created Parfis objects. */
         static std::map<uint32_t, std::unique_ptr<Parfis>> s_parfisMap;
     };
 
     namespace cAPI {
         
-        /** @defgroup cAPI
-         *
-         *  @brief Exported C Functions of the interface class ParfisAPI
-         *
+        /** @defgroup cAPI C functions API
+         *  @brief Exported C Functions of the main class Parfis
          *  @details Functions are compiled with the **extern "C"** thus forbiding
-         *           C++ to mangle the function names. This is essential for 
-         *           using these functions with python ctypes.
-         * 
+         * C++ to mangle the function names. This is essential for using these 
+         * functions with python ctypes. This functions are the only way to access 
+         * library functionality from outside.
          * @{
          */
         extern "C" 
         {
             PARFIS_EXPORT const char* info();
+            PARFIS_EXPORT const char* parfisInfo(uint32_t id);
             PARFIS_EXPORT const char* version();
-            PARFIS_EXPORT Parfis* newParfis();
+            PARFIS_EXPORT uint32_t newParfis();
         };
-        /** @} */ // end of group cAPI
+        /** @} */ // end of group C fucntions API
     }
 }
 

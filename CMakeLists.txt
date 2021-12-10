@@ -6,16 +6,18 @@ set_version()
 
 option(BUILD_STATIC_LIB "Build static library" OFF)
 option(BUILD_PARFISAPP "Build executable application" ON)
-option(HIDE_CXX_SYMBOLS "Build shared library and hide all C++ symbols" OFF)
 option(STATE_TYPE_DOUBLE "Use double for state data type" OFF)
 option(BUILD_DOXYGEN "Build documentation C++ code using Doxygen." ON)
 
 # core parfis
 file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${parfis_SOURCE_DIR}/src/parfis/*.h)
 if (BUILD_STATIC_LIB)
+    message("Build static lib")
     add_library(parfis STATIC)
 else (BUILD_STATIC_LIB)
+    message("Build shared lib")
     add_library(parfis SHARED)
+    add_compile_definitions(PARFIS_SHARED_LIB)
 endif (BUILD_STATIC_LIB)
 target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
 target_include_directories(parfis PUBLIC
@@ -37,9 +39,6 @@ if(BUILD_PARFISAPP)
     target_link_libraries(parfisApp PRIVATE parfis)
     add_dependencies(parfisApp parfis)
 endif(BUILD_PARFISAPP)
-
-add_compile_definitions(PARFIS_SHARED_LIB)
-
 
 if(NOT PARFIS_LOG_LEVEL)
     set(PARFIS_LOG_LEVEL 0)

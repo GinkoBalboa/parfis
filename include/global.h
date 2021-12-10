@@ -16,6 +16,15 @@
 #define LOG_LEVEL 0
 #endif
 
+#if LOG_LEVEL > 0
+#define LOG(lvl, msg) if(uint32_t(lvl) & LOG_LEVEL) Log::log(lvl, msg);
+#define LOGFUNC(lvl, msg) if(uint32_t(lvl) & LOG_LEVEL) Log::log(lvl, "["+std::string(__FUNCTION__)+"] " + msg);
+#define LOGBLOCK(lvl, header, msg) if(uint32_t(lvl) & LOG_LEVEL) { Log::log(lvl, "---------- START BLOCK: " + header + " ---------\n" + msg); Log::log(lvl, "---------- END BLOCK: " + header + " -----------");}
+#else
+#define LOG(lvl, msg)  
+#define LOGFUNC(lvl, msg)  
+#endif // LOG_LEVEL
+
 #if defined(STATE_TYPE_DOUBLE)
 #define STATE_TYPE double
 #else
@@ -25,7 +34,8 @@
 namespace parfis 
 {
 
-    /** @defgroup physical_constants Physical constants 
+    /** @defgroup phys_const Constants
+     * @brief Physical and mathematical constants
      * @{
      */
     /** Pi */
@@ -42,7 +52,7 @@ namespace parfis
     const double JOULE_IN_EV = 1.602176634e-19;
     /** One electronvolt in joules [J] */
     const double EV_IN_JOULE = 6.2415090744608e18;
-    /** @} */ // end of group physical_constants
+    /** @} */ // end of group phys_const
 
     
     typedef STATE_TYPE state_t;
