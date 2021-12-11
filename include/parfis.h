@@ -23,6 +23,38 @@
 #endif
 
 namespace parfis {
+
+    /**
+     * @brief Log bitmask that corresponds to log level
+     * 
+     */
+    enum struct LogMask: uint32_t {
+        None = 0b0,
+        Error = 0b1,
+        Warning = 0b10,
+        Memory = 0b100,
+        Info = 0b1000
+    };
+
+    /**
+     * @brief Logging class
+     * 
+     */
+    struct Logger
+    {
+        Logger(): m_fname(""), m_str(""){};
+
+        /** String with the log text*/
+        std::string m_str;
+        /** File name where the log text is written */
+        std::string m_fname;
+
+        void initialize(const std::string& fname);
+        void log(LogMask mask, std::string& str);
+        void log(LogMask mask, const char* str);
+        void printLogFile();
+    };
+
     /** 
      * @struct Parfis
      * @brief The main class in the parfis library
@@ -34,9 +66,14 @@ namespace parfis {
         Parfis(uint32_t id);
         Parfis(const Parfis&) = default;
         Parfis& operator=(const Parfis&) = default;
-        ~Parfis() = default;
+        ~Parfis();
 
         static Parfis* newParfis();
+
+        int initialize();
+
+        /** Logging object */
+        parfis::Logger m_logger;
 
         /** Id of the created object (same as Parfis::s_parfisMap id) */
         uint32_t m_id;

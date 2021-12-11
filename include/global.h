@@ -17,12 +17,9 @@
 #endif
 
 #if LOG_LEVEL > 0
-#define LOG(lvl, msg) if(uint32_t(lvl) & LOG_LEVEL) Log::log(lvl, msg);
-#define LOGFUNC(lvl, msg) if(uint32_t(lvl) & LOG_LEVEL) Log::log(lvl, "["+std::string(__FUNCTION__)+"] " + msg);
-#define LOGBLOCK(lvl, header, msg) if(uint32_t(lvl) & LOG_LEVEL) { Log::log(lvl, "---------- START BLOCK: " + header + " ---------\n" + msg); Log::log(lvl, "---------- END BLOCK: " + header + " -----------");}
+#define LOG(mask, msg) if(uint32_t(mask) & LOG_LEVEL) Log::log(mask, msg);
 #else
-#define LOG(lvl, msg)  
-#define LOGFUNC(lvl, msg)  
+#define LOG(mask, msg)  
 #endif // LOG_LEVEL
 
 #if defined(STATE_TYPE_DOUBLE)
@@ -33,6 +30,20 @@
 
 namespace parfis 
 {
+    /**
+     *  @brief Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+     * 
+     */ 
+    const std::string currentDateTime() 
+    {
+        time_t     now = time(0);
+        struct tm  tstruct;
+        char       buf[80];
+        tstruct = *localtime(&now);
+        strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+        return buf;
+    }
+
 
     /** @defgroup phys_const Constants
      * @brief Physical and mathematical constants

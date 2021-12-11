@@ -104,25 +104,6 @@ namespace parfis
         static std::string logFileHeader;
     };
 
-    struct Log
-    {
-        enum struct Lvl: uint32_t {
-            None = 0b0,
-            Error = 0b1,
-            Warning = 0b10,
-            Code = 0b100,
-            Info = 0b1000
-        };
-
-        static std::string s_log;
-        static std::string s_logFileName;
-
-        static void log(Log::Lvl lvl, std::string& str);
-        static void log(Log::Lvl lvl, const char* str);
-        static void setLogFile(std::string fname);
-        static void printLogFile();
-    };
-
 }
 
 #endif // PARFIS_INFO_H

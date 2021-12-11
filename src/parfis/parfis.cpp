@@ -5,11 +5,36 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <filesystem>
 #include "parfis.h"
 #include "global.h"
 #include "version.h"
 
 std::map<uint32_t, std::unique_ptr<parfis::Parfis>> parfis::Parfis::s_parfisMap;
+
+/**
+ * @brief Initializes log string and file name 
+ * @param fname Name of the file to write log to
+ */
+void parfis::Logger::initialize(const std::string& fname) {
+    m_fname = fname;
+    m_str = "Parfis log file";
+    m_str += "\n--------------";
+    m_str += "\nCreated on: " + parfis::currentDateTime();
+}
+
+/**
+ * @brief Prints the log string to the defined file
+ */
+void parfis::Logger::printLogFile()
+{
+    if (m_fname != "") {
+        std::ofstream logFile(m_fname, std::ofstream::app);
+        logFile << m_str;
+        logFile.close();
+        m_str.clear();
+    }
+}
 
 /**
  * @brief Creates new Parfis object in memory
@@ -33,11 +58,33 @@ parfis::Parfis* parfis::Parfis::newParfis()
  */
 parfis::Parfis::Parfis(uint32_t id) :
     m_id(id)
-    // m_pSpace(nullptr),
-    // m_pParticle(nullptr),
-    // m_pData(nullptr)
 {
-    LOGFUNC(Log::Lvl::Code, "constructor with id=" + tostr(m_id));
+    initialize();
+    LOG(LogMask::Memory, "constructor with id=" + tostr(m_id));
+}
+
+/**
+ * @brief Initializes
+ * 
+ * @return int Zero for success
+ */
+int parfis::Parfis::initialize() 
+{
+    int fcnt = 0;
+    std::string fname = "./parfisLog_id" + std::to_string(m_id) + "_0";
+    while(std::filesystem::exists(fname)) {
+        fcnt++;
+        fname = "./parfisLog_id" + std::to_string(m_id) + '_' + std::to_string(fcnt);
+    }
+    m_logger.initialize(fname);
+}
+
+/**
+ * @brief Destroy the parfis::Parfis object
+ * @details Print log file
+ */
+parfis::Parfis::~Parfis() {
+    m_logger.printLogFile();
 }
 
 /**
@@ -71,6 +118,7 @@ PARFIS_EXPORT const char* parfis::cAPI::parfisInfo(uint32_t id)
     }
     else {
         str = "Parfis.m_id = " + std::to_string(Parfis::s_parfisMap.at(id)->m_id);
+        str += "\nParfis.m_logger.m_fname = " + Parfis::s_parfisMap.at(id)->m_logger.m_fname;
     }
 
     return str.c_str();
