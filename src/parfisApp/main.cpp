@@ -3,6 +3,13 @@
 
 using namespace parfis;
 
+std::string helpString = 
+"\nhelp()       - This message.\
+\ninfo()       - Information about the global settings of the program and\
+\n               existing Parfis objects.\
+\ninfo(<id>)   - Information about the Parfis object with id <id>.\
+\nquit()       - Exits this application.";
+
 int main() {
 
     std::cout << "Running parfisApp terminal version: " << cAPI::version() << std::endl;
@@ -28,9 +35,12 @@ int main() {
                 }
             }
         }
-        if (userin == "new()") {
+        else if (userin == "new()") {
             uint32_t id = cAPI::newParfis();
             std::cout << "new Parfis object created with id = " << id << std::endl;
+        }
+        else if (userin == "help()") {
+            std::cout << helpString << std::endl;
         }
     }
     std::cout << "Quiting parfisApp, cheers!" << std::endl;

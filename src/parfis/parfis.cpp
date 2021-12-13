@@ -24,6 +24,17 @@ void parfis::Logger::initialize(const std::string& fname) {
 }
 
 /**
+ * @brief Logs strings into Logger::m_str
+ * @param mask LogMask
+ * @param msg String to log to Logger::m_str
+ */
+void parfis::Logger::logToStr(LogMask mask, const std::string& msg)
+{
+    m_str += msg;
+}
+
+
+/**
  * @brief Prints the log string to the defined file
  */
 void parfis::Logger::printLogFile()
@@ -60,12 +71,12 @@ parfis::Parfis::Parfis(uint32_t id) :
     m_id(id)
 {
     initialize();
-    LOG(LogMask::Memory, "constructor with id=" + tostr(m_id));
+    log(m_logger, LogMask::Memory, 
+        std::string("\n") + __FUNCTION__ + " constructor with id = " + std::to_string(m_id));
 }
 
 /**
  * @brief Initializes
- * 
  * @return int Zero for success
  */
 int parfis::Parfis::initialize() 
@@ -77,6 +88,7 @@ int parfis::Parfis::initialize()
         fname = "./parfisLog_id" + std::to_string(m_id) + '_' + std::to_string(fcnt);
     }
     m_logger.initialize(fname);
+    return 0;
 }
 
 /**
@@ -96,11 +108,21 @@ parfis::Parfis::~Parfis() {
 PARFIS_EXPORT const char* parfis::cAPI::info()
 {
     static std::string str;
-    str = "parfis::state_t size = " + std::to_string(sizeof(parfis::state_t));
+    str = "state_t size = " + std::to_string(sizeof(parfis::state_t));
     str += "\nLOG_LEVEL = " + std::to_string(LOG_LEVEL);
     str += "\nVERSION = " + std::string(VERSION);
     str += "\nGIT_TAG = " + std::string(GIT_TAG);
-    str += "\nParfis object count = " + std::to_string(Parfis::s_parfisMap.size());
+    int pfSize = Parfis::s_parfisMap.size();
+    str += "\nParfis object count = " + std::to_string(pfSize);
+    str += "\nParfis object id = [";
+    int i = 0;
+    for (auto& pfis: Parfis::s_parfisMap) {
+        str += std::to_string(pfis.first);
+        if (i != pfSize - 1)
+            str += ", ";
+        i++;
+    }
+    str += "]";
     return str.c_str();
 }
 

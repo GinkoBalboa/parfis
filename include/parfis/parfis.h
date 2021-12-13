@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include "global.h"
 
 #if defined(_MSC_VER) || defined(WIN64) || defined(_WIN64) || \
     defined(__WIN64__) || defined(WIN32) || defined(_WIN32) || \
@@ -24,11 +25,8 @@
 
 namespace parfis {
 
-    /**
-     * @brief Log bitmask that corresponds to log level
-     * 
-     */
-    enum struct LogMask: uint32_t {
+    /// Log bitmask that corresponds to log level
+    enum LogMask: uint32_t {
         None = 0b0,
         Error = 0b1,
         Warning = 0b10,
@@ -36,23 +34,33 @@ namespace parfis {
         Info = 0b1000
     };
 
-    /**
-     * @brief Logging class
-     * 
-     */
+    /// Logging class
     struct Logger
     {
         Logger(): m_fname(""), m_str(""){};
 
-        /** String with the log text*/
+        /// String with the log text
         std::string m_str;
-        /** File name where the log text is written */
+        /// File name where the log text is written
         std::string m_fname;
 
         void initialize(const std::string& fname);
-        void log(LogMask mask, std::string& str);
-        void log(LogMask mask, const char* str);
+        void logToStr(LogMask mask, const std::string& msg);
         void printLogFile();
+    };
+
+    /**
+     * @brief Constexpr function for logging
+     * 
+     * @param logger Reference to a logger to be used
+     * @param mask LogMask enum value
+     * @param msg String for logging
+     */
+    constexpr void log(parfis::Logger& logger, parfis::LogMask mask, const std::string& msg) 
+    {
+        if (LOG_LEVEL > 0) {
+            if(mask & LOG_LEVEL) logger.logToStr(mask, msg);
+        }
     };
 
     /** 
@@ -72,16 +80,17 @@ namespace parfis {
 
         int initialize();
 
-        /** Logging object */
+        /// Logging object
         parfis::Logger m_logger;
 
-        /** Id of the created object (same as Parfis::s_parfisMap id) */
+        /// Id of the created object (same as Parfis::s_parfisMap id)
         uint32_t m_id;
 
-        /** The static map tracks created Parfis objects. */
+        /// The static map tracks created Parfis objects.
         static std::map<uint32_t, std::unique_ptr<Parfis>> s_parfisMap;
     };
 
+    /// Holds C functions visibile from outside (exported functions)
     namespace cAPI {
         
         /** @defgroup cAPI C functions API

@@ -33,7 +33,7 @@
 /parfisApp
 
 # Version file
-/include/version.h
+/include/parfis/version.h
 
 # CMake
 CMakeLists.txt.user
@@ -50,6 +50,7 @@ _deps
 
 # Build directories
 build/
+lib/
 
 # User settings
 .vscode

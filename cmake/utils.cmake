@@ -70,7 +70,7 @@ function(set_version)
         set(OLD_VERSION_H "")
     endif()
     if(NOT "${VERSION_H}" STREQUAL "${OLD_VERSION_H}")
-        file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h "${VERSION_H}")
+        file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/include/parfis/version.h "${VERSION_H}")
     endif()
 endfunction(set_version)
 

@@ -10,7 +10,7 @@ option(BUILD_PARFISAPP "Build executable application" ON)
 option(STATE_TYPE_DOUBLE "Use double for state data type" OFF)
 option(BUILD_DOXYGEN "Build documentation C++ code using Doxygen." ON)
 
-# core parfis
+# Core parfis
 file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${parfis_SOURCE_DIR}/src/parfis/*.h)
 if (BUILD_STATIC_LIB)
     message("Build static lib")
@@ -22,7 +22,7 @@ else (BUILD_STATIC_LIB)
 endif (BUILD_STATIC_LIB)
 target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
 target_include_directories(parfis PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
   $<INSTALL_INTERFACE:include>  # <prefix>/include
 )
 set_output_directory(parfis ${parfis_SOURCE_DIR}/lib)
@@ -33,7 +33,7 @@ if(BUILD_PARFISAPP)
     add_executable(parfisApp)
     target_sources(parfisApp PRIVATE ${PARFIS_APP_SOURCES})
     target_include_directories(parfisApp PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
         $<INSTALL_INTERFACE:include>  # <prefix>/include
     )
     set_output_directory(parfisApp ${parfis_SOURCE_DIR})
@@ -41,6 +41,7 @@ if(BUILD_PARFISAPP)
     add_dependencies(parfisApp parfis)
 endif(BUILD_PARFISAPP)
 
+# Logging level
 if(NOT PARFIS_LOG_LEVEL)
     set(PARFIS_LOG_LEVEL 0)
 endif(NOT PARFIS_LOG_LEVEL)
@@ -52,7 +53,7 @@ if(BUILD_DOXYGEN)
     run_doxygen()
 endif(BUILD_DOXYGEN)
 
-# Make double state type
+# State type float or double
 if(STATE_TYPE_DOUBLE)
     message("Using double for type parfis::state_t")
     add_compile_definitions(PARFIS_STATE_TYPE_DOUBLE)
