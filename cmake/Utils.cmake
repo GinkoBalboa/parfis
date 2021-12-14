@@ -63,6 +63,8 @@ function(set_version)
 #endif // PARFIS_VERSION_H
 ")
     set(VERSION "${VERSION}" PARENT_SCOPE)
+    set(GIT_TAG "${GIT_TAG}" PARENT_SCOPE)
+    set(GIT_REV "${GIT_REV}${GIT_DIFF}" PARENT_SCOPE)
 
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h)
         file(READ ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h OLD_VERSION_H)        
@@ -85,7 +87,7 @@ function (run_doxygen)
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc)
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen)
   configure_file(
-    ${parfis_SOURCE_DIR}/doc/doxygen/Doxyfile
+    ${parfis_SOURCE_DIR}/doc/doxygen/Doxyfile.in
     ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 
   add_custom_target(doc_doxygen ALL
@@ -94,3 +96,61 @@ function (run_doxygen)
     COMMENT "Generate C APIs documentation."
     VERBATIM)
 endfunction (run_doxygen)
+
+# This runs sphins from python
+function (run_sphinx)
+
+    # configured documentation tools and intermediate build results
+    set(SPHINX_SOURCE_DIR ${parfis_SOURCE_DIR}/doc/sphinx/source)
+    
+    # HTML output directory
+    set(SPHINX_HTML_DIR ${CMAKE_CURRENT_BINARY_DIR}/doc/sphinx/html)
+
+    configure_file(
+        ${parfis_SOURCE_DIR}/doc/sphinx/conf.py.in
+        ${parfis_SOURCE_DIR}/doc/sphinx/source/conf.py
+        @ONLY)
+
+    add_custom_command(
+        TARGET doc_doxygen POST_BUILD
+        COMMAND python3 -m sphinx 
+                        -b html ${SPHINX_SOURCE_DIR} ${SPHINX_HTML_DIR}
+        VERBATIM)
+endfunction (run_sphinx)
+
+# This runs sphinx-build
+function (run_sphinx_build)
+    set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+    find_package(Sphinx REQUIRED)
+    
+    if(NOT DEFINED SPHINX_THEME)
+        set(SPHINX_THEME default)
+    endif()
+    
+    if(NOT DEFINED SPHINX_THEME_DIR)
+        set(SPHINX_THEME_DIR)
+    endif()
+    
+    # configured documentation tools and intermediate build results
+    set(SPHINX_SOURCE_DIR ${parfis_SOURCE_DIR}/doc/sphinx/source)
+    
+    # Sphinx cache with pickled ReST documents
+    set(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/doc/sphinx/_doctrees")
+    
+    # HTML output directory
+    set(SPHINX_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/doc/sphinx/html")
+    
+    configure_file(
+        ${parfis_SOURCE_DIR}/doc/sphinx/conf.py.in
+        ${parfis_SOURCE_DIR}/doc/sphinx/source/conf.py
+        @ONLY)          
+    
+    add_custom_target(doc_sphinx ALL
+    ${SPHINX_EXECUTABLE}
+        -q -b html
+        -c "${SPHINX_SOURCE_DIR}"
+        -d "${SPHINX_CACHE_DIR}"
+        "${SPHINX_SOURCE_DIR}"
+        "${SPHINX_HTML_DIR}"
+    COMMENT "Building HTML documentation with Sphinx")
+endfunction (run_sphinx_build)

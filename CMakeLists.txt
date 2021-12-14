@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 17)
-include(cmake/utils.cmake)
+include(cmake/Utils.cmake)
 project(parfis LANGUAGES CXX C)
 
 set_version()
 
 option(BUILD_STATIC_LIB "Build static library" OFF)
 option(BUILD_PARFISAPP "Build executable application" ON)
-option(STATE_TYPE_DOUBLE "Use double for state data type" OFF)
+option(PARFIS_STATE_TYPE_DOUBLE "Use double for state data type" OFF)
 option(BUILD_DOXYGEN "Build documentation C++ code using Doxygen." ON)
+option(BUILD_SPHINX "Build documentation using Sphinx." ON)
 
 # Core parfis
 file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${parfis_SOURCE_DIR}/src/parfis/*.h)
@@ -53,13 +54,19 @@ if(BUILD_DOXYGEN)
     run_doxygen()
 endif(BUILD_DOXYGEN)
 
+# Sphinx
+if(BUILD_SPHINX)
+    message("Building sphinx")
+    run_sphinx_build()
+endif(BUILD_SPHINX)
+
 # State type float or double
-if(STATE_TYPE_DOUBLE)
+if(PARFIS_STATE_TYPE_DOUBLE)
     message("Using double for type parfis::state_t")
     add_compile_definitions(PARFIS_STATE_TYPE_DOUBLE)
-else(STATE_TYPE_DOUBLE)
+else(PARFIS_STATE_TYPE_DOUBLE)
     message("Using float for type parfis::state_t")
-endif(STATE_TYPE_DOUBLE)
+endif(PARFIS_STATE_TYPE_DOUBLE)
 
 message("VERSION = ${VERSION}")
 message("PARFIS_LOG_LEVEL = ${PARFIS_LOG_LEVEL}")

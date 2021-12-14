@@ -42,6 +42,7 @@ CMakeFiles
 CMakeScripts
 Testing
 Makefile
+!doc/sphinx/Makefile
 cmake_install.cmake
 install_manifest.txt
 compile_commands.json
@@ -51,6 +52,9 @@ _deps
 # Build directories
 build/
 lib/
+
+# Sphinx build directories
+_build
 
 # User settings
 .vscode
