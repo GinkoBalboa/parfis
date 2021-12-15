@@ -10,6 +10,18 @@ option(BUILD_PARFISAPP "Build executable application" ON)
 option(PARFIS_STATE_TYPE_DOUBLE "Use double for state data type" OFF)
 option(BUILD_DOXYGEN "Build documentation C++ code using Doxygen." ON)
 option(BUILD_SPHINX "Build documentation using Sphinx." ON)
+option(BUILD_GOOGLE_TEST "Build google tests" ON)
+option(BUILD_DEBUG "Build debug version" OFF)
+
+if(BUILD_DEBUG)
+    message("Build Debug version")
+    set(CMAKE_BUILD_TYPE, "Debug")
+    set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+else(BUILD_DEBUG)
+    message("Build Release version")
+    set(CMAKE_BUILD_TYPE, "Release")
+endif(BUILD_DEBUG)
 
 # Core parfis
 file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${parfis_SOURCE_DIR}/src/parfis/*.h)
@@ -22,11 +34,12 @@ else (BUILD_STATIC_LIB)
     add_compile_definitions(PARFIS_SHARED_LIB)
 endif (BUILD_STATIC_LIB)
 target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
+set_target_properties(parfis PROPERTIES PUBLIC_HEADER "parfis.h")
 target_include_directories(parfis PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
-  $<INSTALL_INTERFACE:include>  # <prefix>/include
+  $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
 )
-set_output_directory(parfis ${parfis_SOURCE_DIR}/lib)
+set_output_directory(parfis ${parfis_SOURCE_DIR}/lib/parfis/lib)
 
 # parfisApp
 if(BUILD_PARFISAPP)
@@ -34,8 +47,8 @@ if(BUILD_PARFISAPP)
     add_executable(parfisApp)
     target_sources(parfisApp PRIVATE ${PARFIS_APP_SOURCES})
     target_include_directories(parfisApp PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
-        $<INSTALL_INTERFACE:include>  # <prefix>/include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib/parfis/include>
+        $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
     )
     set_output_directory(parfisApp ${parfis_SOURCE_DIR})
     target_link_libraries(parfisApp PRIVATE parfis)
@@ -67,6 +80,22 @@ if(PARFIS_STATE_TYPE_DOUBLE)
 else(PARFIS_STATE_TYPE_DOUBLE)
     message("Using float for type parfis::state_t")
 endif(PARFIS_STATE_TYPE_DOUBLE)
+
+# Google test
+if(BUILD_GOOGLE_TEST)
+    message("Build googletest")
+    include(ExternalProject)
+    ExternalProject_Add(googletest
+        GIT_REPOSITORY https://github.com/google/googletest
+        GIT_TAG main
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/lib/googletest -DBUILD_SHARED_LIBS=ON
+    )
+    add_library(gtest SHARED IMPORTED)
+    if(UNIX)
+        set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/lib/googletest/lib/libgtest.so)
+    endif(UNIX)
+    include(${parfis_SOURCE_DIR}/test/CMakeLists.txt)
+endif(BUILD_GOOGLE_TEST)
 
 message("VERSION = ${VERSION}")
 message("PARFIS_LOG_LEVEL = ${PARFIS_LOG_LEVEL}")

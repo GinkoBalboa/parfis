@@ -58,3 +58,10 @@ _build
 
 # User settings
 .vscode
+
+# Google test
+test/googletest
+gtestAll
+
+# Doc
+doc/sphinx/source/conf.py
