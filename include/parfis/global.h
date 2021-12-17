@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <fstream>
 
 #if defined(PARFIS_LOG_LEVEL)
 #define LOG_LEVEL PARFIS_LOG_LEVEL
@@ -34,6 +35,12 @@ namespace parfis
         tstruct = *localtime(&now);
         strftime(buf, sizeof(buf), "%Y-%m %d.%X", &tstruct);
         return buf;
+    }
+
+    /// Check if file @param fname exists
+    const bool fileExists (const std::string& fname) {
+        std::ifstream f(fname.c_str());
+        return f.good();
     }
 
 

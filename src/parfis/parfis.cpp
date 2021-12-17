@@ -5,7 +5,6 @@
 #include <iostream>
 #include <map>
 #include <memory>
-#include <filesystem>
 #include "parfis.h"
 #include "global.h"
 #include "version.h"
@@ -85,7 +84,7 @@ int parfis::Parfis::initialize()
 {
     int fcnt = 0;
     std::string fname = "./parfisLog_id" + std::to_string(m_id) + "_0";
-    while(std::filesystem::exists(fname)) {
+    while(fileExists(fname)) {
         fcnt++;
         fname = "./parfisLog_id" + std::to_string(m_id) + '_' + std::to_string(fcnt);
     }
