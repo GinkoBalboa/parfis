@@ -21,6 +21,8 @@ void parfis::Logger::initialize(const std::string& fname) {
     m_str = "Parfis log file";
     m_str += "\n--------------";
     m_str += "\nCreated on: " + parfis::currentDateTime();
+    m_str += "\n" + std::string(cAPI::info());
+    m_str += "\n--------------";
 }
 
 /**
@@ -139,8 +141,8 @@ PARFIS_EXPORT const char* parfis::cAPI::parfisInfo(uint32_t id)
         str = "Parfis with id = " + std::to_string(id) + " doesn't exist";
     }
     else {
-        str = "Parfis.m_id = " + std::to_string(Parfis::s_parfisMap.at(id)->m_id);
-        str += "\nParfis.m_logger.m_fname = " + Parfis::s_parfisMap.at(id)->m_logger.m_fname;
+        str = "Parfis::m_id = " + std::to_string(Parfis::s_parfisMap.at(id)->m_id);
+        str += "\nParfis::m_logger.m_fname = " + Parfis::s_parfisMap.at(id)->m_logger.m_fname;
     }
 
     return str.c_str();
