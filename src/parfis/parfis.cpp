@@ -5,11 +5,37 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include "config.h"
 #include "parfis.h"
 #include "global.h"
 #include "version.h"
+#include "system.h"
 
 std::map<uint32_t, std::unique_ptr<parfis::Parfis>> parfis::Parfis::s_parfisMap;
+
+parfis::Domain::Domain(Logger& logger, const std::string& dname):
+    m_logger(&logger),
+    m_domainName(dname)
+{
+    // Config::initialize(m_domainName);
+}
+
+parfis::Parfis* parfis::Parfis::getParfis(uint32_t id) 
+{
+    auto it = Parfis::s_parfisMap.find(id);
+    if (it == Parfis::s_parfisMap.end())
+        return nullptr;
+    return it->second.get();
+}
+
+parfis::Domain* parfis::Parfis::getDomain(uint32_t id) 
+{
+    return Parfis::m_domainMap.find(id)->second.get();
+}
+
+std::string parfis::Logger::getLogFileName(uint32_t id, uint32_t cnt) {
+    return "./parfisLog_id" + std::to_string(id) + "_cnt" + std::to_string(cnt) + ".log";
+}
 
 /**
  * @brief Initializes log string and file name 
@@ -19,8 +45,8 @@ void parfis::Logger::initialize(const std::string& fname) {
     m_fname = fname;
     m_str = "Parfis log file";
     m_str += "\n--------------";
-    m_str += "\nCreated on: " + parfis::currentDateTime();
-    m_str += "\n" + std::string(cAPI::info());
+    m_str += "\nCreated on: " + Global::currentDateTime();
+    m_str += "\n" + std::string(ParfisAPI::info());
     m_str += "\n--------------";
 }
 
@@ -71,9 +97,16 @@ parfis::Parfis* parfis::Parfis::newParfis()
 parfis::Parfis::Parfis(uint32_t id) :
     m_id(id)
 {
-    initialize();
-    log(m_logger, LogMask::Memory, 
+    int fcnt = 0;
+    std::string fname = Logger::getLogFileName(m_id, 0);
+    while(Global::fileExists(fname)) {
+        fcnt++;
+        fname = Logger::getLogFileName(m_id, fcnt);
+    }
+    m_logger.initialize(fname);
+    log(m_logger, LogMask::Memory,
         std::string("\n") + __FUNCTION__ + " constructor with id = " + std::to_string(m_id));
+    initialize();
 }
 
 /**
@@ -82,13 +115,25 @@ parfis::Parfis::Parfis(uint32_t id) :
  */
 int parfis::Parfis::initialize() 
 {
-    int fcnt = 0;
-    std::string fname = "./parfisLog_id" + std::to_string(m_id) + "_0";
-    while(fileExists(fname)) {
-        fcnt++;
-        fname = "./parfisLog_id" + std::to_string(m_id) + '_' + std::to_string(fcnt);
+    // Initialize all avalable Domains
+    for (auto& it : Config::s_domainNameIdMap) {
+        if (it.first == "system")
+            m_domainMap[it.second] = std::unique_ptr<Domain>(new System(m_logger));
     }
-    m_logger.initialize(fname);
+    return 0;
+}
+
+
+int parfis::Parfis::configure(const char* str) 
+{
+    std::string cstr = Global::removeWhitespace(str);
+    size_t fdot = cstr.find('.');
+    std::string dname = cstr.substr(0, fdot);
+    cstr = cstr.substr(fdot+1, cstr.size() - fdot);
+    int id = Config::getDomainId(dname);
+    if (id < 0)
+        return -1;
+    getDomain(id)->configure(cstr);
     return 0;
 }
 
@@ -106,13 +151,18 @@ parfis::Parfis::~Parfis() {
  * of the current runtime.
  * @return const char* The info string
  */
-PARFIS_EXPORT const char* parfis::cAPI::info()
+PARFIS_EXPORT const char* parfis::ParfisAPI::info()
 {
     static std::string str;
-    str = "state_t size = " + std::to_string(sizeof(parfis::state_t));
-    str += "\nLOG_LEVEL = " + std::to_string(LOG_LEVEL);
-    str += "\nVERSION = " + std::string(VERSION);
-    str += "\nGIT_TAG = " + std::string(GIT_TAG);
+    if (sizeof(state_t) == 4)
+        str = "parfis::state_t = float";
+    else if (sizeof(state_t) == 8)
+        str = "parfis::state_t = double";
+    else
+        str = "parfis::state_t = unknown";
+    str += "\nparfis::logLevel = " + std::to_string(Const::logLevel);
+    str += "\nparfis::version = " + std::string(Const::version);
+    str += "\nparfis::gitTag = " + std::string(Const::gitTag);
     int pfSize = Parfis::s_parfisMap.size();
     str += "\nParfis object count = " + std::to_string(pfSize);
     str += "\nParfis object id = [";
@@ -132,7 +182,7 @@ PARFIS_EXPORT const char* parfis::cAPI::info()
  * @param pfis Id of the Parfis object
  * @return const char* The object's info string
  */
-PARFIS_EXPORT const char* parfis::cAPI::parfisInfo(uint32_t id)
+PARFIS_EXPORT const char* parfis::ParfisAPI::parfisInfo(uint32_t id)
 {
     static std::string str;
     
@@ -151,7 +201,7 @@ PARFIS_EXPORT const char* parfis::cAPI::parfisInfo(uint32_t id)
  * @brief Returns version string
  * @return const char* The version string
  */
-PARFIS_EXPORT const char* parfis::cAPI::version()
+PARFIS_EXPORT const char* parfis::ParfisAPI::version()
 {
     return VERSION;
 }
@@ -160,7 +210,18 @@ PARFIS_EXPORT const char* parfis::cAPI::version()
  * @brief Creates new Parfis object and returns its id.
  * @return uint32_t Id of the created object
  */
-PARFIS_EXPORT uint32_t parfis::cAPI::newParfis()
+PARFIS_EXPORT uint32_t parfis::ParfisAPI::newParfis()
 {
     return Parfis::newParfis()->m_id;
+}
+
+PARFIS_EXPORT int parfis::ParfisAPI::configure(uint32_t id, const char* str)
+{
+    if (Parfis::getParfis(id) == nullptr) 
+        return 1;
+    int retval = Parfis::getParfis(id)->configure(str);
+    // Domain name not recognized
+    if (retval == -1)
+        return 2;
+    return 0;
 }

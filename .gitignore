@@ -32,9 +32,6 @@
 *.app
 /parfisApp
 
-# Version file
-/include/parfis/version.h
-
 # CMake
 CMakeLists.txt.user
 CMakeCache.txt
@@ -65,3 +62,6 @@ gtestAll
 
 # Doc
 doc/sphinx/source/conf.py
+
+# Log files
+*.log

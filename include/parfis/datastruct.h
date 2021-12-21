@@ -9,6 +9,13 @@
 #include <vector>
 #include <math.h>
 #include <functional>
-#include "global.h"
+
+namespace parfis {
+
+    struct Data {
+        Data();
+        ~Data();
+    };
+}
 
 #endif // PARFIS_DATASTRUCT_H
