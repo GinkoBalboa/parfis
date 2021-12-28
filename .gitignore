@@ -60,8 +60,5 @@ _build
 test/googletest
 gtestAll
 
-# Doc
-doc/sphinx/source/conf.py
-
 # Log files
 *.log

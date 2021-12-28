@@ -153,4 +153,6 @@ function (run_sphinx_build)
         "${SPHINX_SOURCE_DIR}"
         "${SPHINX_HTML_DIR}"
     COMMENT "Building HTML documentation with Sphinx")
+
+    add_dependencies(doc_sphinx doc_doxygen)
 endfunction (run_sphinx_build)

@@ -1,12 +1,13 @@
+#include <fstream>
+#include "config.h"
 #include "system.h"
 #include "global.h"
 
-parfis::System::System(parfis::Logger& logger):
-    Domain(logger, "system")
+parfis::System::System(const std::string& dname, Logger& logger):
+    Domain(dname, logger)
 {
-    log(*m_logger, LogMask::Memory, std::string("\n") + __FUNCTION__ + " constructor");
+    LOG(*m_logger, LogMask::Memory, std::string("\n") + __FUNCTION__ + " constructor");
 }
-
 
 /**
  * @brief Initializes variables from the Data according to the initialization string
@@ -17,10 +18,11 @@ parfis::System::System(parfis::Logger& logger):
 int parfis::System::configure(const std::string& cstr) 
 {
     std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(cstr);
-    return 0;
-}
-
-int parfis::System::initialize()
-{
+    if (std::get<1>(keyValue).find("<parfis::Param>") != std::string::npos) {
+        auto vec = Global::getVector(std::get<1>(keyValue), '[', ']');
+        for (auto& pname: vec) {
+            addChild(pname);
+        }
+    }
     return 0;
 }

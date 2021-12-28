@@ -5,6 +5,7 @@ project(parfis LANGUAGES CXX C)
 
 set_version()
 
+option(BUILD_DEBUG "Build debug version" OFF)
 option(BUILD_STATIC_LIB "Build static library" OFF)
 option(BUILD_PARFISAPP "Build executable application" ON)
 option(PARFIS_STATE_TYPE_DOUBLE "Use double for state data type" OFF)
@@ -12,7 +13,6 @@ option(BUILD_DOXYGEN "Build documentation C++ code using Doxygen." OFF)
 option(BUILD_SPHINX "Build documentation using Sphinx." OFF)
 option(BUILD_GOOGLE_TEST "Build google test" OFF)
 option(BUILD_GTESTALL "Build gtestAll" ON)
-option(BUILD_DEBUG "Build debug version" OFF)
 
 if(BUILD_DEBUG)
     message("Build Debug version")
@@ -36,7 +36,8 @@ else (BUILD_STATIC_LIB)
     set_target_properties(parfis PROPERTIES SUFFIX "d.so")
 endif (BUILD_STATIC_LIB)
 target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
-set_target_properties(parfis PROPERTIES PUBLIC_HEADER "parfis.h")
+set_target_properties(parfis PROPERTIES 
+    PUBLIC_HEADER "parfis.h")
 target_include_directories(parfis PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
   $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include

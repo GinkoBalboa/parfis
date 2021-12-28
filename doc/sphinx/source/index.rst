@@ -22,6 +22,7 @@ of the distribution such as densities and currents are computed simultaneously o
 
    installation
    build
+   cpp
 
 Indices and tables
 ==================

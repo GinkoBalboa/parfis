@@ -28,9 +28,19 @@ namespace parfis
         static std::string removeWhitespace(const std::string& str);
         
         static std::tuple<std::string, std::string> splitKeyValue(const std::string& str);
+        static std::tuple<std::string, std::string> splitKeyString(const std::string& str);
+        static std::string childName(const std::string& str);
 
         /// Check if file @param fname exists
         static bool fileExists (const std::string& fname);
+
+        /// Get vector of strings
+        static std::vector<std::string> getVector(const std::string& str, char bra, char ket);
+        static std::vector<std::string> getInheritanceVector(const std::string& str);
+
+        /// Conversion from floating point to number
+        static std::string to_string(double num);
+        static std::string to_string(float num);
     };
 
     /// Type of state space variables of each particle (float or double)

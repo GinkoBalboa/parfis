@@ -1,4 +1,8 @@
-﻿#ifndef PARFIS_H
+﻿/**
+ * @file parfis.h
+ * @brief Main declarations for Parfis objects.
+ */
+#ifndef PARFIS_H
 #define PARFIS_H
 
 #include <string>
@@ -6,40 +10,66 @@
 #include <map>
 #include <memory>
 
+
 #if defined(_MSC_VER) || defined(WIN64) || defined(_WIN64) || \
     defined(__WIN64__) || defined(WIN32) || defined(_WIN32) || \
     defined(__WIN32__) || defined(__NT__)
 #define DECL_EXPORT __declspec(dllexport)
 #define DECL_IMPORT __declspec(dllimport)
 #else
+/// Export macro
 #define DECL_EXPORT __attribute__((visibility("default")))
+/// Import macro
 #define DECL_IMPORT __attribute__((visibility("default")))
 #endif
 
+/// Export/import macro reconfiguration if compiling/calling the library.
 #if defined(PARFIS_SHARED_LIB)
 #define PARFIS_EXPORT DECL_EXPORT
 #else
 #define PARFIS_EXPORT DECL_IMPORT
 #endif
 
+/// Logging level defined from cmake is or-ed with bitmask to log strings.
 #if defined(PARFIS_LOG_LEVEL)
 #define LOG_LEVEL PARFIS_LOG_LEVEL
 #else
 #define LOG_LEVEL 0
 #endif
 
+/// Logging macro function that yields calls to Logger::log only when LOG_LEVEL is not zero.
+#if LOG_LEVEL > 0
+#define LOG(logger, level, msg) {Logger::log(logger, level, msg);}
+#else
+#define LOG(logger, level, msg) {}
+#endif // LOG_LEVEL
+
+
 namespace parfis {
 
-    /// Log bitmask that corresponds to log level
+    /** 
+     * @brief Log bitmask that corresponds to log level
+     * @details Loging is performed by calling the macro with the desired log message type.
+     * The macro calls a function from the parfis::Logger::log and based on the LOG_LEVEL saves 
+     * the message. For example the comand <c>LOG(m_logger, LogMask::Info, "Test message");</c> 
+     * will log if the LOG_LEVEL has set bit on position four.
+     */ 
     enum LogMask: uint32_t {
+        /// No logging (mask: 0000)
         None = 0b0,
+        /// Log error messages (mask: 0001)
         Error = 0b1,
+        /// Log warning messages (mask: 0010)
         Warning = 0b10,
+        /// Log messages concerned with memory allocation/deallocation (mask: 0100)
         Memory = 0b100,
+        /// Log info messages (mask: 1000)
         Info = 0b1000
     };
 
-    /// Logging class
+    /**
+     * @brief Logging class
+     */
     struct Logger
     {
         Logger(): m_fname(""), m_str(""){};
@@ -53,39 +83,41 @@ namespace parfis {
         void logToStr(LogMask mask, const std::string& msg);
         void printLogFile();
         static std::string getLogFileName(uint32_t id, uint32_t cnt);
-    };
-
-    /**
-     * @brief Constexpr function for logging
-     * 
-     * @param logger Reference to a logger to be used
-     * @param mask LogMask enum value
-     * @param msg String for logging
-     */
-    constexpr void log(Logger& logger, LogMask mask, const std::string& msg) {
-        if (LOG_LEVEL > 0) {
-            if(mask & LOG_LEVEL) logger.logToStr(mask, msg);
+        /**
+         * @brief Function for logging.
+         * @details Functiion is meant to be called through the LOG macro function. Which yelds
+         * no code if LOG_LEVEL is zero.
+         * @param logger Reference to a logger to be used
+         * @param mask parfis::LogMask enum value
+         * @param msg String for logging
+         */
+        static void log(Logger& logger, LogMask mask, const std::string& msg) {
+            if (LOG_LEVEL > 0) {
+                if(mask & LOG_LEVEL) logger.logToStr(mask, msg);
+            }
         }
-    }
+    };
 
     struct ParamBase
     {
-        uint32_t m_id;
         std::string m_name;
-        std::string m_domain;
         std::string m_type;
-        std::vector<ParamBase> m_paramVec;
+        size_t m_size;
+        ParamBase* m_parent;
+        bool inRange(const std::string& valstr);
+        bool isDomain();
+        std::string getValueString();
+        std::map<std::string, std::unique_ptr<ParamBase>> m_childMap;
     };
 
     template<class T>
     struct Param : public ParamBase
     {
-        T m_default;
-        T m_value;
-        std::vector<T> m_range;
-        bool inRange(const T& val) { 
-            return val >= m_range[0] && val <= m_range[1]; 
-        }
+        std::vector<T> m_valueVec;
+        std::vector<T> m_rangeVec;
+        void setType();
+        bool inRange(T value);
+        void addChild(const std::string& name);
     };
 
     /**
@@ -95,22 +127,19 @@ namespace parfis {
      * Domain is used as an abstract class to have its functionality exposed to the API, along
      * with the speciffic functionalities of its children.
      */
-    struct Domain {
+    struct Domain: public Param<std::string> {
         Domain() = default;
-        Domain(Logger& logger, const std::string& dname);
+        Domain(const std::string& dname, Logger& logger);
         Domain(const Domain&) = default;
         Domain& operator=(const Domain&) = default;
         virtual ~Domain() = default;
 
-        virtual int initialize() = 0;
+        int initialize(const std::string& cstr);
+        parfis::Param<std::string>* getParent(const std::string& cstr);
         virtual int configure(const std::string& cstr) = 0;
 
-        /// Pointer to the Logging object from parfis
+        /// Pointer to the Logger object from parfis
         Logger* m_logger;
-        /// Parameters for this domain 
-        std::vector<ParamBase> m_paramVec;
-
-        std::string m_domainName;
     };
 
     /** 
@@ -121,7 +150,7 @@ namespace parfis {
     struct Parfis
     {
         Parfis() = default;
-        Parfis(uint32_t id);
+        Parfis(uint32_t id, const std::string& cfgstr = "");
         Parfis(const Parfis&) = default;
         Parfis& operator=(const Parfis&) = default;
         ~Parfis();
@@ -131,20 +160,25 @@ namespace parfis {
         int initialize();
         int configure(const char* str);
 
+        Domain* getDomain(const std::string& cstr);
+        void initializeDomains();
+
         /// Logging object
         Logger m_logger;
 
+        /// Configuration string
+        std::string m_cfgstr;
+
         /// Id of the created object (same as Parfis::s_parfisMap id)
         uint32_t m_id;
+
+        /// Map of all domains (name -> Domain)
+        std::map<std::string, std::unique_ptr<Domain>> m_domainMap;
 
         /// Static map of pointers to Parfis objects
         static std::map<uint32_t, std::unique_ptr<Parfis>> s_parfisMap;
 
         static Parfis* getParfis(uint32_t);
-        Domain* getDomain(uint32_t);
-
-        /// Map of pointers Domain objects (System, Particle, Field)
-        std::map<uint32_t, std::unique_ptr<Domain>> m_domainMap;
     };
 
     /// Holds C functions visibile from outside (exported functions)
@@ -165,6 +199,8 @@ namespace parfis {
             PARFIS_EXPORT const char* version();
             PARFIS_EXPORT uint32_t newParfis();
             PARFIS_EXPORT int configure(uint32_t id, const char* str);
+            PARFIS_EXPORT const char* defaultConfiguration();
+            PARFIS_EXPORT const char* configuration(uint32_t id);
         };
         /** @} */ // end of group C fucntions API
     }

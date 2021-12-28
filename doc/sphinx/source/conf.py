@@ -18,9 +18,9 @@
 # -- Project information -----------------------------------------------------
 
 # The full version, including alpha/beta/rc tags
-version = '@VERSION@'
-git_tag = '@GIT_TAG@'
-git_rev = '@GIT_REV@'
+version = 'v0.0.5-dev'
+git_tag = 'v0.0.5-dev-13-g52d7473'
+git_rev = '52d7473+'
 
 project = 'Parfis'
 author = 'Ginko Balboa'
