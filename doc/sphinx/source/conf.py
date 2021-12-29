@@ -19,8 +19,8 @@
 
 # The full version, including alpha/beta/rc tags
 version = 'v0.0.5-dev'
-git_tag = 'v0.0.5-dev-14-g12f8a3c'
-git_rev = '12f8a3c'
+git_tag = 'v0.0.5-dev-15-g8316bec'
+git_rev = '8316bec'
 
 project = 'Parfis'
 author = 'Ginko Balboa'
