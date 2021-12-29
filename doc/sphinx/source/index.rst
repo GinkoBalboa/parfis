@@ -12,17 +12,26 @@ the altered particle-in-cell (PIC) method. In the PIC method method individual p
 of the distribution such as densities and currents are computed simultaneously on Eulerian 
 (stationary) mesh points.
 
+`doxygen <www.google.com>`_
+
 - `Link to GitHub repo <https://github.com/GinkoBalboa/parfis>`_
 - Version: |version|
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   :titlesonly:
 
    installation
    build
    cpp
+
+.. toctree::
+   :maxdepth: 1
+   :caption: External links:
+   :titlesonly:
+
+   Doxygen  docs<https://www.parfis.com/doxygen/index.html>
+   GitHub repo <https://github.com/GinkoBalboa/parfis>
 
 Indices and tables
 ==================

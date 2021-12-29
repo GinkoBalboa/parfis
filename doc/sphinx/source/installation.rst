@@ -5,7 +5,7 @@ Installation Guide
 Parfis is packed in binary packages and provides language bindings for Python. 
 For building from source visit :doc:`this page </build>`
 
-.. contents:: Contents
+.. contents::
 
 Stable Release
 ==============

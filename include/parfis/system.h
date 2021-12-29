@@ -27,9 +27,6 @@ namespace parfis
 
         /// Pointer to Data struct
         // std::shared_ptr<Data> m_pData;
-
-        /// Overrided initialize method from Interface::initialize
-        int configure(const std::string& cstr) override;
     };
 }
 

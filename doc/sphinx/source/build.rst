@@ -64,10 +64,10 @@ You can add build options through command-line arguments with the call to cmake.
 - ``PARFIS_LOG_LEVEL`` (default 0). Bitmask for the Logger, corresponds to bitmasks defined in 
   :c:enum:`parfis::LogMask`.
 
-.. note::
-
-    Example: If we want to build debug version with full logging for the first four levels we 
-    can use the following cmake settings:
+For example: 
+  If we want to build debug version with full logging for the first four levels we can use the 
+  following cmake settings:
+  
     .. code-block::bash
 
         parfis/build$ cmake .. -DBUILD_DEBUG=ON -DPARFIS_LOG_LEVEL=15 

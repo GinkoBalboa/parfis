@@ -30,7 +30,7 @@ std::string parfis::Global::removeWhitespace(const std::string& str)
  * @brief Create key,value pair from "key=value" string
  * 
  * @param str String must be without whitespace characters
- * @return std::tuple<std::string, std::string> Key value pair as tuple
+ * @return Key value pair as tuple
  */
 std::tuple<std::string, std::string> parfis::Global::splitKeyValue(const std::string& str)
 {

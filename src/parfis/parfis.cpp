@@ -63,24 +63,35 @@ void parfis::Parfis::initializeDomains()
 
 }
 
-
 template<>
-void parfis::Param<int>::setType() 
+void parfis::Param<std::string>::setValueVec(const std::string& valstr) 
 {
-    m_type = "int";
-}
-
-
-template<>
-void parfis::Param<std::string>::setType() 
-{
-    m_type = "std::string";
+    m_valueVec = Global::getVector(valstr, '[', ']');
+    m_size = m_valueVec.size();
 }
 
 template<>
-void parfis::Param<double>::setType() 
+void parfis::Param<std::string>::setRangeVec(const std::string& ranstr) 
 {
-    m_type = "double";
+    m_rangeVec = Global::getVector(ranstr, '(', ')');
+}
+
+template<>
+void parfis::Param<double>::setValueVec(const std::string& valstr) 
+{
+    m_valueVec.clear();
+    auto valvec = Global::getVector(valstr, '[', ']');
+    for (auto& val: valvec)
+        m_valueVec.push_back(std::strtold(val.c_str(), nullptr));
+    m_size = m_valueVec.size();
+}
+
+template<>
+void parfis::Param<double>::setRangeVec(const std::string& ranstr) 
+{
+    auto ranvec = Global::getVector(ranstr, '(', ')');
+    for (auto& ran: ranvec)
+        m_rangeVec.push_back(std::strtold(ran.c_str(), nullptr));
 }
 
 template<class T>
@@ -103,16 +114,21 @@ bool parfis::ParamBase::isDomain()
     return m_parent == this;
 }
 
-template<class T>
-void parfis::Param<T>::addChild(const std::string& name) 
+template<>
+parfis::Param<double>::Param() { m_type = "double"; }
+template<>
+parfis::Param<std::string>::Param() { m_type = "std::string"; }
+
+template<class S>
+void parfis::ParamBase::addChild(const std::string& name) 
 {
-    m_childMap[name] = std::unique_ptr<ParamBase>(new Param<T>());
+    m_childMap[name] = std::unique_ptr<ParamBase>(new Param<S>());
     m_childMap[name]->m_name = name;
     m_childMap[name]->m_parent = this;
-    static_cast<Param<T>*>(m_childMap[name].get())->setType();
 }
 
-template void parfis::Param<std::string>::addChild(const std::string& name);
+template void parfis::ParamBase::addChild<std::string>(const std::string& name);
+template void parfis::ParamBase::addChild<double>(const std::string& name);
 
 bool parfis::ParamBase::inRange(const std::string& valstr)
 {
@@ -123,6 +139,22 @@ bool parfis::ParamBase::inRange(const std::string& valstr)
     else if (m_type == "std::string")
         return static_cast<Param<std::string>*>(this)->inRange(valstr);
     return false;
+}
+
+void parfis::ParamBase::setValueVec(ParamBase* ppb, const std::string& valstr)
+{
+    if (ppb->m_type == "double")
+        static_cast<Param<double>*>(ppb)->setValueVec(valstr);
+    else if (ppb->m_type == "std::string")
+        static_cast<Param<std::string>*>(ppb)->setValueVec(valstr);
+}
+
+void parfis::ParamBase::setRangeVec(ParamBase* ppb, const std::string& ranstr)
+{
+    if (ppb->m_type == "double")
+        static_cast<Param<double>*>(ppb)->setRangeVec(ranstr);
+    else if (ppb->m_type == "std::string")
+        static_cast<Param<std::string>*>(ppb)->setRangeVec(ranstr);
 }
 
 std::string parfis::ParamBase::getValueString()
@@ -184,35 +216,46 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     return this;
 }
 
+/**
+ * @brief Initializes Domain from DEFAULT_INITIALIZATION_STRING
+ * @param cstr Initialization string is in the format key=value<type>(range). Value 
+ * can be of type array in which case is given as [value1, value2, ...]. 
+ * @return Zero on success 
+ */
 int parfis::Domain::initialize(const std::string& cstr)
 {
     std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(cstr);
     std::tuple<std::string, std::string> keyString = Global::splitKeyString(cstr);
     std::string childName = Global::childName(std::get<0>(keyValue));
     Param<std::string>* pp = getParent(std::get<0>(keyValue));
+    ParamBase* cp = nullptr;
     if (cstr.find("<parfis::Param>") != std::string::npos) {
-        pp->m_valueVec = Global::getVector(std::get<1>(keyValue), '[', ']');
-        pp->m_rangeVec = Global::getVector(std::get<1>(keyString), '(', ')');
-        pp->setType();
-        pp->m_size = m_valueVec.size();
+        cp = pp;
     }
     else if (cstr.find("<std::string>") != std::string::npos) {
-        pp->addChild(childName);
-        Param<std::string>* cp = static_cast<Param<std::string>*>(m_childMap[childName].get());
-        cp->m_valueVec = Global::getVector(std::get<1>(keyValue), '[', ']');
-        cp->m_rangeVec = Global::getVector(std::get<1>(keyString), '(', ')');
-        cp->setType();
-        cp->m_size = cp->m_valueVec.size();
+        pp->addChild<std::string>(childName);
+        cp = m_childMap[childName].get();
     }
     else if (cstr.find("double") != std::string::npos) {
-        pp->addChild(childName);
-        Param<double>* cp = static_cast<Param<double>*>(m_childMap[childName].get());
-        auto valvec = Global::getVector(std::get<1>(keyValue), '[', ']');
-        for (auto& val: valvec)
-            cp->m_valueVec.push_back(std::strtold(val.c_str(), nullptr));
-        cp->setType();
-        cp->m_size = cp->m_valueVec.size();
+        pp->addChild<double>(childName);
+        cp = m_childMap[childName].get();
     }
+    ParamBase::setValueVec(cp, std::get<1>(keyValue));
+    ParamBase::setRangeVec(cp, std::get<1>(keyString));
+    return 0;
+}
+
+/**
+ * @brief Configures initialized Domain
+ * @param cstr Initialization string is in the format key=value 
+ * @return Zero on success 
+ */
+int parfis::Domain::configure(const std::string& cstr) 
+{
+    std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(cstr);
+    std::string childName = Global::childName(std::get<0>(keyValue));
+    Param<std::string>* pp = getParent(std::get<0>(keyValue));
+    ParamBase::setValueVec(pp->m_childMap[childName].get(), std::get<1>(keyValue));
     return 0;
 }
 
@@ -238,7 +281,7 @@ void parfis::Logger::initialize(const std::string& fname) {
     m_str = "Parfis log file";
     m_str += "\n--------------";
     m_str += "\nCreated on: " + Global::currentDateTime();
-    m_str += "\n" + std::string(ParfisAPI::info());
+    m_str += "\n" + std::string(api::info());
     m_str += "\n--------------";
 }
 
@@ -268,9 +311,9 @@ void parfis::Logger::printLogFile()
 
 /**
  * @brief Creates new Parfis object in memory
- * @details Saves a pointer to the dynamicaly created object in the static 
+ * @details Saves a uniquie pointer to the dynamicaly created object in the static 
  * map Parfis::s_parfisMap.
- * @return parfis::Parfis* Pointer to the created Parfis object
+ * @return Pointer to the created Parfis object
  */
 parfis::Parfis* parfis::Parfis::newParfis()
 {
@@ -299,7 +342,7 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
     LOG(m_logger, LogMask::Memory, std::string("\n") + __FUNCTION__ + 
         " constructor with id = " + std::to_string(m_id));
     if (cfgstr == "")
-        m_cfgstr = DEFAULT_CONFIGURATION;
+        m_cfgstr = DEFAULT_INITIALIZATION_STRING;
     else 
         m_cfgstr = cfgstr;
     initialize();
@@ -307,7 +350,7 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
 
 /**
  * @brief Initialize all domains
- * @return int Zero for success
+ * @return Zero for success
  */
 int parfis::Parfis::initialize() 
 {
@@ -339,11 +382,10 @@ parfis::Parfis::~Parfis() {
 
 /**
  * @brief Returns info about the program settings.
- * @details These settings are compilation definitions and values
- * of the current runtime.
- * @return const char* The info string
+ * @details These settings are compilation definitions and values of the current runtime.
+ * @return The info string
  */
-PARFIS_EXPORT const char* parfis::ParfisAPI::info()
+PARFIS_EXPORT const char* parfis::api::info()
 {
     static std::string str;
     if (sizeof(state_t) == 4)
@@ -372,9 +414,9 @@ PARFIS_EXPORT const char* parfis::ParfisAPI::info()
 /**
  * @brief Returns info about the Parfis object.
  * @param id Id of the Parfis object
- * @return const char* The object's info string
+ * @return The object's info string
  */
-PARFIS_EXPORT const char* parfis::ParfisAPI::parfisInfo(uint32_t id)
+PARFIS_EXPORT const char* parfis::api::parfisInfo(uint32_t id)
 {
     static std::string APIStaticString;
     
@@ -392,23 +434,29 @@ PARFIS_EXPORT const char* parfis::ParfisAPI::parfisInfo(uint32_t id)
 
 /**
  * @brief Returns version string
- * @return const char* The version string
+ * @return The version string
  */
-PARFIS_EXPORT const char* parfis::ParfisAPI::version()
+PARFIS_EXPORT const char* parfis::api::version()
 {
     return VERSION;
 }
 
 /**
  * @brief Creates new Parfis object and returns its id.
- * @return uint32_t Id of the created object
+ * @return Id of the created object
  */
-PARFIS_EXPORT uint32_t parfis::ParfisAPI::newParfis()
+PARFIS_EXPORT uint32_t parfis::api::newParfis()
 {
     return Parfis::newParfis()->m_id;
 }
 
-PARFIS_EXPORT int parfis::ParfisAPI::configure(uint32_t id, const char* str)
+/**
+ * @brief Configures the Parfis object with the given id.
+ * @param id Id of the Parfis object to configure
+ * @param str Configuration string
+ * @return Zero for success
+ */
+PARFIS_EXPORT int parfis::api::configure(uint32_t id, const char* str)
 {
     if (Parfis::getParfis(id) == nullptr) 
         return 1;
@@ -419,32 +467,36 @@ PARFIS_EXPORT int parfis::ParfisAPI::configure(uint32_t id, const char* str)
     return 0;
 }
 
-PARFIS_EXPORT const char* parfis::ParfisAPI::defaultConfiguration()
+/**
+ * @brief Returns the default configuration hardcoded in DEFAULT_INITIALIZATION_STRING.
+ * @return The default configuration 
+ */
+PARFIS_EXPORT const char* parfis::api::defaultConfiguration()
 {
-    return DEFAULT_CONFIGURATION;
+    return DEFAULT_INITIALIZATION_STRING;
 }
 
 /**
  * @brief Returns configuration of Parfis object
+ * @details The function serializes the Domain objects and its children.
  * @param id Object id
- * @return const char* The serialized configuration string
+ * @return The serialized configuration string
  */
-PARFIS_EXPORT const char* parfis::ParfisAPI::configuration(uint32_t id)
+PARFIS_EXPORT const char* parfis::api::configuration(uint32_t id)
 {
     static std::string APIStaticString;
     std::string str;
     std::string domainName;
 
+    APIStaticString = "";
     std::function<std::string(ParamBase* pb)> addChildString;
     addChildString = [&str, &addChildString, &domainName](ParamBase* pb)->std::string {
         str += pb->m_name + "=" + pb->getValueString() + "\n";
-        if (pb->m_childMap.size() > 0) {
-            // str += "[";
-            //for(auto& cpb: pb->m_childMap)
-            //    str += cpb.first + ",";
-            // str[str.size()-1] = ']';
-            for(auto& cpb: pb->m_childMap)
+        if (pb->m_childMap.size() > 0) { 
+            for(auto& cpb: pb->m_childMap) {
+                str += pb->m_name + ".";
                 addChildString(cpb.second.get());
+            }
         }
         return "";
     };
@@ -454,6 +506,7 @@ PARFIS_EXPORT const char* parfis::ParfisAPI::configuration(uint32_t id)
         
     for(auto& dom: Parfis::getParfis(id)->m_domainMap) {
         str = "";
+        domainName = dom.first;
         addChildString(dom.second.get());
         APIStaticString += str;
     }

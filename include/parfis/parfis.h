@@ -1,4 +1,17 @@
 ﻿/**
+ * @mainpage Parfis
+ * @section intro_sec Introduction
+ * Parfis is an acronym for PARticles and FIeld Simulator. Parfis is written in C++ with Python 
+ * interface and is based on the altered particle-in-cell (PIC) method. In the PIC method
+ * method individual particles (or fluid elements) in a Lagrangian frame are tracked
+ * in a continuous phase space, whereas moments of the distribution such as densities
+ * and currents are computed simultaneously on Eulerian (stationary) mesh points.
+ * @subsection Installation
+ * Installation is explained in the sphinx doc page: 
+ * <a href="https://www.parfis.com/installation.html">Parfis installation</a>
+ */
+
+/**
  * @file parfis.h
  * @brief Main declarations for Parfis objects.
  */
@@ -37,22 +50,30 @@
 #define LOG_LEVEL 0
 #endif
 
+/**
+ * @defgroup logging
+ * @brief Classes and functions used for logging
+ * 
+ * @{
+ */
 /// Logging macro function that yields calls to Logger::log only when LOG_LEVEL is not zero.
 #if LOG_LEVEL > 0
 #define LOG(logger, level, msg) {Logger::log(logger, level, msg);}
 #else
 #define LOG(logger, level, msg) {}
 #endif // LOG_LEVEL
-
+/** @} logging */
 
 namespace parfis {
-
     /** 
      * @brief Log bitmask that corresponds to log level
      * @details Loging is performed by calling the macro with the desired log message type.
      * The macro calls a function from the parfis::Logger::log and based on the LOG_LEVEL saves 
      * the message. For example the comand <c>LOG(m_logger, LogMask::Info, "Test message");</c> 
      * will log if the LOG_LEVEL has set bit on position four.
+     * 
+     * @addtogroup logging
+     * @{
      */ 
     enum LogMask: uint32_t {
         /// No logging (mask: 0000)
@@ -68,7 +89,7 @@ namespace parfis {
     };
 
     /**
-     * @brief Logging class
+     * @brief Logger class
      */
     struct Logger
     {
@@ -97,7 +118,18 @@ namespace parfis {
             }
         }
     };
+    /** @} logging */
 
+    /**
+     * @defgroup configuration
+     * @brief Tree data structure used for configuring parfis.
+     * @{
+     */
+    /**
+     * @brief Base class used for configurations
+     * @details The ParamBase acts as a node in a tree data structure. Root nodes are of
+     * Domain type.
+     */
     struct ParamBase
     {
         std::string m_name;
@@ -108,21 +140,31 @@ namespace parfis {
         bool isDomain();
         std::string getValueString();
         std::map<std::string, std::unique_ptr<ParamBase>> m_childMap;
+        template<class S>
+        void addChild(const std::string& name);
+        static void setValueVec(ParamBase* ppb, const std::string& valstr);
+        static void setRangeVec(ParamBase* ppb, const std::string& ranstr);
     };
 
+    /**
+     * @brief Class derived from ParamBase.
+     * @details Class is used as leaf node in the configuration data tree structure. 
+     * @tparam T Type can be on of the following (int, double, std::string, parfis::state_t)
+     */
     template<class T>
     struct Param : public ParamBase
     {
+        Param();
         std::vector<T> m_valueVec;
         std::vector<T> m_rangeVec;
-        void setType();
+        void setValueVec(const std::string& valstr);
+        void setRangeVec(const std::string& ranstr);
         bool inRange(T value);
-        void addChild(const std::string& name);
     };
 
     /**
      * @struct Domain
-     * @brief Domain class that is used as base class
+     * @brief Class is used as a base class
      * @details Objects used in the Parfis class, are objects from classes that inherit Domain.
      * Domain is used as an abstract class to have its functionality exposed to the API, along
      * with the speciffic functionalities of its children.
@@ -134,13 +176,14 @@ namespace parfis {
         Domain& operator=(const Domain&) = default;
         virtual ~Domain() = default;
 
-        int initialize(const std::string& cstr);
         parfis::Param<std::string>* getParent(const std::string& cstr);
-        virtual int configure(const std::string& cstr) = 0;
+        int initialize(const std::string& cstr);
+        int configure(const std::string& cstr);
 
         /// Pointer to the Logger object from parfis
         Logger* m_logger;
     };
+    /** @} configuration */
 
     /** 
      * @struct Parfis
@@ -181,10 +224,10 @@ namespace parfis {
         static Parfis* getParfis(uint32_t);
     };
 
-    /// Holds C functions visibile from outside (exported functions)
-    namespace ParfisAPI {
+    /// Exported C functions
+    namespace api {
         
-        /** @defgroup ParfisAPI C functions API
+        /** @defgroup api
          *  @brief Exported C Functions of the main class Parfis
          *  @details Functions are compiled with the **extern "C"** thus forbiding
          * C++ to mangle the function names. This is essential for using these 
@@ -202,7 +245,7 @@ namespace parfis {
             PARFIS_EXPORT const char* defaultConfiguration();
             PARFIS_EXPORT const char* configuration(uint32_t id);
         };
-        /** @} */ // end of group C fucntions API
+        /** @} api */
     }
 }
 

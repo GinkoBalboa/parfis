@@ -19,8 +19,8 @@
 
 # The full version, including alpha/beta/rc tags
 version = 'v0.0.5-dev'
-git_tag = 'v0.0.5-dev-13-g52d7473'
-git_rev = '52d7473+'
+git_tag = 'v0.0.5-dev-14-g12f8a3c'
+git_rev = '12f8a3c'
 
 project = 'Parfis'
 author = 'Ginko Balboa'
@@ -73,6 +73,8 @@ exclude_patterns = ['_build',
 #
 
 html_theme = 'sphinx_rtd_theme'
+
+html_theme_optioin = {'navigation_depth': 4}
 
 html_context = {
 'display_github': True,  # Add 'Edit on Github' link instead of 'View page source'

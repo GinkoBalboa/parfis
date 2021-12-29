@@ -46,6 +46,7 @@ namespace parfis
     /// Type of state space variables of each particle (float or double)
     typedef STATE_TYPE state_t;
 
+    /// Physical and mathematical constats
     struct Const {
         /// Pi
         static constexpr double pi = 3.14159265358979323846;
