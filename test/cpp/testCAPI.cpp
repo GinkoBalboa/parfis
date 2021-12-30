@@ -21,11 +21,14 @@ TEST(api, checkStateType) {
 
 TEST(api, newParfis_checkTimestep) {
     uint32_t id = parfis::api::newParfis();
-    std::string cfgstr = parfis::api::configuration(id);
-    // This is the default timestep
+    std::string cfgstr = parfis::api::getConfig(id);
+    // This is the default timestep from full configuration
     ASSERT_NE(cfgstr.find("system.timestep=1"), std::string::npos);
+    cfgstr = parfis::api::getConfigParam(id, "system.timestep");
+    // Check default as single param
+    ASSERT_EQ(double(1.0), std::stod(cfgstr, nullptr));
     // This is the new timestep
-    parfis::api::configure(id, "system.timestep=2.0");
-    cfgstr = parfis::api::configuration(id);
-    ASSERT_NE(cfgstr.find("system.timestep=2"), std::string::npos);
+    parfis::api::setConfig(id, "system.timestep=0.00112e-12");
+    cfgstr = parfis::api::getConfigParam(id, "system.timestep");
+    ASSERT_EQ(double(1.12e-15), std::stod(cfgstr, nullptr));
 }

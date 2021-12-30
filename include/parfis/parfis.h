@@ -137,7 +137,6 @@ namespace parfis {
         size_t m_size;
         ParamBase* m_parent;
         bool inRange(const std::string& valstr);
-        bool isDomain();
         std::string getValueString();
         std::map<std::string, std::unique_ptr<ParamBase>> m_childMap;
         template<class S>
@@ -204,6 +203,7 @@ namespace parfis {
         int configure(const char* str);
 
         Domain* getDomain(const std::string& cstr);
+        std::string getParamValue(const std::string& key);
         void initializeDomains();
 
         /// Logging object
@@ -241,9 +241,10 @@ namespace parfis {
             PARFIS_EXPORT const char* parfisInfo(uint32_t id);
             PARFIS_EXPORT const char* version();
             PARFIS_EXPORT uint32_t newParfis();
-            PARFIS_EXPORT int configure(uint32_t id, const char* str);
+            PARFIS_EXPORT int setConfig(uint32_t id, const char* str);
             PARFIS_EXPORT const char* defaultConfiguration();
-            PARFIS_EXPORT const char* configuration(uint32_t id);
+            PARFIS_EXPORT const char* getConfig(uint32_t id);
+            PARFIS_EXPORT const char* getConfigParam(uint32_t id, const char* key);
         };
         /** @} api */
     }

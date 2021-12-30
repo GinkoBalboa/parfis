@@ -22,6 +22,16 @@ parfis::Domain* parfis::Parfis::getDomain(const std::string& cstr)
         return dmap->second.get();
 }
 
+std::string parfis::Parfis::getParamValue(const std::string& key)
+{
+    auto inhvec = Global::getInheritanceVector(key);
+    ParamBase* pp = m_domainMap[inhvec[0]].get();
+    for(size_t i=1; i<inhvec.size(); i++) {
+        pp = pp->m_childMap[inhvec[i]].get();
+    }
+    return pp->getValueString();
+}
+
 void parfis::Parfis::initializeDomains() 
 {
     if (m_domainMap.size() != 0)
@@ -107,11 +117,6 @@ bool parfis::Param<std::string>::inRange(std::string valstr)
         if (str == valstr)
             return true;
     return false;
-}
-
-bool parfis::ParamBase::isDomain()
-{
-    return m_parent == this;
 }
 
 template<>
@@ -456,7 +461,7 @@ PARFIS_EXPORT uint32_t parfis::api::newParfis()
  * @param str Configuration string
  * @return Zero for success
  */
-PARFIS_EXPORT int parfis::api::configure(uint32_t id, const char* str)
+PARFIS_EXPORT int parfis::api::setConfig(uint32_t id, const char* str)
 {
     if (Parfis::getParfis(id) == nullptr) 
         return 1;
@@ -482,15 +487,14 @@ PARFIS_EXPORT const char* parfis::api::defaultConfiguration()
  * @param id Object id
  * @return The serialized configuration string
  */
-PARFIS_EXPORT const char* parfis::api::configuration(uint32_t id)
+PARFIS_EXPORT const char* parfis::api::getConfig(uint32_t id)
 {
     static std::string APIStaticString;
     std::string str;
-    std::string domainName;
 
     APIStaticString = "";
     std::function<std::string(ParamBase* pb)> addChildString;
-    addChildString = [&str, &addChildString, &domainName](ParamBase* pb)->std::string {
+    addChildString = [&str, &addChildString](ParamBase* pb)->std::string {
         str += pb->m_name + "=" + pb->getValueString() + "\n";
         if (pb->m_childMap.size() > 0) { 
             for(auto& cpb: pb->m_childMap) {
@@ -506,9 +510,24 @@ PARFIS_EXPORT const char* parfis::api::configuration(uint32_t id)
         
     for(auto& dom: Parfis::getParfis(id)->m_domainMap) {
         str = "";
-        domainName = dom.first;
         addChildString(dom.second.get());
         APIStaticString += str;
     }
+    return APIStaticString.c_str();
+}
+
+/**
+ * @brief Returns value for a single configuration parameter of Parfis object.
+ * @details The function serializes the single children of the Domain object.
+ * @param id Object id
+ * @param key The parameter key
+ * @return The parameter value as string
+ */
+PARFIS_EXPORT const char* parfis::api::getConfigParam(uint32_t id, const char* key)
+{
+    static std::string APIStaticString;
+    std::string str;
+
+    APIStaticString = Parfis::getParfis(id)->getParamValue(key);
     return APIStaticString.c_str();
 }

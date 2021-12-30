@@ -3,16 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Parfis's documentation!
-==================================
+Parfis documentation!
+=====================
 
 Parfis is a particles and field simulator. Written in C++ with Python interface, Parfis is based on 
-the altered particle-in-cell (PIC) method. In the PIC method method individual particles 
-(or fluid elements) in a Lagrangian frame are tracked in a continuous phase space, whereas moments 
+the altered particle-in-cell (PIC) method. In the PIC method, individual particles (or fluid 
+elements) in a Lagrangian frame are tracked in continuous phase space, whereas moments 
 of the distribution such as densities and currents are computed simultaneously on Eulerian 
 (stationary) mesh points.
-
-`doxygen <www.google.com>`_
 
 - `Link to GitHub repo <https://github.com/GinkoBalboa/parfis>`_
 - Version: |version|
