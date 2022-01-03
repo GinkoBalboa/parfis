@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <functional>
 #include "parfis.h"
 #include "global.h"
 #include "version.h"
@@ -402,7 +403,7 @@ PARFIS_EXPORT const char* parfis::api::info()
     str += "\nparfis::logLevel = " + std::to_string(Const::logLevel);
     str += "\nparfis::version = " + std::string(Const::version);
     str += "\nparfis::gitTag = " + std::string(Const::gitTag);
-    int pfSize = Parfis::s_parfisMap.size();
+    int pfSize = int(Parfis::s_parfisMap.size());
     str += "\nParfis object count = " + std::to_string(pfSize);
     str += "\nParfis object id = [";
     int i = 0;

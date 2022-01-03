@@ -18,6 +18,77 @@ function(set_output_directory target dir)
     ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ${dir})
 endfunction(set_output_directory)
 
+# Set binary files extension
+function(set_properties target type)
+    if(${type} MATCHES "SHARED")
+        if(UNIX)
+            if(BUILD_DEBUG)
+                set_target_properties(
+                    ${target} 
+                    PROPERTIES 
+                        SUFFIX "d.so"
+                        FILE_NAME "${target}d.so"
+                        CMAKE_C_FLAGS_DEBUG "-g -DDEBUG"
+                        CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+            else()
+                set_target_properties(
+                    ${target} 
+                    PROPERTIES 
+                        SUFFIX ".so"
+                        FILE_NAME "${target}.so")
+            endif()
+        elseif(WIN32)
+            if(BUILD_DEBUG)
+                set_target_properties(
+                    ${target} 
+                    PROPERTIES 
+                        SUFFIX "d.dll"
+                        FILE_NAME "${target}d.dll"
+                        CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MDd"
+                        CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+            else()
+                set_target_properties(
+                    ${target} 
+                    PROPERTIES 
+                        SUFFIX ".dll"
+                        FILE_NAME "${target}.dll"
+                        CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MD"
+                        CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+            endif()
+        endif()
+    elseif(${type} MATCHES "EXECUTABLE")
+        if(UNIX)
+            if(BUILD_DEBUG)
+                set_target_properties(
+                    ${target} 
+                    PROPERTIES 
+                        SUFFIX "d"
+                        FILE_NAME "${target}d"
+                        CMAKE_C_FLAGS_DEBUG "-g -DDEBUG"
+                        CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+            endif()
+        elseif(WIN32)
+            if(BUILD_DEBUG)
+                set_target_properties(
+                    ${target} 
+                    PROPERTIES 
+                        SUFFIX "d.exe"
+                        FILE_NAME "${target}d.exe"
+                        CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd"
+                        CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+            else()
+                set_target_properties(
+                    ${target} 
+                    PROPERTIES 
+                        SUFFIX ".exe"
+                        FILE_NAME "${target}.exe"
+                        CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT"
+                        CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+            endif()
+        endif()
+    endif()
+endfunction(set_properties)
+
 function(set_version)
     execute_process(COMMAND git log --pretty=format:'%h' -n 1
                     OUTPUT_VARIABLE GIT_REV

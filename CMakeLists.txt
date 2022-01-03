@@ -17,11 +17,20 @@ option(BUILD_GTESTALL "Build gtestAll" ON)
 if(BUILD_DEBUG)
     message("Build Debug version")
     set(CMAKE_BUILD_TYPE Debug) 
-    set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+    # if(UNIX)
+    #     set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
+    #     set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+    # elseif(WIN32)
+    #     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
+    #     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+    # endif()    
 else(BUILD_DEBUG)
     message("Build Release version")
     set(CMAKE_BUILD_TYPE Release)
+    # if(WIN32)
+    #     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
+    #     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    # endif()
 endif(BUILD_DEBUG)
 
 # Core parfis
@@ -29,15 +38,15 @@ file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${pa
 if (BUILD_STATIC_LIB)
     message("Build static lib")
     add_library(parfis STATIC)
-else (BUILD_STATIC_LIB)
+else ()
     message("Build shared lib")
     add_library(parfis SHARED)
     add_compile_definitions(PARFIS_SHARED_LIB)
-    set_target_properties(parfis PROPERTIES SUFFIX "d.so")
-endif (BUILD_STATIC_LIB)
+    set_properties(parfis SHARED)
+    set_target_properties(parfis PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/parfis)
+endif ()
 target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
-set_target_properties(parfis PROPERTIES 
-    PUBLIC_HEADER "parfis.h")
+set_target_properties(parfis PROPERTIES PUBLIC_HEADER "parfis.h")
 target_include_directories(parfis PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
   $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
@@ -54,9 +63,16 @@ if(BUILD_PARFISAPP)
         $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
     )
     set_output_directory(parfisApp ${parfis_SOURCE_DIR}/build/bin/parfisApp)
-    set_target_properties(parfisApp PROPERTIES SUFFIX "d")
+    set_properties(parfisApp EXECUTABLE)
+    add_dependencies(parfisApp parfis)
     target_link_libraries(parfisApp PRIVATE parfis)
     add_dependencies(parfisApp parfis)
+    get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
+    get_target_property(PARFIS_FILE_NAME parfis FILE_NAME)
+    add_custom_command(TARGET parfisApp POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
+        ${parfis_SOURCE_DIR}/build/bin/parfisApp/${PARFIS_FILE_NAME})
 endif(BUILD_PARFISAPP)
 
 # Logging level
@@ -92,12 +108,29 @@ if(BUILD_GOOGLE_TEST)
     ExternalProject_Add(googletest
         GIT_REPOSITORY https://github.com/google/googletest
         GIT_TAG main
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/build/lib/googletest -DBUILD_SHARED_LIBS=ON
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/build/lib/googletest 
+                   -DBUILD_SHARED_LIBS=ON
+                   -DGTEST_CREATE_SHARED_LIBRARY=ON
+                   -DGTEST_LINKED_AS_SHARED_LIBRARY=ON
+        BUILD_COMMAND ""
+        BUILD_ALWAYS 1
+        INSTALL_COMMAND cmake --build . --target install --config ${CMAKE_BUILD_TYPE}
     )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_library(gtest SHARED IMPORTED)
+    set_target_properties(gtest PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/googletest/bin)
     if(UNIX)
         set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/libgtest.so)
-    endif(UNIX)
+        set_target_properties(gtest PROPERTIES FILE_NAME libgtest.so)
+    elseif(WIN32)
+        if(BUILD_DEBUG)
+            set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/gtestd.lib)
+            set_target_properties(gtest PROPERTIES FILE_NAME gtestd.dll)
+        else()
+            set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/gtest.lib)
+            set_target_properties(gtest PROPERTIES FILE_NAME gtest.dll)
+        endif()
+    endif()
 endif(BUILD_GOOGLE_TEST)
 
 # gtestAll
@@ -109,3 +142,14 @@ endif()
 
 message("VERSION = ${VERSION}")
 message("PARFIS_LOG_LEVEL = ${PARFIS_LOG_LEVEL}")
+
+get_target_property(GTEST_IMPORTED_LOCATION gtest IMPORTED_LOCATION)
+get_target_property(GTEST_FILE_DIR gtest FILE_DIR)
+get_target_property(GTEST_FILE_NAME gtest FILE_NAME)
+get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
+get_target_property(PARFIS_FILE_NAME parfis FILE_NAME)
+message("GTEST_IMPORTED_LOCATION = ${GTEST_IMPORTED_LOCATION}")
+message("GTEST_FILE_DIR = ${GTEST_FILE_DIR}")
+message("GTEST_FILE_NAME = ${GTEST_FILE_NAME}")
+message("PARFIS_FILE_DIR = ${PARFIS_FILE_DIR}")
+message("PARFIS_FILE_NAME = ${PARFIS_FILE_NAME}")
