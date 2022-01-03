@@ -27,7 +27,7 @@ function(set_properties target type)
                     ${target} 
                     PROPERTIES 
                         SUFFIX "d.so"
-                        FILE_NAME "${target}d.so"
+                        FILE_NAME "lib${target}d.so"
                         CMAKE_C_FLAGS_DEBUG "-g -DDEBUG"
                         CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
             else()
@@ -35,7 +35,7 @@ function(set_properties target type)
                     ${target} 
                     PROPERTIES 
                         SUFFIX ".so"
-                        FILE_NAME "${target}.so")
+                        FILE_NAME "lib${target}.so")
             endif()
         elseif(WIN32)
             if(BUILD_DEBUG)
