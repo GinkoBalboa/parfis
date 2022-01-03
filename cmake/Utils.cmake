@@ -65,7 +65,13 @@ function(set_properties target type)
                         SUFFIX "d"
                         FILE_NAME "${target}d"
                         CMAKE_C_FLAGS_DEBUG "-g -DDEBUG"
-                        CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+                        CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG"
+                        BUILD_RPATH ".")
+            else()
+                set_target_properties(
+                    ${target} 
+                    PROPERTIES 
+                        BUILD_RPATH ".")
             endif()
         elseif(WIN32)
             if(BUILD_DEBUG)

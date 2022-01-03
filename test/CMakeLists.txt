@@ -28,8 +28,8 @@ target_link_libraries(gtestAll PUBLIC parfis ${GTEST_IMPORTED_LOCATION})
 add_dependencies(gtestAll parfis gtest)
 add_custom_command(TARGET gtestAll POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy 
-        ${GTEST_FILE_DIR}/${GTEST_FILE_NAME} 
-        ${parfis_SOURCE_DIR}/build/bin/gtestAll/${GTEST_FILE_NAME})
+        "${GTEST_FILE_DIR}/${GTEST_FILE_NAME}*" 
+        "${parfis_SOURCE_DIR}/build/bin/gtestAll/${GTEST_FILE_NAME}*")
 add_custom_command(TARGET gtestAll POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy 
         ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
