@@ -66,12 +66,15 @@ function(set_properties target type)
                         FILE_NAME "${target}d"
                         CMAKE_C_FLAGS_DEBUG "-g -DDEBUG"
                         CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG"
-                        BUILD_RPATH ".")
+                        CMAKE_SKIP_BUILD_RPATH FALSE
+                        CMAKE_BUILD_WITH_INSTALL_RPATH FALSE
+                        CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
             else()
                 set_target_properties(
                     ${target} 
                     PROPERTIES 
-                        BUILD_RPATH ".")
+                        BUILD_WITH_RPATH TRUE 
+                        BUILD_RPATH "@ORIGIN")
             endif()
         elseif(WIN32)
             if(BUILD_DEBUG)

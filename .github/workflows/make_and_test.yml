@@ -1,7 +1,10 @@
-name: Run CMake
-on: pull_request
+name: Build and test
+on:
+  pull_request:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 jobs:
-  build:
+  build-release-ubuntu:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -16,5 +19,36 @@ jobs:
         cmake ..
         make
     - name: Run Test
-      run: ./gtestAll
-     
+      run: ./build/bin/gtestAll/gtestAll
+  build-debug-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+      with:
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
+    - name: Make build dir, run cmake and make
+      shell: bash
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DBUILD_DEBUG=ON
+        make
+    - name: Run Test
+      run: ./build/bin/gtestAll/gtestAlld
+  build-release-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+      with:
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
+    - name: Make build dir, run cmake and make
+      shell: bash
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build .
+    - name: Run Test
+      run: ./build/bin/gtestAll/gtestAll.exe
