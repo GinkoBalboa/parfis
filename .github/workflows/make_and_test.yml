@@ -49,7 +49,7 @@ jobs:
         mkdir build
         cd build
         cmake ..
-        cmake --build .
+        cmake --build . --config Debug
     - name: Run Test
       run: ./build/bin/gtestAll/gtestAll.exe
   build-debug-windows:
@@ -65,6 +65,6 @@ jobs:
         mkdir build
         cd build
         cmake .. -DBUILD_DEBUG=ON
-        cmake --build .
+        cmake --build . --config Release
     - name: Run Test
       run: ./build/bin/gtestAll/gtestAlld.exe
