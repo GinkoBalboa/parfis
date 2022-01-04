@@ -96,10 +96,16 @@ function(set_version)
     # Check whether we got any revision (which isn't
     # always the case, e.g. when someone downloaded a zip
     # file from Github instead of a checkout)
-    execute_process(
-        COMMAND bash -c "git diff --quiet --exit-code || echo +"
-        OUTPUT_VARIABLE GIT_DIFF)
-
+    if(UNIX)
+        execute_process(
+            COMMAND bash -c "git diff --quiet --exit-code || echo +"
+            OUTPUT_VARIABLE GIT_DIFF)
+    elseif(WIN32)
+        execute_process(
+            COMMAND git diff --quiet --exit-code; if ($LASTEXITCODE=1) {echo +}
+            OUTPUT_VARIABLE GIT_DIFF)
+    endif()
+    
     execute_process(
         COMMAND git describe --tags
         OUTPUT_VARIABLE GIT_TAG ERROR_QUIET)
@@ -107,6 +113,7 @@ function(set_version)
         set(GIT_TAG "N/A")
     endif()
         
+    
     execute_process(
         COMMAND git describe --tags --abbrev=0
         OUTPUT_VARIABLE VERSION ERROR_QUIET)

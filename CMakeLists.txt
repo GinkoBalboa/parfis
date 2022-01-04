@@ -14,6 +14,10 @@ option(BUILD_SPHINX "Build documentation using Sphinx." OFF)
 option(BUILD_GOOGLE_TEST "Build google test" OFF)
 option(BUILD_GTESTALL "Build gtestAll" ON)
 
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
 if(BUILD_DEBUG)
     message("Build Debug version")
     set(CMAKE_BUILD_TYPE Debug)
@@ -102,8 +106,6 @@ if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)
         GIT_TAG main
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/build/lib/googletest 
                    -DBUILD_SHARED_LIBS=ON
-                   -DGTEST_CREATE_SHARED_LIBRARY=ON
-                   -DGTEST_LINKED_AS_SHARED_LIBRARY=ON
         BUILD_COMMAND ""
         BUILD_ALWAYS 1
         INSTALL_COMMAND cmake --build . --target install --config ${CMAKE_BUILD_TYPE}
