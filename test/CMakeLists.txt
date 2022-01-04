@@ -29,7 +29,7 @@ add_dependencies(gtestAll parfis gtest)
 # Copy shared libs under win
 if(WIN32)
     add_custom_command(TARGET gtestAll POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            COMMAND ${CMAKE_COMMAND} -E copy
             ${GTEST_FILE_DIR}/${GTEST_FILE_NAME} 
             ${parfis_SOURCE_DIR}/build/bin/gtestAll/${GTEST_FILE_NAME})
     add_custom_command(TARGET gtestAll POST_BUILD
