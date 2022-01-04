@@ -1,0 +1,74 @@
+/**
+ * @file global.h
+ *
+ * @brief Global definitions and functions.
+ */
+#ifndef PARFIS_GLOBAL_H
+#define PARFIS_GLOBAL_H
+
+#include <string>
+#include <vector>
+#include <map>
+#include <fstream>
+#include <algorithm>
+
+#if defined(STATE_TYPE_DOUBLE)
+#define STATE_TYPE double
+#else
+#define STATE_TYPE float
+#endif
+
+/// Main namespace of the library
+namespace parfis 
+{
+    struct Global {
+        /// Get current date and time in the format YYYY-MM-DD HH:mm:ss
+        static std::string currentDateTime();
+
+        static std::string removeWhitespace(const std::string& str);
+        
+        static std::tuple<std::string, std::string> splitKeyValue(const std::string& str);
+        static std::tuple<std::string, std::string> splitKeyString(const std::string& str);
+        static std::string childName(const std::string& str);
+
+        /// Check if file @param fname exists
+        static bool fileExists (const std::string& fname);
+
+        /// Get vector of strings
+        static std::vector<std::string> getVector(const std::string& str, char bra, char ket);
+        static std::vector<std::string> getInheritanceVector(const std::string& str);
+
+        /// Conversion from floating point to number
+        static std::string to_string(double num);
+        static std::string to_string(float num);
+    };
+
+    /// Type of state space variables of each particle (float or double)
+    typedef STATE_TYPE state_t;
+
+    /// Physical and mathematical constats
+    struct Const {
+        /// Pi
+        static constexpr double pi = 3.14159265358979323846;
+        /// Pi/2
+        static constexpr double halfPi = 1.57079632679489661923;
+        /// One atomic mass unit [kg]
+        static constexpr double amuKg = 1.66053906660e-27;
+        /// Electron mass [kg]
+        static constexpr double eMass = 9.1093837015e-31;
+        /// Elementary charge [C]
+        static constexpr double eCharge = 1.602176634e-19;
+        /// One joule in electronvolts [eV]
+        static constexpr double JeV = 1.602176634e-19;
+        /// One electronvolt in joules [J]
+        static constexpr double eVJ = 6.2415090744608e18;
+        /// Version string
+        static uint32_t logLevel;
+        /// Version string
+        static const char* version;
+        /// Git tag string
+        static const char* gitTag;
+    };
+}
+
+#endif // PARFIS_GLOBAL_H
