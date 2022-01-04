@@ -142,7 +142,7 @@ function(set_version)
 #endif // PARFIS_VERSION_H
 ")
 
-    message("VERSION_H=${VERSION_H}")
+    message("VERSION_H=\n${VERSION_H}")
     set(VERSION "${VERSION}" PARENT_SCOPE)
     set(GIT_TAG "${GIT_TAG}" PARENT_SCOPE)
     set(GIT_REV "${GIT_REV}${GIT_DIFF}" PARENT_SCOPE)
