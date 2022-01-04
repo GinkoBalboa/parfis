@@ -9,12 +9,12 @@
 #include <vector>
 #include <math.h>
 #include <functional>
+#include "parfis.h"
 
 namespace parfis {
 
-    struct Data {
-        Data();
-        ~Data();
+    struct CfgData : public DataBase {
+        double systemTimestep;
     };
 }
 

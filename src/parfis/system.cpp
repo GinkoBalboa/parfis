@@ -8,3 +8,8 @@ parfis::System::System(const std::string& dname, Logger& logger):
 {
     LOG(*m_logger, LogMask::Memory, std::string("\n") + __FUNCTION__ + " constructor");
 }
+
+void parfis::System::loadCfgData()
+{
+    m_cfgData->systemTimestep = getParamValue<double>("timestep");
+}

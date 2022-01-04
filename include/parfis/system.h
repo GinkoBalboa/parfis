@@ -8,6 +8,7 @@
 #include <map>
 #include <random>
 #include "parfis.h"
+#include "datastruct.h"
 
 #if defined(PARFIS_SYSTEM_INI_FILE)
 #define SYSTEM_INI_FILE PARFIS_SYSTEM_INI_FILE
@@ -25,8 +26,10 @@ namespace parfis
         System& operator=(const System&) = default;
         ~System() = default;
 
-        /// Pointer to Data struct
-        // std::shared_ptr<Data> m_pData;
+        /// Pointer to Data structs
+        CfgData* m_cfgData;
+
+        void loadCfgData() override;
     };
 }
 

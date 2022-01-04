@@ -123,6 +123,19 @@ namespace parfis {
     /** @} logging */
 
     /**
+     * @defgroup data
+     * @brief Data structures.
+     * @{
+     */
+    /**
+     * @brief Basic data class used for data structures
+     */ 
+    struct DataBase {
+
+    };
+    /** @} data */
+
+    /**
      * @defgroup configuration
      * @brief Tree data structure used for configuring parfis.
      * @{
@@ -180,6 +193,10 @@ namespace parfis {
         parfis::Param<std::string>* getParent(const std::string& cstr);
         int initialize(const std::string& cstr);
         int configure(const std::string& cstr);
+        virtual void loadCfgData() = 0;
+
+        template<class T>
+        T getParamValue(const std::string& key);
 
         /// Pointer to the Logger object from parfis
         Logger* m_logger;
@@ -205,7 +222,7 @@ namespace parfis {
         int configure(const char* str);
 
         Domain* getDomain(const std::string& cstr);
-        std::string getParamValue(const std::string& key);
+        std::string getParamValueString(const std::string& key);
         void initializeDomains();
 
         /// Logging object
@@ -213,6 +230,9 @@ namespace parfis {
 
         /// Configuration string
         std::string m_cfgstr;
+
+        /// Data extracted from configuration
+        std::unique_ptr<DataBase> m_cfgData;
 
         /// Id of the created object (same as Parfis::s_parfisMap id)
         uint32_t m_id;

@@ -11,6 +11,7 @@
 #include "version.h"
 #include "system.h"
 #include "config.h"
+#include "datastruct.h"
 
 std::map<uint32_t, std::unique_ptr<parfis::Parfis>> parfis::Parfis::s_parfisMap;
 
@@ -23,7 +24,7 @@ parfis::Domain* parfis::Parfis::getDomain(const std::string& cstr)
         return dmap->second.get();
 }
 
-std::string parfis::Parfis::getParamValue(const std::string& key)
+std::string parfis::Parfis::getParamValueString(const std::string& key)
 {
     auto inhvec = Global::getInheritanceVector(key);
     ParamBase* pp = m_domainMap[inhvec[0]].get();
@@ -55,6 +56,8 @@ void parfis::Parfis::initializeDomains()
                     if (domain == "system")
                         m_domainMap["system"] = std::unique_ptr<Domain>(
                             new System("system", m_logger));
+                        static_cast<System*>(m_domainMap["system"].get())->m_cfgData = 
+                            static_cast<CfgData*>(m_cfgData.get());
                 }
             }
             // Configure domains
@@ -212,6 +215,20 @@ parfis::Domain::Domain(const std::string& dname, Logger& logger):
     m_parent = this;
 }
 
+template<class T>
+T parfis::Domain::getParamValue(const std::string& key) 
+{
+    auto inhvec = Global::getInheritanceVector(key);
+    ParamBase* pp = this;
+    size_t i;
+    for(i=0; i<inhvec.size() - 1; i++) {
+        pp = pp->m_childMap[inhvec[i]].get();
+    }
+    return static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
+}
+
+template double parfis::Domain::getParamValue<double>(const std::string& key);
+
 parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     
     auto inheritvec = Global::getInheritanceVector(cstr);
@@ -360,7 +377,11 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
  */
 int parfis::Parfis::initialize() 
 {
+    m_cfgData = std::unique_ptr<DataBase>(new CfgData());
     initializeDomains();
+    for (auto& domain : m_domainMap) {
+        domain.second->loadCfgData();
+    }
     return 0;
 }
 
@@ -529,6 +550,6 @@ PARFIS_EXPORT const char* parfis::api::getConfigParam(uint32_t id, const char* k
     static std::string APIStaticString;
     std::string str;
 
-    APIStaticString = Parfis::getParfis(id)->getParamValue(key);
+    APIStaticString = Parfis::getParfis(id)->getParamValueString(key);
     return APIStaticString.c_str();
 }
