@@ -105,7 +105,6 @@ function(set_version)
     # Check whether we got any revision (which isn't
     # always the case, e.g. when someone downloaded a zip
     # file from Github instead of a checkout)
-    set(GIT_REV "N/A")
     set(GIT_DIFF "N/A")
     set(GIT_TAG "N/A")
     set(GIT_BRANCH "N/A")
