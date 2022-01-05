@@ -21,22 +21,8 @@ We describe the whole process, from cloning the repo to running tests.
         git clone https://github.com/GinkoBalboa/parfis.git
 
 
-Build under Linux
-=================
-
-For Linux we use CMake, and we run it from the build directory. The full set of commands, with 
-default settings for cmake, is given in the following block of code:
-
-.. code-block:: bash
-
-    cd parfis
-    mkdir build
-    cd build
-    cmake ..
-    make
-
 CMake options
--------------
+=============
 
 You can add build options through command-line arguments with the call to cmake. Build options:
 
@@ -71,3 +57,33 @@ For example:
     .. code-block::bash
 
         parfis/build$ cmake .. -DBUILD_DEBUG=ON -DPARFIS_LOG_LEVEL=15 
+
+
+Build under Linux
+=================
+
+For Linux we use CMake, and we run it from the build directory. The full set of commands, with 
+default settings for cmake, is given in the following block of code:
+
+.. code-block:: bash
+
+    cd parfis
+    mkdir build
+    cd build
+    cmake ..
+    make
+
+Build under Windows
+===================
+
+Under Windows systems we don't have the ``make`` command so we must use ``cmake`` with the`
+``--build`` flag and also configuration must be specified (``Debug`` of ``Release``). Here
+we give an example for the debug compilation under windows:
+
+.. code-block:: bash
+
+    cd parfis
+    mkdir build
+    cd build
+    cmake .. -DBUILD_DEBUG=ON
+    cmake --build . --config Debug

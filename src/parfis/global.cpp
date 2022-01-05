@@ -76,6 +76,12 @@ std::vector<std::string> parfis::Global::getVector(const std::string& str, char 
     return vec;
 }
 
+/**
+ * @brief Returns vector of iheritance
+ * @details Splits a string where the split character is dot and constructs a vector
+ * @param str string in the format grandparent.parent.child
+ * @return vector of parents and children
+ */
 std::vector<std::string> parfis::Global::getInheritanceVector(const std::string& str)
 {
     std::vector<std::string> vec;

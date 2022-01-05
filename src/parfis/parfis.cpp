@@ -85,12 +85,6 @@ void parfis::Param<std::string>::setValueVec(const std::string& valstr)
 }
 
 template<>
-void parfis::Param<std::string>::setRangeVec(const std::string& ranstr) 
-{
-    m_rangeVec = Global::getVector(ranstr, '(', ')');
-}
-
-template<>
 void parfis::Param<double>::setValueVec(const std::string& valstr) 
 {
     m_valueVec.clear();
@@ -101,11 +95,35 @@ void parfis::Param<double>::setValueVec(const std::string& valstr)
 }
 
 template<>
+void parfis::Param<int>::setValueVec(const std::string& valstr) 
+{
+    m_valueVec.clear();
+    auto valvec = Global::getVector(valstr, '[', ']');
+    for (auto& val: valvec)
+        m_valueVec.push_back(std::strtol(val.c_str(), nullptr, 10));
+    m_size = m_valueVec.size();
+}
+
+template<>
+void parfis::Param<std::string>::setRangeVec(const std::string& ranstr) 
+{
+    m_rangeVec = Global::getVector(ranstr, '(', ')');
+}
+
+template<>
 void parfis::Param<double>::setRangeVec(const std::string& ranstr) 
 {
     auto ranvec = Global::getVector(ranstr, '(', ')');
     for (auto& ran: ranvec)
         m_rangeVec.push_back(std::strtold(ran.c_str(), nullptr));
+}
+
+template<>
+void parfis::Param<int>::setRangeVec(const std::string& ranstr) 
+{
+    auto ranvec = Global::getVector(ranstr, '(', ')');
+    for (auto& ran: ranvec)
+        m_rangeVec.push_back(std::strtol(ran.c_str(), nullptr, 10));
 }
 
 template<class T>
@@ -126,6 +144,8 @@ bool parfis::Param<std::string>::inRange(std::string valstr)
 template<>
 parfis::Param<double>::Param() { m_type = "double"; }
 template<>
+parfis::Param<int>::Param() { m_type = "int"; }
+template<>
 parfis::Param<std::string>::Param() { m_type = "std::string"; }
 
 template<class S>
@@ -138,6 +158,7 @@ void parfis::ParamBase::addChild(const std::string& name)
 
 template void parfis::ParamBase::addChild<std::string>(const std::string& name);
 template void parfis::ParamBase::addChild<double>(const std::string& name);
+template void parfis::ParamBase::addChild<int>(const std::string& name);
 
 bool parfis::ParamBase::inRange(const std::string& valstr)
 {
@@ -154,6 +175,8 @@ void parfis::ParamBase::setValueVec(ParamBase* ppb, const std::string& valstr)
 {
     if (ppb->m_type == "double")
         static_cast<Param<double>*>(ppb)->setValueVec(valstr);
+    else if (ppb->m_type == "int")
+        static_cast<Param<int>*>(ppb)->setValueVec(valstr);
     else if (ppb->m_type == "std::string")
         static_cast<Param<std::string>*>(ppb)->setValueVec(valstr);
 }
@@ -162,6 +185,8 @@ void parfis::ParamBase::setRangeVec(ParamBase* ppb, const std::string& ranstr)
 {
     if (ppb->m_type == "double")
         static_cast<Param<double>*>(ppb)->setRangeVec(ranstr);
+    else if (ppb->m_type == "int")
+        static_cast<Param<int>*>(ppb)->setRangeVec(ranstr);
     else if (ppb->m_type == "std::string")
         static_cast<Param<std::string>*>(ppb)->setRangeVec(ranstr);
 }
@@ -215,6 +240,12 @@ parfis::Domain::Domain(const std::string& dname, Logger& logger):
     m_parent = this;
 }
 
+/**
+ * @brief Returns the first value of the Param<T>::m_valueVec
+ * @tparam T type of parameter (double, float, int or string)
+ * @param key string in the format domain.paramA=value
+ * @return T with the value of the first vector element
+ */
 template<class T>
 T parfis::Domain::getParamValue(const std::string& key) 
 {
@@ -241,7 +272,7 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
 
 /**
  * @brief Initializes Domain from DEFAULT_INITIALIZATION_STRING
- * @param cstr Initialization string is in the format key=value<type>(range). Value 
+ * @param cstr initialization string is in the format key=value<type>(range). Value 
  * can be of type array in which case is given as [value1, value2, ...]. 
  * @return Zero on success 
  */
@@ -255,12 +286,13 @@ int parfis::Domain::initialize(const std::string& cstr)
     if (cstr.find("<parfis::Param>") != std::string::npos) {
         cp = pp;
     }
-    else if (cstr.find("<std::string>") != std::string::npos) {
-        pp->addChild<std::string>(childName);
-        cp = m_childMap[childName].get();
-    }
-    else if (cstr.find("double") != std::string::npos) {
-        pp->addChild<double>(childName);
+    else {
+        if (cstr.find("<std::string>") != std::string::npos)
+            pp->addChild<std::string>(childName);
+        else if (cstr.find("double") != std::string::npos)
+            pp->addChild<double>(childName);
+        else if (cstr.find("int") != std::string::npos)
+            pp->addChild<int>(childName);
         cp = m_childMap[childName].get();
     }
     ParamBase::setValueVec(cp, std::get<1>(keyValue));
@@ -270,7 +302,7 @@ int parfis::Domain::initialize(const std::string& cstr)
 
 /**
  * @brief Configures initialized Domain
- * @param cstr Initialization string is in the format key=value 
+ * @param cstr initialization string is in the format key=value 
  * @return Zero on success 
  */
 int parfis::Domain::configure(const std::string& cstr) 
@@ -297,24 +329,33 @@ std::string parfis::Logger::getLogFileName(uint32_t id, uint32_t cnt) {
 
 /**
  * @brief Initializes log string and file name 
- * @param fname Name of the file to write log to
+ * @param fname name of the file to write log to
  */
 void parfis::Logger::initialize(const std::string& fname) {
     m_fname = fname;
-    m_str = "Parfis log file";
-    m_str += "\n--------------";
-    m_str += "\nCreated on: " + Global::currentDateTime();
-    m_str += "\n" + std::string(api::info());
-    m_str += "\n--------------";
+    m_str = "Parfis log file\n";
+    m_str += "Created on: " + Global::currentDateTime() + "\n";
+    m_str += "api::info():\n";
+    m_str += "--------------\n";
+    m_str += std::string(api::info()) + "\n";
+    m_str += "--------------\n";
 }
 
 /**
  * @brief Logs strings into Logger::m_str
- * @param mask Logging mask defined by parfis::LogMask
- * @param msg String to log to Logger::m_str
+ * @param mask logging mask defined by parfis::LogMask
+ * @param msg string that is copied to log (that is Logger::m_str memeber)
  */
 void parfis::Logger::logToStr(LogMask mask, const std::string& msg)
 {
+    if (mask == LogMask::Error)
+        m_str += "[error] ";
+    else if (mask == LogMask::Info)
+        m_str += "[info] ";
+    else if (mask == LogMask::Memory)
+        m_str += "[memory] ";
+    else if (mask == LogMask::Warning)
+        m_str += "[warning] ";    
     m_str += msg;
 }
 
@@ -362,8 +403,8 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
         fname = Logger::getLogFileName(m_id, fcnt);
     }
     m_logger.initialize(fname);
-    LOG(m_logger, LogMask::Memory, std::string("\n") + __FUNCTION__ + 
-        " constructor with id = " + std::to_string(m_id));
+    LOG(m_logger, LogMask::Memory, std::string(__FUNCTION__) + 
+        " constructor with id = " + std::to_string(m_id) + "\n");
     if (cfgstr == "")
         m_cfgstr = DEFAULT_INITIALIZATION_STRING;
     else 
@@ -373,6 +414,8 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
 
 /**
  * @brief Initialize all domains
+ * @details Creates Data structs and calls loaders for the data that reside inside
+ * specific domains.
  * @return Zero for success
  */
 int parfis::Parfis::initialize() 
@@ -400,8 +443,8 @@ int parfis::Parfis::configure(const char* str)
 }
 
 /**
- * @brief Destroy the parfis::Parfis object
- * @details Print log file
+ * @brief Destroy the Parfis object.
+ * @details Print log file.
  */
 parfis::Parfis::~Parfis() {
     m_logger.printLogFile();
@@ -409,7 +452,7 @@ parfis::Parfis::~Parfis() {
 
 /**
  * @brief Returns info about the program settings.
- * @details These settings are compilation definitions and values of the current runtime.
+ * @details Settings are the compilation definitions and values of the current runtime.
  * @return The info string
  */
 PARFIS_EXPORT const char* parfis::api::info()

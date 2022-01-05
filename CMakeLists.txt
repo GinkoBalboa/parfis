@@ -21,10 +21,10 @@ endif()
 if(BUILD_DEBUG)
     message("Build Debug version")
     set(CMAKE_BUILD_TYPE Debug)
-else(BUILD_DEBUG)
+else()
     message("Build Release version")
     set(CMAKE_BUILD_TYPE Release)
-endif(BUILD_DEBUG)
+endif()
 
 # Core parfis
 file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${parfis_SOURCE_DIR}/src/parfis/*.h)
@@ -69,33 +69,33 @@ if(BUILD_PARFISAPP)
             ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
             ${parfis_SOURCE_DIR}/build/bin/parfisApp/${PARFIS_FILE_NAME})
     endif()
-endif(BUILD_PARFISAPP)
+endif()
 
 # Logging level
 if(NOT PARFIS_LOG_LEVEL)
     set(PARFIS_LOG_LEVEL 0)
-endif(NOT PARFIS_LOG_LEVEL)
+endif()
 add_compile_definitions(PARFIS_LOG_LEVEL=${PARFIS_LOG_LEVEL})
 
 # Doxygen
-if(BUILD_DOXYGEN)
+if(BUILD_DOXYGEN OR BUILD_SPHINX)
     message("Building doxygen")
     run_doxygen()
-endif(BUILD_DOXYGEN)
+endif()
 
 # Sphinx
 if(BUILD_SPHINX)
     message("Building sphinx")
     run_sphinx_build()
-endif(BUILD_SPHINX)
+endif()
 
 # State type float or double
 if(PARFIS_STATE_TYPE_DOUBLE)
     message("Using double for type parfis::state_t")
     add_compile_definitions(PARFIS_STATE_TYPE_DOUBLE)
-else(PARFIS_STATE_TYPE_DOUBLE)
+else()
     message("Using float for type parfis::state_t")
-endif(PARFIS_STATE_TYPE_DOUBLE)
+endif()
 
 # Google test
 if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)

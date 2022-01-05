@@ -55,7 +55,6 @@
 /**
  * @defgroup logging
  * @brief Classes and functions used for logging
- * 
  * @{
  */
 /// Logging macro function that yields calls to Logger::log only when LOG_LEVEL is not zero.
@@ -67,15 +66,16 @@
 /** @} logging */
 
 namespace parfis {
+    /**
+     * @addtogroup logging
+     * @{
+     */ 
     /** 
      * @brief Log bitmask that corresponds to log level
      * @details Loging is performed by calling the macro with the desired log message type.
      * The macro calls a function from the parfis::Logger::log and based on the LOG_LEVEL saves 
      * the message. For example the comand <c>LOG(m_logger, LogMask::Info, "Test message");</c> 
      * will log if the LOG_LEVEL has set bit on position four.
-     * 
-     * @addtogroup logging
-     * @{
      */ 
     enum LogMask: uint32_t {
         /// No logging (mask: 0000)
@@ -131,7 +131,6 @@ namespace parfis {
      * @brief Basic data class used for data structures
      */ 
     struct DataBase {
-
     };
     /** @} data */
 
@@ -153,6 +152,7 @@ namespace parfis {
         ParamBase* m_parent;
         bool inRange(const std::string& valstr);
         std::string getValueString();
+        /// Map of children ParamBase objects (functions as a data containter)
         std::map<std::string, std::unique_ptr<ParamBase>> m_childMap;
         template<class S>
         void addChild(const std::string& name);
@@ -161,15 +161,17 @@ namespace parfis {
     };
 
     /**
-     * @brief Class derived from ParamBase.
+     * @brief Class derived from ParamBase that holds parameter values.
      * @details Class is used as leaf node in the configuration data tree structure. 
-     * @tparam T Type can be on of the following (int, double, std::string, parfis::state_t)
+     * @tparam T type can be on of the following (int, double, std::string, parfis::state_t)
      */
     template<class T>
     struct Param : public ParamBase
     {
         Param();
+        /// Vector of parameter values
         std::vector<T> m_valueVec;
+        /// Vector with the range of allowed values
         std::vector<T> m_rangeVec;
         void setValueVec(const std::string& valstr);
         void setRangeVec(const std::string& ranstr);
