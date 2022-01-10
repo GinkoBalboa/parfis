@@ -32,3 +32,15 @@ TEST(api, newParfis_checkTimestep) {
     cfgstr = parfis::api::getConfigParam(id, "system.timestep");
     ASSERT_EQ(double(1.12e-15), std::stod(cfgstr, nullptr));
 }
+
+TEST(api, newParfis_numberOfCells) {
+    uint32_t id = parfis::api::newParfis();
+    std::string cfgstr = parfis::api::getConfig(id);
+    int retval = 0;
+    // Set normal number of cells
+    retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-3, 1.0e-3, 1.0e-3]");
+    ASSERT_EQ(retval, 0); 
+    // Set over the limit number of cells
+    retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-6, 1.0e-6, 1.0e-6]");
+    ASSERT_NE(retval, 0);
+}

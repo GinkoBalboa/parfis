@@ -29,7 +29,7 @@ namespace parfis
         /// Pointer to Data structs
         CfgData* m_cfgData;
 
-        void loadCfgData() override;
+        int loadCfgData() override;
     };
 }
 

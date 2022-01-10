@@ -195,10 +195,13 @@ namespace parfis {
         parfis::Param<std::string>* getParent(const std::string& cstr);
         int initialize(const std::string& cstr);
         int configure(const std::string& cstr);
-        virtual void loadCfgData() = 0;
+        virtual int loadCfgData() = 0;
 
         template<class T>
-        T getParamValue(const std::string& key);
+        void getParamToValue(const std::string& key, T& valRef);
+
+        template<class T>
+        void getParamToVector(const std::string& key, std::vector<T>& vecRef);
 
         /// Pointer to the Logger object from parfis
         Logger* m_logger;

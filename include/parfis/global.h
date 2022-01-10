@@ -24,7 +24,6 @@ namespace parfis
     struct Global {
         /// Get current date and time in the format YYYY-MM-DD HH:mm:ss
         static std::string currentDateTime();
-
         static std::string removeWhitespace(const std::string& str);
         
         static std::tuple<std::string, std::string> splitKeyValue(const std::string& str);
@@ -34,17 +33,26 @@ namespace parfis
         /// Check if file @param fname exists
         static bool fileExists (const std::string& fname);
 
-        /// Get vector of strings
         static std::vector<std::string> getVector(const std::string& str, char bra, char ket);
         static std::vector<std::string> getInheritanceVector(const std::string& str);
 
-        /// Conversion from floating point to number
+        /// Convert double to string
         static std::string to_string(double num);
+        /// Convert float to string
         static std::string to_string(float num);
+        /// Comvert int to string (for completness and use in Vec3D struct)
+        static std::string to_string(int num);
     };
 
     /// Type of state space variables of each particle (float or double)
     typedef STATE_TYPE state_t;
+    /// Type for cell id
+    typedef uint32_t cellId_t;
+
+    /// Number limits
+    struct Limit {
+        static constexpr cellId_t cellIdMax = UINT32_MAX;
+    };
 
     /// Physical and mathematical constats
     struct Const {

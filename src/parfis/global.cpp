@@ -58,6 +58,13 @@ bool parfis::Global::fileExists(const std::string& fname)
     return f.good();
 }
 
+/**
+ * @brief Parses string and returns vector of elements
+ * @param str string to be parsed of the form [a,b,c]
+ * @param bra starting array character (ex. '[' or '(')
+ * @param ket ending array character (ex. ']' or ')')
+ * @return Vector of strings 
+ */
 std::vector<std::string> parfis::Global::getVector(const std::string& str, char bra, char ket)
 {
     std::vector<std::string> vec;
@@ -110,4 +117,9 @@ std::string parfis::Global::to_string(float num)
     char buf[50];
     std::snprintf(buf, sizeof(buf), "%.7g", num);
     return std::string(buf);
+}
+
+std::string parfis::Global::to_string(int num)
+{
+    return std::to_string(num);
 }

@@ -241,13 +241,13 @@ parfis::Domain::Domain(const std::string& dname, Logger& logger):
 }
 
 /**
- * @brief Returns the first value of the Param<T>::m_valueVec
+ * @brief Sets the first value of the Param<T>::m_valueVec
  * @tparam T type of parameter (double, float, int or string)
- * @param key string in the format domain.paramA=value
- * @return T with the value of the first vector element
+ * @param key name of the parameter without the first, domain, name level.
+ * @param valRef reference to set value to
  */
 template<class T>
-T parfis::Domain::getParamValue(const std::string& key) 
+void parfis::Domain::getParamToValue(const std::string& key, T& valRef) 
 {
     auto inhvec = Global::getInheritanceVector(key);
     ParamBase* pp = this;
@@ -255,10 +255,59 @@ T parfis::Domain::getParamValue(const std::string& key)
     for(i=0; i<inhvec.size() - 1; i++) {
         pp = pp->m_childMap[inhvec[i]].get();
     }
-    return static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
+    valRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
 }
 
-template double parfis::Domain::getParamValue<double>(const std::string& key);
+template<>
+void parfis::Domain::getParamToValue(const std::string& key, Vec3D<double>& valRef) 
+{
+    auto inhvec = Global::getInheritanceVector(key);
+    ParamBase* pp = this;
+    size_t i;
+    for(i=0; i<inhvec.size() - 1; i++) {
+        pp = pp->m_childMap[inhvec[i]].get();
+    }
+    valRef.x = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
+    valRef.y = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[1];
+    valRef.z = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[2];
+}
+
+template<>
+void parfis::Domain::getParamToValue(const std::string& key, Vec3D<int>& valRef) 
+{
+    auto inhvec = Global::getInheritanceVector(key);
+    ParamBase* pp = this;
+    size_t i;
+    for(i=0; i<inhvec.size() - 1; i++) {
+        pp = pp->m_childMap[inhvec[i]].get();
+    }
+    valRef.x = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
+    valRef.y = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[1];
+    valRef.z = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[2];
+}
+
+template void parfis::Domain::getParamToValue<double>(const std::string& key, double& valRef);
+
+/**
+ * @brief Sets the values of Param<T>::m_valueVec to a vector
+ * @tparam T type of parameter (double, float, int or string)
+ * @param key name of the parameter without the first, domain, name level.
+ * @param vecRef reference of a vector to set values to
+ */
+template<class T>
+void parfis::Domain::getParamToVector(const std::string& key, std::vector<T>& vecRef) 
+{
+    auto inhvec = Global::getInheritanceVector(key);
+    ParamBase* pp = this;
+    size_t i;
+    for(i=0; i<inhvec.size() - 1; i++) {
+        pp = pp->m_childMap[inhvec[i]].get();
+    }
+    vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
+}
+
+template 
+void parfis::Domain::getParamToVector<double>(const std::string& key, std::vector<double>& vecRef);
 
 parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     
@@ -422,10 +471,13 @@ int parfis::Parfis::initialize()
 {
     m_cfgData = std::unique_ptr<DataBase>(new CfgData());
     initializeDomains();
+    int retval = 0;
     for (auto& domain : m_domainMap) {
-        domain.second->loadCfgData();
+        retval = domain.second->loadCfgData();
+        if (retval != 0)
+            break;
     }
-    return 0;
+    return retval;
 }
 
 
@@ -438,8 +490,10 @@ int parfis::Parfis::configure(const char* str)
     Domain* dptr = Parfis::getDomain(dname);
     if (dptr == nullptr)
         return -1;
-    dptr->configure(cstr);
-    return 0;
+    int retval = 0;
+    retval = dptr->configure(cstr);
+    retval = dptr->loadCfgData();
+    return retval;
 }
 
 /**
@@ -534,6 +588,8 @@ PARFIS_EXPORT int parfis::api::setConfig(uint32_t id, const char* str)
     // Domain name not recognized
     if (retval == -1)
         return 2;
+    else if (retval != 0)
+        return 3;
     return 0;
 }
 
