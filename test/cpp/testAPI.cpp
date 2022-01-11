@@ -6,6 +6,15 @@
 #include "parfis.h"
 #include "define.h"
 
+/**
+ * @defgroup cpp-tests
+ * @brief Tests for the c++ code using Googletest
+ * @{
+ */
+
+/**
+ * @brief Check the type of state_t
+ */
 TEST(api, checkStateType) {
     std::string infostr = parfis::api::info();
     std::string str1 = infostr.substr(0, infostr.find('\n'));
@@ -19,6 +28,9 @@ TEST(api, checkStateType) {
     ASSERT_EQ(str1, str2);
 }
 
+/**
+ * @brief Check timestep value
+ */
 TEST(api, newParfis_checkTimestep) {
     uint32_t id = parfis::api::newParfis();
     std::string cfgstr = parfis::api::getConfig(id);
@@ -33,10 +45,51 @@ TEST(api, newParfis_checkTimestep) {
     ASSERT_EQ(double(1.12e-15), std::stod(cfgstr, nullptr));
 }
 
-TEST(api, newParfis_numberOfCells) {
+/**
+ * @brief Creates three new parfis objects and deletes one from the middle
+ */
+TEST(api, newParfis_deleteParfis)
+{
+    int sizeBefore = parfis::api::getParfisIdVec().size();
+    std::vector<uint32_t> idVec;
+    idVec.push_back(parfis::api::newParfis());
+    idVec.push_back(parfis::api::newParfis());
+    idVec.push_back(parfis::api::newParfis());
+    parfis::api::deleteParfis(1);
+    ASSERT_EQ(sizeBefore + 2, parfis::api::getParfisIdVec().size());
+}
+
+/**
+ * @brief Checks configuration parameter by comparing the value from CfgData
+ */
+TEST(api, newParfis_checkCellSize) {
+    uint32_t id = parfis::api::newParfis();
+    // Compare CfgData values and configuration string
+    double cellSize_x = parfis::api::getCfgData(id)->cellSize.x;
+    double cellSize_y = parfis::api::getCfgData(id)->cellSize.y;
+    double cellSize_z = parfis::api::getCfgData(id)->cellSize.z;
+    std::string str1 = parfis::api::getConfigParam(id, "system.cellSize");
+    std::string str2 = "[" + parfis::Global::to_string(cellSize_x) + "," +
+        parfis::Global::to_string(cellSize_y) + "," + parfis::Global::to_string(cellSize_z) + "]";
+    ASSERT_EQ(str1, str2);
+}
+
+/**
+ * @brief Check if number of cells is calculated correctly.
+ * @details Also and checks if error is returned if number of cells is greater than maximum
+ */
+TEST(api, newParfis_checkNumberOfCells) {
     uint32_t id = parfis::api::newParfis();
     std::string cfgstr = parfis::api::getConfig(id);
     int retval = 0;
+    // Get number of cells in the x direction
+    int cellCount_x = parfis::api::getCfgData(id)->cellCount.x;
+    // Calculate number of cells from the config parameters
+    double cellSize_x = parfis::api::getCfgData(id)->cellSize.x;
+    double geometrySize_x = parfis::api::getCfgData(id)->geometrySize.x;
+    int cellCount_x_calc = ceil(geometrySize_x/cellSize_x);
+    // Check if number of cells is calculated correctly
+    ASSERT_EQ(cellCount_x, cellCount_x_calc);
     // Set normal number of cells
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-3, 1.0e-3, 1.0e-3]");
     ASSERT_EQ(retval, 0); 
@@ -44,3 +97,5 @@ TEST(api, newParfis_numberOfCells) {
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-6, 1.0e-6, 1.0e-6]");
     ASSERT_NE(retval, 0);
 }
+
+/** @} cpp-tests*/

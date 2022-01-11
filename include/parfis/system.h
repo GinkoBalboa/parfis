@@ -21,15 +21,15 @@ namespace parfis
     struct System : public Domain
     {
         System() = default;
-        System(const std::string& dname, Logger& logger);
+        System(const std::string& dname, Logger& logger, CfgData& cfgData)
+            : Domain(dname, logger, cfgData) {};
         System(const System&) = default;
         System& operator=(const System&) = default;
         ~System() = default;
 
-        /// Pointer to Data structs
-        CfgData* m_cfgData;
-
         int loadCfgData() override;
+
+
     };
 }
 
