@@ -7,7 +7,7 @@
 #include "define.h"
 
 /**
- * @defgroup cpp-tests
+ * @defgroup gtestAll
  * @brief Tests for the c++ code using Googletest
  * @{
  */
@@ -31,7 +31,7 @@ TEST(api, checkStateType) {
 /**
  * @brief Check timestep value
  */
-TEST(api, newParfis_checkTimestep) {
+TEST(api, checkTimestep) {
     uint32_t id = parfis::api::newParfis();
     std::string cfgstr = parfis::api::getConfig(id);
     // This is the default timestep from full configuration
@@ -48,7 +48,7 @@ TEST(api, newParfis_checkTimestep) {
 /**
  * @brief Creates three new parfis objects and deletes one from the middle
  */
-TEST(api, newParfis_deleteParfis)
+TEST(api, deleteParfis)
 {
     int sizeBefore = parfis::api::getParfisIdVec().size();
     std::vector<uint32_t> idVec;
@@ -62,7 +62,7 @@ TEST(api, newParfis_deleteParfis)
 /**
  * @brief Checks configuration parameter by comparing the value from CfgData
  */
-TEST(api, newParfis_checkCellSize) {
+TEST(api, checkCellSize) {
     uint32_t id = parfis::api::newParfis();
     // Compare CfgData values and configuration string
     double cellSize_x = parfis::api::getCfgData(id)->cellSize.x;
@@ -78,9 +78,8 @@ TEST(api, newParfis_checkCellSize) {
  * @brief Check if number of cells is calculated correctly.
  * @details Also and checks if error is returned if number of cells is greater than maximum
  */
-TEST(api, newParfis_checkNumberOfCells) {
+TEST(api, checkNumberOfCalculatedCellCount) {
     uint32_t id = parfis::api::newParfis();
-    std::string cfgstr = parfis::api::getConfig(id);
     int retval = 0;
     // Get number of cells in the x direction
     int cellCount_x = parfis::api::getCfgData(id)->cellCount.x;
@@ -98,4 +97,10 @@ TEST(api, newParfis_checkNumberOfCells) {
     ASSERT_NE(retval, 0);
 }
 
-/** @} cpp-tests*/
+
+TEST(api, checkNumberOfCreatedCells) {
+    uint32_t id = parfis::api::newParfis();
+    int createdCellCount = parfis::api::getSimData(id)->cellVec.size();
+    // std::cout << "CREATED COUNT = " << createdCellCount << std::endl;
+}
+/** @} gtestAll*/

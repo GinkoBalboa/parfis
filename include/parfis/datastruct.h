@@ -36,7 +36,22 @@
 #endif // LOG_LEVEL
 /** @} logging */
 
+#if defined(STATE_TYPE_DOUBLE)
+#define STATE_TYPE double
+#else
+#define STATE_TYPE float
+#endif
+
 namespace parfis {
+
+    /// Type of state space variables of each particle (float or double)
+    typedef STATE_TYPE state_t;
+    /// Type for cell id
+    typedef uint32_t cellId_t;
+    /// Type for cell position vector components
+    typedef uint16_t cell1D_t;
+    /// Type for node bitwise marking
+    typedef uint8_t nodeMask_t;
 
     /**
      * @addtogroup logging
@@ -125,18 +140,70 @@ namespace parfis {
          * @brief Returns the vector length in Eucledian metric.
          * @details The length is calculated as @f$ \sqrt{x^2 + y^2 + z^2} @f$
          */
-        T len() { return sqrt(x*x + y * y + z * z); }
+        T len() { return sqrt(x * x + y * y + z * z); }
 
         /** 
          * @brief Returns the squared vector length in Eucledian metric.
          * @details The length is calculated as @f$ x^2 + y^2 + z^2 @f$
          */
-        T lenSqr() { return x * x + y * y + z * z; }
+        T lenSq() { return x * x + y * y + z * z; }
     };
+
+    /**
+     * @brief Squared distance between two points in the x-y plane.
+     * @param a first point
+     * @param b second point
+     * @return distance of two points as double
+     */
+    inline double xyDistSq(Vec3D<double>& a, Vec3D<double>& b) {
+        return (a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y);
+    };
+
+    /**
+     * @brief Structure used to represent space cells
+     * @details 
+     *  Cells nodes can be inside or outside the simulation space - i.e. geometry. 
+     *  If all cell nodes are outside the geometry then the cell is not used in the 
+     *  simulation.
+     * 
+     *  We use a 8bit number as a bitwise marker for nodes:
+     *
+     *         e-------g       | z
+     *        /|      /|       |
+     *       / |     / |       + ---- y
+     *      f--|----h  |      /
+     *      |  a----|--c     / x
+     *      | /     | /
+     *      b-------d
+     *
+     *  node position inside a cell are bitwise ordered: h g f e d c b a
+     *
+     *  In the given node representation for a single cell, if the bit is 1 then that 
+     *  node is inside the simulation space.
+     *
+     *  Nodes laying exactly on the border are considered OUTSIDE the geometry and are 
+     *  marked with 0.
+     *
+     *  For example the cylindrical geometry is defined with box boundaries inside which
+     *  lies a cylinder that defines the simulation space. Nodes inside the cylnder are 
+     *  part of the simulation space. For clindrical geometry, if the XY point is inside, 
+     *  then both Z points are inside, except on the two basis of the cylinder laying on 
+     *  the boundaries.
+     */
+    struct Cell
+    {
+        /// Bit mask for nodes inside the simulation space
+        nodeMask_t nodeMask;
+        /// Cell position is represented with three integers x,y,z
+        Vec3D<cell1D_t> cell3D;
+    };
+
     /**
      * @brief Configuration parameters data
      */
     struct CfgData {
+        /// Geometry type
+        std::string geometry;
         /// Timestep for the system in seconds
         double timestep;
         /// Geometry size in meters (bounding box of the simulation space)
@@ -147,6 +214,24 @@ namespace parfis {
         Vec3D<int> periodicBoundary;
         /// Number of cells in every direction
         Vec3D<int> cellCount;
+        /// Get absolute cell id from i,j,k
+        inline cellId_t getCellVecPosition(Vec3D<cell1D_t>& cell3D) {
+            return cellCount.x * (cellCount.y * cell3D.z + cell3D.y ) + cell3D.x;
+        };
+    };
+
+    /**
+     * @brief Simulation data
+     */
+    struct SimData {
+        /// Vector of cells
+        std::vector<Cell> cellVec;
+        /**
+         * @brief Vector of cellId pointers to the cellVec.
+         * @details Maping of absolute cell id (calculated from cellPos) to real cell id
+         * which is the position in the cellVec vector
+         */ 
+        std::vector<cellId_t> cellIdVec;
     };
     /** @} data */
 
@@ -213,8 +298,9 @@ namespace parfis {
      */
     struct Domain: public Param<std::string> {
         Domain() = default;
-        Domain(const std::string& dname, Logger& logger, CfgData& cfgData) 
-            : m_logger(&logger), m_cfgData(&cfgData) { m_name = dname; };
+        Domain(const std::string& dname, Logger& logger, CfgData& cfgData, SimData& simData) 
+            : m_pLogger(&logger), m_pCfgData(&cfgData), m_pSimData(&simData) 
+            { m_name = dname; };
         Domain(const Domain&) = default;
         Domain& operator=(const Domain&) = default;
         virtual ~Domain() = default;
@@ -231,9 +317,11 @@ namespace parfis {
         void getParamToVector(const std::string& key, std::vector<T>& vecRef);
 
         /// Pointer to the Logger object from parfis
-        Logger* m_logger;
-        /// Pointer to Data struct
-        CfgData* m_cfgData;
+        Logger* m_pLogger;
+        /// Pointer to configuration data
+        CfgData* m_pCfgData;
+        /// Pointer to simulation data
+        SimData* m_pSimData;
     };
     /** @} configuration */
 
@@ -244,7 +332,7 @@ namespace parfis {
      */
     struct Command
     {
-        Command(std::string name) :
+        Command(std::string name = "") :
             m_name(name), m_pNext(nullptr) {}
 
         /// Name for the command
@@ -257,7 +345,7 @@ namespace parfis {
         Command* m_pNext;
 
         /// Set next command in the chain
-        void setNext(Command * pcom) { m_pNext = pcom; }
+        void setNext(Command& comRef) { m_pNext = &comRef; }
 
         /// Get the next command in the chain
         Command* getNext() { return m_pNext; };

@@ -55,8 +55,8 @@ void parfis::Parfis::initializeDomains()
                 domainVec = Global::getVector(line, '[', ']');
                 for (auto& domain : domainVec) {
                     if (domain == "system")
-                        m_domainMap["system"] = std::unique_ptr<Domain>(
-                            new System("system", m_logger, m_cfgData));
+                        m_domainMap[domain] = std::unique_ptr<Domain>(
+                            new System(domain, m_logger, m_cfgData, m_simData));
                 }
             }
             // Configure domains
@@ -122,7 +122,7 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
 }
 
 /**
- * @brief Initialize all domains
+ * @brief Initialize all domains create command chains
  * @details Creates Data structs and calls loaders for the data that reside inside
  * specific domains.
  * @return Zero for success
@@ -139,6 +139,17 @@ int parfis::Parfis::initialize()
     return retval;
 }
 
+/**
+ * @brief Create command chains
+ */
+int parfis::Parfis::createCommandChains(const std::string& chainHeadName) 
+{
+//     m_cmdChainCreate.m_name = chainHeadName;
+//     m_cmdChainCreate.m_head = 
+//     m_cmdChainCreate.setNext(m_domainMap["system"]->m_cmdCreate);
+// 
+    return 0;
+}
 
 /**
  * @brief Configures the domain with a string and loads the CfgData
@@ -324,6 +335,15 @@ PARFIS_EXPORT const char* parfis::api::getConfigParam(uint32_t id, const char* k
 PARFIS_EXPORT const parfis::CfgData* parfis::api::getCfgData(uint32_t id)
 {
     return &Parfis::getParfis(id)->m_cfgData;
+}
+
+/**
+ * @brief Returns pointer to the SimData of the Parfis object given by id
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT const parfis::SimData* parfis::api::getSimData(uint32_t id)
+{
+    return &Parfis::getParfis(id)->m_simData;
 }
 
 /**

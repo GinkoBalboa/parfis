@@ -11,12 +11,7 @@
 #include <map>
 #include <fstream>
 #include <algorithm>
-
-#if defined(STATE_TYPE_DOUBLE)
-#define STATE_TYPE double
-#else
-#define STATE_TYPE float
-#endif
+#include "datastruct.h"
 
 /// Main namespace of the library
 namespace parfis 
@@ -44,16 +39,6 @@ namespace parfis
         static std::string to_string(int num);
     };
 
-    /// Type of state space variables of each particle (float or double)
-    typedef STATE_TYPE state_t;
-    /// Type for cell id
-    typedef uint32_t cellId_t;
-
-    /// Number limits
-    struct Limit {
-        static constexpr cellId_t cellIdMax = UINT32_MAX;
-    };
-
     /// Physical and mathematical constats
     struct Const {
         /// Pi
@@ -76,6 +61,10 @@ namespace parfis
         static const char* version;
         /// Git tag string
         static const char* gitTag;
+        /// Maximum number of cell ids for cellIdVec containter
+        static constexpr cellId_t cellIdMax = UINT32_MAX;
+        /// Id that represents that no cell exists
+        static constexpr cellId_t noCellId = UINT32_MAX;
     };
 }
 

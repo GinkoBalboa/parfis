@@ -62,11 +62,13 @@ namespace parfis {
         static Parfis* newParfis();
 
         int initialize();
+        int createCommandChains(const std::string& str);
         int configure(const char* str);
 
         Domain* getDomain(const std::string& cstr);
         std::string getParamValueString(const std::string& key);
         void initializeDomains();
+
 
         /// Logging object
         Logger m_logger;
@@ -74,8 +76,11 @@ namespace parfis {
         /// Configuration string
         std::string m_cfgstr;
 
-        /// Data extracted from configuration
+        /// Configuration data, from cfg strings and calculated
         CfgData m_cfgData;
+
+        /// Simulation data, particles and cell data
+        SimData m_simData;
 
         /// Id of the created object (same as Parfis::s_parfisMap id)
         uint32_t m_id;
@@ -85,6 +90,9 @@ namespace parfis {
 
         /// Static map of pointers to Parfis objects
         static std::map<uint32_t, std::unique_ptr<Parfis>> s_parfisMap;
+
+        /// Map of command chains
+        std::map<std::string, std::unique_ptr<Command>> m_cmdChainMap;
 
         /// Parfis id counter, unique id for every parfis even when deleted
         static uint32_t s_parfisMapId;
@@ -114,6 +122,7 @@ namespace parfis {
             PARFIS_EXPORT const char* getConfig(uint32_t id);
             PARFIS_EXPORT const char* getConfigParam(uint32_t id, const char* key);
             PARFIS_EXPORT const CfgData* getCfgData(uint32_t id);
+            PARFIS_EXPORT const SimData* getSimData(uint32_t id);
             PARFIS_EXPORT int deleteParfis(uint32_t id);
             PARFIS_EXPORT const std::vector<uint32_t>& getParfisIdVec();
         };

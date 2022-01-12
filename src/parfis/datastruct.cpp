@@ -169,6 +169,9 @@ void parfis::Domain::getParamToValue(const std::string& key, T& valRef)
     valRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
 }
 
+template void parfis::Domain::getParamToValue<double>(const std::string& key, double& valRef);
+template void parfis::Domain::getParamToValue<std::string>(const std::string& key, std::string& valRef);
+
 template<>
 void parfis::Domain::getParamToValue(const std::string& key, Vec3D<double>& valRef) 
 {
@@ -196,8 +199,6 @@ void parfis::Domain::getParamToValue(const std::string& key, Vec3D<int>& valRef)
     valRef.y = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[1];
     valRef.z = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[2];
 }
-
-template void parfis::Domain::getParamToValue<double>(const std::string& key, double& valRef);
 
 /**
  * @brief Sets the values of Param<T>::m_valueVec to a vector
@@ -274,6 +275,12 @@ int parfis::Domain::configure(const std::string& cstr)
     return 0;
 }
 
+/**
+ * @brief Constructs file name for the log files
+ * @param id of the Parfis object
+ * @param cnt number of log file for the same id
+ * @return Log file name
+ */
 std::string parfis::Logger::getLogFileName(uint32_t id, uint32_t cnt) {
     return "./parfisLog_id" + std::to_string(id) + "_cnt" + std::to_string(cnt) + ".log";
 }

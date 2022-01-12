@@ -9,6 +9,10 @@ const char* parfis::Const::version = VERSION;
 const char* parfis::Const::gitTag = GIT_TAG;
 uint32_t parfis::Const::logLevel = LOG_LEVEL;
 
+/**
+ * @brief Get current date and time as a string
+ * @return String of current date and time
+ */
 std::string parfis::Global::currentDateTime() 
 {
     time_t     now = time(0);
@@ -19,6 +23,11 @@ std::string parfis::Global::currentDateTime()
     return buf;
 }
 
+/**
+ * @brief Remove all characters that return true to ::isspace
+ * @param str original string
+ * @return String with the removed whitespaces
+ */
 std::string parfis::Global::removeWhitespace(const std::string& str)
 {
     std::string cstr = str;
@@ -28,7 +37,6 @@ std::string parfis::Global::removeWhitespace(const std::string& str)
 
 /**
  * @brief Create key,value pair from "key=value" string
- * 
  * @param str String must be without whitespace characters
  * @return Key value pair as tuple
  */
