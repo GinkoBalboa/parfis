@@ -52,6 +52,8 @@ namespace parfis {
     typedef uint16_t cell1D_t;
     /// Type for node bitwise marking
     typedef uint8_t nodeMask_t;
+    /// Type for cell state
+    typedef uint8_t cellState_t;
 
     /**
      * @addtogroup logging
@@ -192,8 +194,10 @@ namespace parfis {
      */
     struct Cell
     {
-        /// Bit mask for nodes inside the simulation space
+        /// Bit mask for nodes inside or outside the simulation space
         nodeMask_t nodeMask;
+        /// State for the whole cell
+        cellState_t state;
         /// Cell position is represented with three integers x,y,z
         Vec3D<cell1D_t> cell3D;
     };
@@ -234,6 +238,36 @@ namespace parfis {
         std::vector<cellId_t> cellIdVec;
     };
     /** @} data */
+
+    /**
+     * @brief Chain of commands
+     * @details Used for chaining functions from the Domain objects that have a 
+     * certain signature. Has a single-linked list structure. Commands are saved in a map
+     * which has a key corresponding to m_name.
+     */
+    struct Command
+    {
+        Command(std::string name = "") :
+            m_name(name), m_pNext(nullptr) {}
+
+        /// Name for the command
+        std::string m_name;
+
+        /// Function name
+        std::string m_funcName;
+
+        /// Function to run in the command object
+        std::function<int()> m_func;
+
+        /// Pointer to the next command in the chain
+        Command* m_pNext;
+
+        /// Set next command in the chain
+        void setNext(Command& comRef) { m_pNext = &comRef; }
+
+        /// Get the next command in the chain
+        Command* getNext() { return m_pNext; };
+    };
 
     /**
      * @defgroup configuration
@@ -298,8 +332,9 @@ namespace parfis {
      */
     struct Domain: public Param<std::string> {
         Domain() = default;
-        Domain(const std::string& dname, Logger& logger, CfgData& cfgData, SimData& simData) 
-            : m_pLogger(&logger), m_pCfgData(&cfgData), m_pSimData(&simData) 
+        Domain(const std::string& dname, Logger& logger, CfgData& cfgData, SimData& simData, 
+                std::map<std::string, std::unique_ptr<Command>>& cmdMap) 
+            : m_pLogger(&logger), m_pCfgData(&cfgData), m_pSimData(&simData), m_pCmdMap(&cmdMap) 
             { m_name = dname; };
         Domain(const Domain&) = default;
         Domain& operator=(const Domain&) = default;
@@ -309,6 +344,10 @@ namespace parfis {
         int initialize(const std::string& cstr);
         int configure(const std::string& cstr);
         virtual int loadCfgData() = 0;
+
+        static std::unique_ptr<Domain> generateDomain(const std::string& dname, Logger& logger, 
+            CfgData& cfgData, SimData& simData, 
+            std::map<std::string, std::unique_ptr<Command>>& cmdMap);
 
         template<class T>
         void getParamToValue(const std::string& key, T& valRef);
@@ -322,34 +361,10 @@ namespace parfis {
         CfgData* m_pCfgData;
         /// Pointer to simulation data
         SimData* m_pSimData;
+        /// Pointer to command map
+        std::map<std::string, std::unique_ptr<Command>>* m_pCmdMap;
     };
     /** @} configuration */
-
-    /**
-     * @brief Chain of commands
-     * @details Used for chaining functions from the Domain objects that have a 
-     * certain signature. Has a single-linked list structure.
-     */
-    struct Command
-    {
-        Command(std::string name = "") :
-            m_name(name), m_pNext(nullptr) {}
-
-        /// Name for the command
-        std::string m_name;
-
-        /// Function to run in the command object
-        std::function<int()> m_func;
-
-        /// Pointer to the next command in the chain
-        Command* m_pNext;
-
-        /// Set next command in the chain
-        void setNext(Command& comRef) { m_pNext = &comRef; }
-
-        /// Get the next command in the chain
-        Command* getNext() { return m_pNext; };
-    };
 }
 
 #endif // PARFIS_DATASTRUCT_H

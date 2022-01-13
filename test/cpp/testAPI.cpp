@@ -97,10 +97,18 @@ TEST(api, checkNumberOfCalculatedCellCount) {
     ASSERT_NE(retval, 0);
 }
 
-
+/**
+ * @brief Create command chains and run creation chain, then check for cells
+ */
 TEST(api, checkNumberOfCreatedCells) {
     uint32_t id = parfis::api::newParfis();
-    int createdCellCount = parfis::api::getSimData(id)->cellVec.size();
-    // std::cout << "CREATED COUNT = " << createdCellCount << std::endl;
+    parfis::api::createCommandChains(id);
+    parfis::api::runCommandChain(id, "create");
+    ASSERT_EQ(139200, parfis::api::getSimData(id)->cellVec.size());
+    ASSERT_EQ(160000, parfis::api::getSimData(id)->cellIdVec.size());
+    uint64_t ptr1 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[0]);
+    uint64_t ptr2 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[1]);
+    // Check size alignment
+    ASSERT_EQ(8, ptr2 - ptr1);
 }
 /** @} gtestAll*/

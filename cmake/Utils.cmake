@@ -126,7 +126,9 @@ function(set_version)
         OUTPUT_VARIABLE GIT_BRANCH)
 
     string(STRIP "${GIT_REV}" GIT_REV)
-    string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
+    # GIT_REV string has quotes
+    string(REPLACE "\'" "" GIT_REV ${GIT_REV})
+    string(REPLACE "\"" "" GIT_REV ${GIT_REV})
     string(STRIP "${GIT_DIFF}" GIT_DIFF)
     string(STRIP "${GIT_TAG}" GIT_TAG)
     string(STRIP "${VERSION}" VERSION)

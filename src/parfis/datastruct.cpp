@@ -1,6 +1,7 @@
 #include "parfis.h"
 #include "datastruct.h"
 #include "global.h"
+#include "system.h"
 
 template<>
 void parfis::Param<std::string>::setValueVec(const std::string& valstr) 
@@ -329,4 +330,23 @@ void parfis::Logger::printLogFile()
         logFile.close();
         m_str.clear();
     }
+}
+
+/**
+ * @brief Generates new domain based on dname
+ * @param dname domain name one of predefined ("system", "particle")
+ * @param logger reference to the logger of the Parfis object
+ * @param cfgData reference to the CfgData object from the Parfis object
+ * @param simData reference to the SimData object from the Parfis object
+ * @param cmdMap reference to the command map from the Parfis object
+ * @return Domain created with new
+ */
+std::unique_ptr<parfis::Domain> parfis::Domain::generateDomain(const std::string& dname, 
+    Logger& logger, CfgData& cfgData, SimData& simData, 
+    std::map<std::string, std::unique_ptr<Command>>& cmdMap) 
+{
+    if (dname == "system")
+        return std::unique_ptr<Domain>(new System(dname, logger, cfgData, simData, cmdMap));
+    else 
+        return std::unique_ptr<Domain>(nullptr);
 }

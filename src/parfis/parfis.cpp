@@ -44,6 +44,7 @@ void parfis::Parfis::initializeDomains()
     size_t start = 0;
     size_t end = m_cfgstr.find('\n');
     std::vector<std::string> domainVec;
+    std::vector<std::string> commandVec;
     while(end != std::string::npos) {
         line = m_cfgstr.substr(start, end - start);
         line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
@@ -53,10 +54,16 @@ void parfis::Parfis::initializeDomains()
             // Initialize Domains
             if (line.find("<parfis::Domain>") != std::string::npos) {
                 domainVec = Global::getVector(line, '[', ']');
-                for (auto& domain : domainVec) {
-                    if (domain == "system")
-                        m_domainMap[domain] = std::unique_ptr<Domain>(
-                            new System(domain, m_logger, m_cfgData, m_simData));
+                for (auto& domain : domainVec)
+                    m_domainMap[domain] = Domain::generateDomain(
+                        domain, m_logger, m_cfgData, m_simData, m_cmdMap);
+            }
+            else if (line.find("<parfis::Command>") != std::string::npos) {
+                commandVec = Global::getVector(line, '[', ']');
+                for (auto& cmdName : commandVec) {
+                    m_cmdHeadMap.insert({cmdName, std::unique_ptr<Command>(new Command(cmdName))});    
+                    m_cmdHeadMap[cmdName]->m_func = [&]()->int { return 0; };
+                    m_cmdHeadMap[cmdName]->m_funcName = "dummy";
                 }
             }
             // Configure domains
@@ -141,14 +148,35 @@ int parfis::Parfis::initialize()
 
 /**
  * @brief Create command chains
+ * @details First initialize heads of command chains, then add command from every
+ * domain.
  */
-int parfis::Parfis::createCommandChains(const std::string& chainHeadName) 
+int parfis::Parfis::createCommandChains() 
 {
-//     m_cmdChainCreate.m_name = chainHeadName;
-//     m_cmdChainCreate.m_head = 
-//     m_cmdChainCreate.setNext(m_domainMap["system"]->m_cmdCreate);
-// 
+    // Command *pcom;
+    std::string cmdName = "create";
+    m_cmdHeadMap.insert({cmdName, std::unique_ptr<Command>(new Command(cmdName))});    
+    m_cmdHeadMap[cmdName]->m_func = [&]()->int { return 0; };
+    m_cmdHeadMap[cmdName]->m_funcName = "dummy";
+    m_cmdHeadMap[cmdName]->setNext(*m_cmdMap["createCells"]);
     return 0;
+}
+
+/**
+ * @brief Run command chain
+ * @param chainHeadName name of the command chain head
+ * @return Zero on success
+ */
+int parfis::Parfis::runCommandChain(const std::string& chainHeadName) 
+{
+    int retval = 0;
+    Command* pcom;
+    pcom = m_cmdHeadMap[chainHeadName].get();
+    while(pcom != nullptr) {
+        retval = pcom->m_func();
+        pcom = pcom->getNext();
+    }
+    return retval;
 }
 
 /**
@@ -373,4 +401,25 @@ PARFIS_EXPORT const std::vector<uint32_t>& parfis::api::getParfisIdVec()
     }
 
     return APIStaticUin32Vec;
+}
+
+/**
+ * @brief Create all command chains for the Parfis object
+ * @param id of the Parfis object
+ * @return Zero on success
+ */
+PARFIS_EXPORT int parfis::api::createCommandChains(uint32_t id) 
+{
+    return Parfis::getParfis(id)->createCommandChains();
+}
+
+/**
+ * @brief Run command chain given by id an name of the command head
+ * @param id of the Parfis object
+ * @param key command head of the chain
+ * @return Zero on success
+ */
+PARFIS_EXPORT int parfis::api::runCommandChain(uint32_t id, const char* key) 
+{
+    return Parfis::getParfis(id)->runCommandChain(key);
 }

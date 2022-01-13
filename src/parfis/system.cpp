@@ -35,13 +35,18 @@ int parfis::System::loadCfgData()
         return 1;
     }
 
+    // Create vector for cell id
     m_pSimData->cellIdVec.resize(
         m_pCfgData->cellCount.x*m_pCfgData->cellCount.y*m_pCfgData->cellCount.z, Const::noCellId);
 
-    // if (m_pCfgData->geometry == "cylindrical") {
-    //     m_cmdCreate.m_name = "System::createCellsCylindrical";
-    //     m_cmdCreate.m_func = System::createCellsCylindrical;
-    // }
+    // Set command for creating cells
+    std::string cmdName = "createCells";
+    m_pCmdMap->insert({cmdName, std::unique_ptr<Command>(new Command(cmdName))});
+    if (m_pCfgData->geometry == "cylindrical") {
+        // Instead of lambda expression can be used std::bind(&System::createCellsCylindrical, this);
+        m_pCmdMap->at(cmdName)->m_func = [&]()->int { return createCellsCylindrical(); };
+        m_pCmdMap->at(cmdName)->m_funcName = "System::createCellsCylindrical";
+    }
     return 0;
 }
 
@@ -51,22 +56,19 @@ int parfis::System::loadCfgData()
  */
 int parfis::System::createCellsCylindrical()
 {
-    // This should be the same for cylindrical geometry
+    // This two vectors components should be equal for the cylindrical geometry
     if (m_pCfgData->geometrySize.x != m_pCfgData->geometrySize.y)
         return 1;
 
-    // XYZ<double> rt;
-    // uint8_t xypin;
-    // uint8_t pin;
-
+    // Center of the geometry
     Vec3D<double> geoCenter = {
         0.5 * m_pCfgData->geometrySize.x, 
         0.5 * m_pCfgData->geometrySize.y,
         0.5 * m_pCfgData->geometrySize.z};
     Vec3D<double> nodePosition;
-    double radiusSquared = geoCenter.x*geoCenter.x + geoCenter.y+geoCenter.y; 
+    double radiusSquared = geoCenter.x*geoCenter.x; 
     nodeMask_t xyNode;
-    nodeMask_t node;
+    nodeMask_t nodeMask;
     cellId_t cellId;
 
     for (cell1D_t i = 0; i < m_pCfgData->cellCount.x; i++) {
@@ -92,16 +94,16 @@ int parfis::System::createCellsCylindrical()
                 xyNode |= 0b10001000;
 
             for (cell1D_t k = 0; k < m_pCfgData->cellCount.z; k++) {
-                node = xyNode;
+                nodeMask = xyNode;
                 if (k == 0)
-                    node &= 0b11110000;
+                    nodeMask &= 0b11110000;
                 else if (k == m_pCfgData->cellCount.z - 1)
-                    node &= 0b00001111;
+                    nodeMask &= 0b00001111;
 
                 // Create cells that have at least one point inside the 
                 // defined geometry (node > 0)
-                if (node) {
-                    m_pSimData->cellVec.push_back({ node, {i, j, k} });
+                if (nodeMask) {
+                    m_pSimData->cellVec.push_back({ nodeMask, 0, {i, j, k} });
                     m_pSimData->cellIdVec[
                         m_pCfgData->getCellVecPosition(m_pSimData->cellVec.back().cell3D)
                         ] = m_pSimData->cellVec.size() - 1;

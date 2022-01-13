@@ -62,13 +62,13 @@ namespace parfis {
         static Parfis* newParfis();
 
         int initialize();
-        int createCommandChains(const std::string& str);
+        int createCommandChains();
+        int runCommandChain(const std::string& str);
         int configure(const char* str);
 
         Domain* getDomain(const std::string& cstr);
         std::string getParamValueString(const std::string& key);
         void initializeDomains();
-
 
         /// Logging object
         Logger m_logger;
@@ -91,8 +91,11 @@ namespace parfis {
         /// Static map of pointers to Parfis objects
         static std::map<uint32_t, std::unique_ptr<Parfis>> s_parfisMap;
 
-        /// Map of command chains
-        std::map<std::string, std::unique_ptr<Command>> m_cmdChainMap;
+        /// Map of commands
+        std::map<std::string, std::unique_ptr<Command>> m_cmdMap;        
+
+        /// Map of commands chains head names associated with vectors of command names
+        std::map<std::string, std::vector<std::string>> m_cmdHeadMap;
 
         /// Parfis id counter, unique id for every parfis even when deleted
         static uint32_t s_parfisMapId;
@@ -125,6 +128,8 @@ namespace parfis {
             PARFIS_EXPORT const SimData* getSimData(uint32_t id);
             PARFIS_EXPORT int deleteParfis(uint32_t id);
             PARFIS_EXPORT const std::vector<uint32_t>& getParfisIdVec();
+            PARFIS_EXPORT int createCommandChains(uint32_t id);
+            PARFIS_EXPORT int runCommandChain(uint32_t id, const char* key);
         };
         /** @} api */
     }
