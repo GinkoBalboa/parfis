@@ -295,7 +295,7 @@ namespace parfis {
         size_t m_size;
         ParamBase* m_parent;
         bool inRange(const std::string& valstr);
-        std::string getValueString();
+        std::string getValueString(bool printType=false);
         /// Map of children ParamBase objects (functions as a data containter)
         std::map<std::string, std::unique_ptr<ParamBase>> m_childMap;
         template<class S>

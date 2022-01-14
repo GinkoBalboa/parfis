@@ -1,5 +1,4 @@
 #include <fstream>
-#include "config.h"
 #include "system.h"
 #include "global.h"
 

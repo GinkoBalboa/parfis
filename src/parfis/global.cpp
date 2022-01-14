@@ -54,9 +54,16 @@ std::tuple<std::string, std::string> parfis::Global::splitKeyString(const std::s
     return {str.substr(0,eqPos), str.substr(eqPos+1, endPos-eqPos-1)};
 }
 
+/**
+ * @brief Return last child name if there is a '.' as a parent-child classifier
+ * @param str string of the format "parent.child.child..."
+ * @return last child name
+ */
 std::string parfis::Global::childName(const std::string& str)
 {
     size_t dotPos = str.find_last_of('.'); 
+    if (dotPos == std::string::npos)
+        return "";
     return str.substr(dotPos+1, str.size() - dotPos - 1);
 }
 
