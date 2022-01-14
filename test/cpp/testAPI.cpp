@@ -60,21 +60,6 @@ TEST(api, deleteParfis)
 }
 
 /**
- * @brief Checks configuration parameter by comparing the value from CfgData
- */
-TEST(api, checkCellSize) {
-    uint32_t id = parfis::api::newParfis();
-    // Compare CfgData values and configuration string
-    double cellSize_x = parfis::api::getCfgData(id)->cellSize.x;
-    double cellSize_y = parfis::api::getCfgData(id)->cellSize.y;
-    double cellSize_z = parfis::api::getCfgData(id)->cellSize.z;
-    std::string str1 = parfis::api::getConfigParam(id, "system.cellSize");
-    std::string str2 = "[" + parfis::Global::to_string(cellSize_x) + "," +
-        parfis::Global::to_string(cellSize_y) + "," + parfis::Global::to_string(cellSize_z) + "]";
-    ASSERT_EQ(str1, str2);
-}
-
-/**
  * @brief Check if number of cells is calculated correctly.
  * @details Also and checks if error is returned if number of cells is greater than maximum
  */
