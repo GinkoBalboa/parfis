@@ -251,9 +251,9 @@ int parfis::Domain::initialize(const std::string& cstr)
     else {
         if (cstr.find("<std::string>") != std::string::npos)
             pp->addChild<std::string>(childName);
-        else if (cstr.find("double") != std::string::npos)
+        else if (cstr.find("<double>") != std::string::npos)
             pp->addChild<double>(childName);
-        else if (cstr.find("int") != std::string::npos)
+        else if (cstr.find("<int>") != std::string::npos)
             pp->addChild<int>(childName);
         cp = m_childMap[childName].get();
     }
@@ -343,10 +343,10 @@ void parfis::Logger::printLogFile()
  */
 std::unique_ptr<parfis::Domain> parfis::Domain::generateDomain(const std::string& dname, 
     Logger& logger, CfgData& cfgData, SimData& simData, 
-    std::map<std::string, std::unique_ptr<Command>>& cmdMap) 
+    std::map<std::string, std::unique_ptr<CommandChain>>& cmdChainMap) 
 {
     if (dname == "system")
-        return std::unique_ptr<Domain>(new System(dname, logger, cfgData, simData, cmdMap));
+        return std::unique_ptr<Domain>(new System(dname, logger, cfgData, simData, cmdChainMap));
     else 
         return std::unique_ptr<Domain>(nullptr);
 }

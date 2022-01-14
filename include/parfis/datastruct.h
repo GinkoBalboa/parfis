@@ -248,7 +248,7 @@ namespace parfis {
     struct Command
     {
         Command(std::string name = "") :
-            m_name(name), m_pNext(nullptr) {}
+            m_name(name), m_funcName(""), m_func(nullptr), m_pNext(nullptr) {}
 
         /// Name for the command
         std::string m_name;
@@ -267,6 +267,15 @@ namespace parfis {
 
         /// Get the next command in the chain
         Command* getNext() { return m_pNext; };
+    };
+
+    /**
+     * @brief Defines the whole command chain
+     */
+    struct CommandChain : public Command
+    {
+        /// Map of commands
+        std::map<std::string, std::unique_ptr<Command>> m_cmdMap;
     };
 
     /**
@@ -333,9 +342,9 @@ namespace parfis {
     struct Domain: public Param<std::string> {
         Domain() = default;
         Domain(const std::string& dname, Logger& logger, CfgData& cfgData, SimData& simData, 
-                std::map<std::string, std::unique_ptr<Command>>& cmdMap) 
-            : m_pLogger(&logger), m_pCfgData(&cfgData), m_pSimData(&simData), m_pCmdMap(&cmdMap) 
-            { m_name = dname; };
+                std::map<std::string, std::unique_ptr<CommandChain>>& cmdChainMap) 
+            : m_pLogger(&logger), m_pCfgData(&cfgData), m_pSimData(&simData), 
+            m_pCmdChainMap(&cmdChainMap) { m_name = dname; };
         Domain(const Domain&) = default;
         Domain& operator=(const Domain&) = default;
         virtual ~Domain() = default;
@@ -347,7 +356,7 @@ namespace parfis {
 
         static std::unique_ptr<Domain> generateDomain(const std::string& dname, Logger& logger, 
             CfgData& cfgData, SimData& simData, 
-            std::map<std::string, std::unique_ptr<Command>>& cmdMap);
+            std::map<std::string, std::unique_ptr<CommandChain>>& cmdChainMap);
 
         template<class T>
         void getParamToValue(const std::string& key, T& valRef);
@@ -362,7 +371,7 @@ namespace parfis {
         /// Pointer to simulation data
         SimData* m_pSimData;
         /// Pointer to command map
-        std::map<std::string, std::unique_ptr<Command>>* m_pCmdMap;
+        std::map<std::string, std::unique_ptr<CommandChain>>* m_pCmdChainMap;
     };
     /** @} configuration */
 }

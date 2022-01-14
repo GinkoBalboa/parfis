@@ -40,12 +40,27 @@ int parfis::System::loadCfgData()
         m_pCfgData->cellCount.x*m_pCfgData->cellCount.y*m_pCfgData->cellCount.z, Const::noCellId);
 
     // Set command for creating cells
-    std::string cmdName = "createCells";
-    m_pCmdMap->insert({cmdName, std::unique_ptr<Command>(new Command(cmdName))});
-    if (m_pCfgData->geometry == "cylindrical") {
-        // Instead of lambda expression can be used std::bind(&System::createCellsCylindrical, this);
-        m_pCmdMap->at(cmdName)->m_func = [&]()->int { return createCellsCylindrical(); };
-        m_pCmdMap->at(cmdName)->m_funcName = "System::createCellsCylindrical";
+    Command *pcom;
+    std::string cmdChainName = "create";
+    std::string cmdName;
+    // Check if creation is defined
+    if (m_pCmdChainMap->find(cmdChainName) != m_pCmdChainMap->end()) {
+        // Check if cell creation is defined
+         cmdName = "createCells";
+        if (m_pCmdChainMap->at(cmdChainName)->m_cmdMap.find(cmdName) != 
+            m_pCmdChainMap->at(cmdChainName)->m_cmdMap.end()) {
+            pcom = m_pCmdChainMap->at(cmdChainName)->m_cmdMap[cmdName].get();
+            // Do this differently for different geometries
+            if (m_pCfgData->geometry == "cylindrical") {
+                // Instead of lambda expression here, we can also use 
+                // pcom->m_func = std::bind(&System::createCellsCylindrical, this);
+                pcom->m_func = [&]()->int { return createCellsCylindrical(); };
+                pcom->m_funcName = "System::createCellsCylindrical";
+                std::string msg = "createCells command defined with " + pcom->m_funcName;
+                LOG(*m_pLogger, LogMask::Info, msg);
+            }
+
+        }
     }
     return 0;
 }

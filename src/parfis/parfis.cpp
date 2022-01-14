@@ -11,7 +11,6 @@
 #include "version.h"
 #include "system.h"
 #include "config.h"
-#include "datastruct.h"
 
 std::map<uint32_t, std::unique_ptr<parfis::Parfis>> parfis::Parfis::s_parfisMap;
 uint32_t parfis::Parfis::s_parfisMapId = 0;
@@ -56,17 +55,37 @@ void parfis::Parfis::initializeDomains()
                 domainVec = Global::getVector(line, '[', ']');
                 for (auto& domain : domainVec)
                     m_domainMap[domain] = Domain::generateDomain(
-                        domain, m_logger, m_cfgData, m_simData, m_cmdMap);
+                        domain, m_logger, m_cfgData, m_simData, m_cmdChainMap);
             }
-            else if (line.find("<parfis::Command>") != std::string::npos) {
+            // Initialize command chains
+            else if (line.find("<parfis::CommandChain>") != std::string::npos) {
                 commandVec = Global::getVector(line, '[', ']');
                 for (auto& cmdName : commandVec) {
-                    m_cmdHeadMap.insert({cmdName, std::unique_ptr<Command>(new Command(cmdName))});    
-                    m_cmdHeadMap[cmdName]->m_func = [&]()->int { return 0; };
-                    m_cmdHeadMap[cmdName]->m_funcName = "dummy";
+                    m_cmdChainMap.insert({cmdName, std::unique_ptr<CommandChain>(new CommandChain())});    
+                    m_cmdChainMap[cmdName]->m_name = cmdName;
+                    m_cmdChainMap[cmdName]->m_func = [&]()->int { return 0; };
+                    m_cmdChainMap[cmdName]->m_funcName = "";
                 }
             }
-            // Configure domains
+            // Initialize commands
+            else if (line.find("<parfis::Command>") != std::string::npos) {
+                std::string cmdChainName = "commandChain";
+                for (auto& cmdChain : m_cmdChainMap) {
+                    std::string sstr = line.substr(0, cmdChainName.size() + cmdChain.first.size() + 2);
+                    if ( sstr == cmdChainName + '.' + cmdChain.first + "=") {
+                        commandVec = Global::getVector(line, '[', ']');
+                        Command *pcom = cmdChain.second.get();
+                        for (auto& cmdName : commandVec) {
+                            // Insert into map of commands and connect with chain
+                            cmdChain.second->m_cmdMap.insert({
+                                cmdName, std::unique_ptr<Command>(new Command(cmdName))});
+                            pcom->setNext(*cmdChain.second->m_cmdMap[cmdName].get());
+                            pcom = cmdChain.second->m_cmdMap[cmdName].get();
+                        }
+                    }
+                }
+            }
+            // Everythin else is domain configuration
             else {
                 for (auto& domain : domainVec) {
                     std::string sstr = line.substr(0, domain.size() + 1);
@@ -102,7 +121,7 @@ parfis::Parfis* parfis::Parfis::newParfis()
     uint32_t id = Parfis::s_parfisMapId;
     Parfis::s_parfisMap[id] = std::unique_ptr<Parfis>(new Parfis(id));
     Parfis::s_parfisMapId++;
-    return Parfis::s_parfisMap.at(id).get();
+    return Parfis::s_parfisMap[id].get();
 }
 
 /**
@@ -147,31 +166,15 @@ int parfis::Parfis::initialize()
 }
 
 /**
- * @brief Create command chains
- * @details First initialize heads of command chains, then add command from every
- * domain.
- */
-int parfis::Parfis::createCommandChains() 
-{
-    // Command *pcom;
-    std::string cmdName = "create";
-    m_cmdHeadMap.insert({cmdName, std::unique_ptr<Command>(new Command(cmdName))});    
-    m_cmdHeadMap[cmdName]->m_func = [&]()->int { return 0; };
-    m_cmdHeadMap[cmdName]->m_funcName = "dummy";
-    m_cmdHeadMap[cmdName]->setNext(*m_cmdMap["createCells"]);
-    return 0;
-}
-
-/**
  * @brief Run command chain
- * @param chainHeadName name of the command chain head
+ * @param chainChainName name of the command chain
  * @return Zero on success
  */
-int parfis::Parfis::runCommandChain(const std::string& chainHeadName) 
+int parfis::Parfis::runCommandChain(const std::string& chainChainName) 
 {
     int retval = 0;
     Command* pcom;
-    pcom = m_cmdHeadMap[chainHeadName].get();
+    pcom = m_cmdChainMap[chainChainName].get();
     while(pcom != nullptr) {
         retval = pcom->m_func();
         pcom = pcom->getNext();
@@ -219,7 +222,7 @@ PARFIS_EXPORT const char* parfis::api::info()
         str = "parfis::state_t = float";
     else if (sizeof(state_t) == 8)
         str = "parfis::state_t = double";
-    else
+    else 
         str = "parfis::state_t = unknown";
     str += "\nparfis::logLevel = " + std::to_string(Const::logLevel);
     str += "\nparfis::version = " + std::string(Const::version);
@@ -251,9 +254,9 @@ PARFIS_EXPORT const char* parfis::api::parfisInfo(uint32_t id)
         APIStaticString = "Parfis with id = " + std::to_string(id) + " doesn't exist";
     }
     else {
-        APIStaticString = "Parfis::m_id = " + std::to_string(Parfis::s_parfisMap.at(id)->m_id);
+        APIStaticString = "Parfis::m_id = " + std::to_string(Parfis::s_parfisMap[id]->m_id);
         APIStaticString += "\nParfis::m_logger.m_fname = " + 
-            Parfis::s_parfisMap.at(id)->m_logger.m_fname;
+            Parfis::s_parfisMap[id]->m_logger.m_fname;
     }
 
     return APIStaticString.c_str();
@@ -404,19 +407,9 @@ PARFIS_EXPORT const std::vector<uint32_t>& parfis::api::getParfisIdVec()
 }
 
 /**
- * @brief Create all command chains for the Parfis object
+ * @brief Run command chain given by id an name of the command chain
  * @param id of the Parfis object
- * @return Zero on success
- */
-PARFIS_EXPORT int parfis::api::createCommandChains(uint32_t id) 
-{
-    return Parfis::getParfis(id)->createCommandChains();
-}
-
-/**
- * @brief Run command chain given by id an name of the command head
- * @param id of the Parfis object
- * @param key command head of the chain
+ * @param key command chain name
  * @return Zero on success
  */
 PARFIS_EXPORT int parfis::api::runCommandChain(uint32_t id, const char* key) 

@@ -22,8 +22,8 @@
 # #  - starts comment\n\
 \n\
 domain = [system] <parfis::Domain> (system, particle) # Domains are defined as separate classes in the code  \n\
-commandChain = [create] <parfis::Command> (create) # Command chains for the program \n\
-commandChain.create = [createCells] <std::string> # Command chain for creation of data \n\
+commandChain = [create] <parfis::CommandChain> (create) # Command chains for the program \n\
+commandChain.create = [createCells] <parfis::Command> # Command chain for creation of data \n\
 \n\
 system = [geometry, timestep, geometrySize, cellSize, periodicBoundary] <parfis::Param> (geometry, timestep, geometrySize, cellSize, periodicBoundary)  # The system configuration domain  \n\
 system.geometry = cylindrical <std::string> (cylindrical) # Only cylindrical geometry is supported for now \n\

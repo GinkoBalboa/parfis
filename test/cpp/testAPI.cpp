@@ -102,7 +102,6 @@ TEST(api, checkNumberOfCalculatedCellCount) {
  */
 TEST(api, checkNumberOfCreatedCells) {
     uint32_t id = parfis::api::newParfis();
-    parfis::api::createCommandChains(id);
     parfis::api::runCommandChain(id, "create");
     ASSERT_EQ(139200, parfis::api::getSimData(id)->cellVec.size());
     ASSERT_EQ(160000, parfis::api::getSimData(id)->cellIdVec.size());

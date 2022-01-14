@@ -22,8 +22,8 @@ namespace parfis
     {
         System() = default;
         System(const std::string& dname, Logger& logger, CfgData& cfgData, SimData& simData,
-            std::map<std::string, std::unique_ptr<Command>>& cmdMap)
-            : Domain(dname, logger, cfgData, simData, cmdMap) {};
+            std::map<std::string, std::unique_ptr<CommandChain>>& cmdChainMap)
+            : Domain(dname, logger, cfgData, simData, cmdChainMap) {};
         System(const System&) = default;
         System& operator=(const System&) = default;
         ~System() = default;
