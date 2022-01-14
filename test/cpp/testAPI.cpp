@@ -34,6 +34,7 @@ TEST(api, checkStateType) {
 TEST(api, checkTimestep) {
     uint32_t id = parfis::api::newParfis();
     std::string cfgstr = parfis::api::getConfig(id);
+    cfgstr.erase(std::remove_if(cfgstr.begin(), cfgstr.end(), ::isspace), cfgstr.end());
     // This is the default timestep from full configuration
     ASSERT_NE(cfgstr.find("system.timestep=1"), std::string::npos);
     cfgstr = parfis::api::getConfigParam(id, "system.timestep");
