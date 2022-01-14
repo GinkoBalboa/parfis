@@ -18,9 +18,9 @@
 # -- Project information -----------------------------------------------------
 
 # The full version, including alpha/beta/rc tags
-version = 'N/A'
-git_tag = 'N/A'
-git_rev = 'N/A'
+version = ''
+git_tag = ''
+git_rev = ''
 
 project = 'Parfis'
 author = 'Ginko Balboa'
@@ -76,7 +76,7 @@ html_theme = 'sphinx_rtd_theme'
 
 html_theme_optioin = {'navigation_depth': 4}
 
-html_context = {
+html_context = {    
 'display_github': True,  # Add 'Edit on Github' link instead of 'View page source'
 'last_updated': True,
 'commit': False
@@ -97,6 +97,7 @@ templates_path = ['_templates']
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['static']
+html_extra_path = ['./.htaccess']
 html_copy_source = False
 
 # Enable numref

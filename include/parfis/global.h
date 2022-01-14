@@ -11,12 +11,7 @@
 #include <map>
 #include <fstream>
 #include <algorithm>
-
-#if defined(STATE_TYPE_DOUBLE)
-#define STATE_TYPE double
-#else
-#define STATE_TYPE float
-#endif
+#include "datastruct.h"
 
 /// Main namespace of the library
 namespace parfis 
@@ -24,7 +19,6 @@ namespace parfis
     struct Global {
         /// Get current date and time in the format YYYY-MM-DD HH:mm:ss
         static std::string currentDateTime();
-
         static std::string removeWhitespace(const std::string& str);
         
         static std::tuple<std::string, std::string> splitKeyValue(const std::string& str);
@@ -34,17 +28,16 @@ namespace parfis
         /// Check if file @param fname exists
         static bool fileExists (const std::string& fname);
 
-        /// Get vector of strings
         static std::vector<std::string> getVector(const std::string& str, char bra, char ket);
         static std::vector<std::string> getInheritanceVector(const std::string& str);
 
-        /// Conversion from floating point to number
+        /// Convert double to string
         static std::string to_string(double num);
+        /// Convert float to string
         static std::string to_string(float num);
+        /// Comvert int to string (for completness and use in Vec3D struct)
+        static std::string to_string(int num);
     };
-
-    /// Type of state space variables of each particle (float or double)
-    typedef STATE_TYPE state_t;
 
     /// Physical and mathematical constats
     struct Const {
@@ -68,6 +61,10 @@ namespace parfis
         static const char* version;
         /// Git tag string
         static const char* gitTag;
+        /// Maximum number of cell ids for cellIdVec containter
+        static constexpr cellId_t cellIdMax = UINT32_MAX;
+        /// Id that represents that no cell exists
+        static constexpr cellId_t noCellId = UINT32_MAX;
     };
 }
 

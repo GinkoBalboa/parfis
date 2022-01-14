@@ -8,6 +8,7 @@
 #include <map>
 #include <random>
 #include "parfis.h"
+#include "datastruct.h"
 
 #if defined(PARFIS_SYSTEM_INI_FILE)
 #define SYSTEM_INI_FILE PARFIS_SYSTEM_INI_FILE
@@ -20,13 +21,15 @@ namespace parfis
     struct System : public Domain
     {
         System() = default;
-        System(const std::string& dname, Logger& logger);
+        System(const std::string& dname, Logger& logger, CfgData& cfgData, SimData& simData,
+            std::map<std::string, std::unique_ptr<CommandChain>>& cmdChainMap)
+            : Domain(dname, logger, cfgData, simData, cmdChainMap) {};
         System(const System&) = default;
         System& operator=(const System&) = default;
         ~System() = default;
 
-        /// Pointer to Data struct
-        // std::shared_ptr<Data> m_pData;
+        int loadCfgData() override;
+        int createCellsCylindrical();
     };
 }
 
