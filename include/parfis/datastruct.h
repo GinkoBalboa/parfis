@@ -203,6 +203,18 @@ namespace parfis {
     };
 
     /**
+     * @brief Holds information about each specie
+     * 
+     */
+    struct Specie
+    {
+        /// Specie name
+        std::string name;
+        /// States per cell for creating initial particles
+        int statesPerCell;
+    };
+
+    /**
      * @brief Configuration parameters data
      */
     struct CfgData {
@@ -218,6 +230,8 @@ namespace parfis {
         Vec3D<int> periodicBoundary;
         /// Number of cells in every direction
         Vec3D<int> cellCount;
+        /// Vector of species
+        std::vector<Specie> specieVec;
         /// Get absolute cell id from i,j,k
         inline cellId_t getCellVecPosition(Vec3D<cell1D_t>& cell3D) {
             return cellCount.x * (cellCount.y * cell3D.z + cell3D.y ) + cell3D.x;

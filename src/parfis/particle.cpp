@@ -9,5 +9,16 @@
  */
 int parfis::Particle::loadCfgData()
 {
+    std::string str;
+    std::vector<std::string> strVec;
+    getParamToVector("specie", strVec);
+
+    m_pCfgData->specieVec.resize(strVec.size());
+    for (size_t i = 0; i < strVec.size(); i++) {
+        m_pCfgData->specieVec[i].name = strVec[i];
+        getParamToValue("specie." + strVec[i] + ".statesPerCell", 
+            m_pCfgData->specieVec[i].statesPerCell);
+    }
+
     return 0;
 }

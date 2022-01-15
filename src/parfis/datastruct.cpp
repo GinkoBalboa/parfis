@@ -179,8 +179,10 @@ void parfis::Domain::getParamToValue(const std::string& key, T& valRef)
     valRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
 }
 
+template void parfis::Domain::getParamToValue<int>(const std::string& key, int& valRef);
 template void parfis::Domain::getParamToValue<double>(const std::string& key, double& valRef);
-template void parfis::Domain::getParamToValue<std::string>(const std::string& key, std::string& valRef);
+template void parfis::Domain::getParamToValue<std::string>(
+    const std::string& key, std::string& valRef);
 
 template<>
 void parfis::Domain::getParamToValue(const std::string& key, Vec3D<double>& valRef) 
@@ -228,8 +230,11 @@ void parfis::Domain::getParamToVector(const std::string& key, std::vector<T>& ve
     vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
 }
 
-template 
-void parfis::Domain::getParamToVector<double>(const std::string& key, std::vector<double>& vecRef);
+template void parfis::Domain::getParamToVector<double>(
+    const std::string& key, std::vector<double>& vecRef);
+
+template void parfis::Domain::getParamToVector<std::string>(
+    const std::string& key, std::vector<std::string>& vecRef);
 
 parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     
