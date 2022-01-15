@@ -2,6 +2,7 @@
 #include "datastruct.h"
 #include "global.h"
 #include "system.h"
+#include "particle.h"
 
 template<>
 void parfis::Param<std::string>::setValueVec(const std::string& valstr) 
@@ -111,43 +112,51 @@ void parfis::ParamBase::setRangeVec(ParamBase* ppb, const std::string& ranstr)
         static_cast<Param<std::string>*>(ppb)->setRangeVec(ranstr);
 }
 
-std::string parfis::ParamBase::getValueString()
+std::string parfis::ParamBase::getValueString(bool printType)
 {
     if (m_size == 0)
         return "";
     std::string str;
     if (m_type == "int") {
         if (m_size == 1)
-            return std::to_string(static_cast<Param<int>*>(this)->m_valueVec[0]);
+            str = std::to_string(static_cast<Param<int>*>(this)->m_valueVec[0]);
         else {
             str += '[';
             for (auto& val : static_cast<Param<int>*>(this)->m_valueVec)
                 str += std::to_string(val) + ",";
             str.back() = ']';
-            return str;
         }
+        if (printType)
+            str += " <int>";
+        return str;
     }
     else if (m_type == "std::string") {
         if (m_size == 1)
-            return static_cast<Param<std::string>*>(this)->m_valueVec[0];
+            str = static_cast<Param<std::string>*>(this)->m_valueVec[0];
         else {
             str += '[';
             for (auto& val : static_cast<Param<std::string>*>(this)->m_valueVec)
                 str += val + ",";
             str.back() = ']';
-            return str;
         }
+        if (printType && (m_childMap.size() > 0))
+            str += " <parfis::Param>";
+        else if (printType)
+            str += " <std::string>";
+        return str;
     }
     else if (m_type == "double") {
         if (m_size == 1)
-            return Global::to_string(static_cast<Param<double>*>(this)->m_valueVec[0]);
+            str = Global::to_string(static_cast<Param<double>*>(this)->m_valueVec[0]);
         else {
             str += '[';
             for (auto& val : static_cast<Param<double>*>(this)->m_valueVec)
                 str += Global::to_string(val) + ",";
             str.back() = ']';
-            return str;
         }
+        if (printType)
+            str += " <double>";
+        return str;
     }
     return "";
 }
@@ -170,8 +179,10 @@ void parfis::Domain::getParamToValue(const std::string& key, T& valRef)
     valRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
 }
 
+template void parfis::Domain::getParamToValue<int>(const std::string& key, int& valRef);
 template void parfis::Domain::getParamToValue<double>(const std::string& key, double& valRef);
-template void parfis::Domain::getParamToValue<std::string>(const std::string& key, std::string& valRef);
+template void parfis::Domain::getParamToValue<std::string>(
+    const std::string& key, std::string& valRef);
 
 template<>
 void parfis::Domain::getParamToValue(const std::string& key, Vec3D<double>& valRef) 
@@ -219,17 +230,20 @@ void parfis::Domain::getParamToVector(const std::string& key, std::vector<T>& ve
     vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
 }
 
-template 
-void parfis::Domain::getParamToVector<double>(const std::string& key, std::vector<double>& vecRef);
+template void parfis::Domain::getParamToVector<double>(
+    const std::string& key, std::vector<double>& vecRef);
+
+template void parfis::Domain::getParamToVector<std::string>(
+    const std::string& key, std::vector<std::string>& vecRef);
 
 parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     
     auto inheritvec = Global::getInheritanceVector(cstr);
-    ParamBase* pp = this;
+    Param<std::string>* pp = this;
     for(size_t i=1; i<inheritvec.size() - 1; i++) {
-        pp = pp->m_childMap[inheritvec[i]].get();
+        pp = static_cast<Param<std::string>*>(pp->m_childMap[inheritvec[i]].get());
     }
-    return this;
+    return pp;
 }
 
 /**
@@ -245,17 +259,20 @@ int parfis::Domain::initialize(const std::string& cstr)
     std::string childName = Global::childName(std::get<0>(keyValue));
     Param<std::string>* pp = getParent(std::get<0>(keyValue));
     ParamBase* cp = nullptr;
-    if (cstr.find("<parfis::Param>") != std::string::npos) {
+    // If it is domain don't add it as a child, because there is no parent
+    if (childName == "") {
         cp = pp;
     }
     else {
-        if (cstr.find("<std::string>") != std::string::npos)
+        if (cstr.find("<parfis::Param>") != std::string::npos)
+            pp->addChild<std::string>(childName);
+        else if (cstr.find("<std::string>") != std::string::npos)
             pp->addChild<std::string>(childName);
         else if (cstr.find("<double>") != std::string::npos)
             pp->addChild<double>(childName);
         else if (cstr.find("<int>") != std::string::npos)
             pp->addChild<int>(childName);
-        cp = m_childMap[childName].get();
+        cp = pp->m_childMap[childName].get();
     }
     ParamBase::setValueVec(cp, std::get<1>(keyValue));
     ParamBase::setRangeVec(cp, std::get<1>(keyString));
@@ -347,6 +364,8 @@ std::unique_ptr<parfis::Domain> parfis::Domain::generateDomain(const std::string
 {
     if (dname == "system")
         return std::unique_ptr<Domain>(new System(dname, logger, cfgData, simData, cmdChainMap));
+    if (dname == "particle")
+        return std::unique_ptr<Domain>(new Particle(dname, logger, cfgData, simData, cmdChainMap));
     else 
         return std::unique_ptr<Domain>(nullptr);
 }

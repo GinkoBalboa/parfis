@@ -1,5 +1,5 @@
-#ifndef PARFIS_SYSTEM_H
-#define PARFIS_SYSTEM_H
+#ifndef PARFIS_PARTICLE_H
+#define PARFIS_PARTICLE_H
 
 #include <iostream>
 #include <vector>
@@ -12,19 +12,19 @@
 
 namespace parfis
 {
-    struct System : public Domain
+    struct Particle : public Domain
     {
-        System() = default;
-        System(const std::string& dname, Logger& logger, CfgData& cfgData, SimData& simData,
+        Particle() = default;
+        Particle(const std::string& dname, Logger& logger, CfgData& cfgData, SimData& simData,
             std::map<std::string, std::unique_ptr<CommandChain>>& cmdChainMap)
             : Domain(dname, logger, cfgData, simData, cmdChainMap) {};
-        System(const System&) = default;
-        System& operator=(const System&) = default;
-        ~System() = default;
+        Particle(const Particle&) = default;
+        Particle& operator=(const Particle&) = default;
+        ~Particle() = default;
 
         int loadCfgData() override;
         int createCellsCylindrical();
     };
 }
 
-#endif // PARFIS_SYSTEM_H
+#endif // PARFIS_PARTICLE_H

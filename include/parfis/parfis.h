@@ -84,6 +84,9 @@ namespace parfis {
         /// Id of the created object (same as Parfis::s_parfisMap id)
         uint32_t m_id;
 
+        /// Domain vector
+        std::vector<std::string> m_domainVec;
+
         /// Map of all domains (name -> Domain)
         std::map<std::string, std::unique_ptr<Domain>> m_domainMap;
 

@@ -34,6 +34,7 @@ TEST(api, checkStateType) {
 TEST(api, checkTimestep) {
     uint32_t id = parfis::api::newParfis();
     std::string cfgstr = parfis::api::getConfig(id);
+    cfgstr.erase(std::remove_if(cfgstr.begin(), cfgstr.end(), ::isspace), cfgstr.end());
     // This is the default timestep from full configuration
     ASSERT_NE(cfgstr.find("system.timestep=1"), std::string::npos);
     cfgstr = parfis::api::getConfigParam(id, "system.timestep");
@@ -63,7 +64,7 @@ TEST(api, deleteParfis)
  * @brief Check if number of cells is calculated correctly.
  * @details Also and checks if error is returned if number of cells is greater than maximum
  */
-TEST(api, checkNumberOfCalculatedCellCount) {
+TEST(api, calculateCellCount) {
     uint32_t id = parfis::api::newParfis();
     int retval = 0;
     // Get number of cells in the x direction
@@ -85,7 +86,7 @@ TEST(api, checkNumberOfCalculatedCellCount) {
 /**
  * @brief Create command chains and run creation chain, then check for cells
  */
-TEST(api, checkNumberOfCreatedCells) {
+TEST(api, createdCells) {
     uint32_t id = parfis::api::newParfis();
     parfis::api::runCommandChain(id, "create");
     ASSERT_EQ(139200, parfis::api::getSimData(id)->cellVec.size());
@@ -94,5 +95,15 @@ TEST(api, checkNumberOfCreatedCells) {
     uint64_t ptr2 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[1]);
     // Check size alignment
     ASSERT_EQ(8, ptr2 - ptr1);
+}
+
+/**
+ * @brief Config specie
+ */
+TEST(api, configSpecie) {
+    uint32_t id = parfis::api::newParfis();
+    ASSERT_EQ(1, parfis::api::getCfgData(id)->specieVec.size());
+    ASSERT_EQ("a", parfis::api::getCfgData(id)->specieVec[0].name);
+    ASSERT_EQ(100, parfis::api::getCfgData(id)->specieVec[0].statesPerCell);
 }
 /** @} gtestAll*/

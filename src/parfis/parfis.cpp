@@ -42,7 +42,6 @@ void parfis::Parfis::initializeDomains()
     std::string line;
     size_t start = 0;
     size_t end = m_cfgstr.find('\n');
-    std::vector<std::string> domainVec;
     std::vector<std::string> commandVec;
     while(end != std::string::npos) {
         line = m_cfgstr.substr(start, end - start);
@@ -52,8 +51,8 @@ void parfis::Parfis::initializeDomains()
         if (line.size() > 0) {
             // Initialize Domains
             if (line.find("<parfis::Domain>") != std::string::npos) {
-                domainVec = Global::getVector(line, '[', ']');
-                for (auto& domain : domainVec)
+                m_domainVec = Global::getVector(line, '[', ']');
+                for (auto& domain : m_domainVec)
                     m_domainMap[domain] = Domain::generateDomain(
                         domain, m_logger, m_cfgData, m_simData, m_cmdChainMap);
             }
@@ -87,7 +86,7 @@ void parfis::Parfis::initializeDomains()
             }
             // Everythin else is domain configuration
             else {
-                for (auto& domain : domainVec) {
+                for (auto& domain : m_domainVec) {
                     std::string sstr = line.substr(0, domain.size() + 1);
                     if ( sstr == domain + "." || sstr == domain + "=" ) {
                         m_domainMap[domain]->initialize(line);
@@ -192,7 +191,6 @@ int parfis::Parfis::configure(const char* str)
     std::string cstr = Global::removeWhitespace(str);
     size_t fdot = cstr.find('.');
     std::string dname = cstr.substr(0, fdot);
-    cstr = cstr.substr(fdot+1, cstr.size() - fdot);
     Domain* dptr = Parfis::getDomain(dname);
     if (dptr == nullptr)
         return -1;
@@ -317,28 +315,55 @@ PARFIS_EXPORT const char* parfis::api::defaultConfiguration()
 PARFIS_EXPORT const char* parfis::api::getConfig(uint32_t id)
 {
     static std::string APIStaticString;
-    std::string str;
+    std::string str, inhStr;
 
-    APIStaticString = "";
     std::function<std::string(ParamBase* pb)> addChildString;
-    addChildString = [&str, &addChildString](ParamBase* pb)->std::string {
-        str += pb->m_name + "=" + pb->getValueString() + "\n";
-        if (pb->m_childMap.size() > 0) { 
-            for(auto& cpb: pb->m_childMap) {
-                str += pb->m_name + ".";
-                addChildString(cpb.second.get());
-            }
+    addChildString = [&str, &inhStr, &addChildString](ParamBase* pb)->std::string {
+        if (pb->m_childMap.size() > 0) {
+            std::string oldInhStr = inhStr;
+            if (inhStr == "")
+                inhStr += pb->m_name;
+            else
+                inhStr += "." + pb->m_name;
+            str += inhStr + " = " + pb->getValueString(true) + "\n";
+            for(auto& child: pb->m_childMap)
+                addChildString(child.second.get());
+            inhStr = oldInhStr;
+        }
+        else {
+            str += inhStr + "." + pb->m_name + " = " + pb->getValueString(true) + "\n";
         }
         return "";
     };
 
     if (Parfis::getParfis(id) == nullptr) 
         return "Given id doesn't exist";
-        
-    for(auto& dom: Parfis::getParfis(id)->m_domainMap) {
+
+    APIStaticString = "domain = [";
+    for(auto& domainName: Parfis::getParfis(id)->m_domainVec)
+        APIStaticString += domainName + ",";
+    APIStaticString.back() = ']';
+    APIStaticString += " <parfis::Domain>\n";
+    for(auto& domainName: Parfis::getParfis(id)->m_domainVec) {
         str = "";
-        addChildString(dom.second.get());
+        addChildString(Parfis::getParfis(id)->m_domainMap[domainName].get());
         APIStaticString += str;
+    }
+    APIStaticString += "commandChain = [";
+    for(auto& cmdChain: Parfis::getParfis(id)->m_cmdChainMap) {
+        APIStaticString += cmdChain.first + ",";
+    }
+    APIStaticString.back() = ']';
+    APIStaticString += " <parfis::CommandChain>\n";    
+    for(auto& cmdChain: Parfis::getParfis(id)->m_cmdChainMap) {
+        APIStaticString += "commandChain." + cmdChain.first + " = [";
+        Command* pcom = cmdChain.second->getNext();
+        while(pcom != nullptr) {
+            APIStaticString += pcom->m_name + ",";
+            pcom = pcom->getNext();
+        }
+        APIStaticString.back() = ']';
+        APIStaticString += " <parfis::Command>\n";
     }
     return APIStaticString.c_str();
 }
