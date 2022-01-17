@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <mutex>
+#include <math.h>
 #include "gtest/gtest.h"
 #include "global.h"
 #include "parfis.h"
@@ -86,8 +87,17 @@ TEST(api, calculateCellCount) {
 /**
  * @brief Create command chains and run creation chain, then check for cells
  */
-TEST(api, createdCells) {
-    uint32_t id = parfis::api::newParfis();
+TEST(api, createCells) {
+    // First take the default configuration string
+    std::string defaultStr = parfis::api::defaultConfiguration();
+    // Find the creation command chain
+    auto startPos = defaultStr.find("commandChain.create");
+    auto endPos = defaultStr.find("\n", startPos);
+    // Replace the line with the create command chain so it will only create cells
+    defaultStr.replace(startPos, endPos-startPos, 
+        "commandChain.create = [createCells] <parfis::Command>");
+    // Proceed as usual with creating the Parfis object
+    uint32_t id = parfis::api::newParfis(defaultStr.c_str());
     parfis::api::runCommandChain(id, "create");
     ASSERT_EQ(139200, parfis::api::getSimData(id)->cellVec.size());
     ASSERT_EQ(160000, parfis::api::getSimData(id)->cellIdVec.size());
@@ -102,8 +112,39 @@ TEST(api, createdCells) {
  */
 TEST(api, configSpecie) {
     uint32_t id = parfis::api::newParfis();
-    ASSERT_EQ(1, parfis::api::getCfgData(id)->specieVec.size());
-    ASSERT_EQ("a", parfis::api::getCfgData(id)->specieVec[0].name);
-    ASSERT_EQ(100, parfis::api::getCfgData(id)->specieVec[0].statesPerCell);
+    ASSERT_EQ(1, parfis::api::getSimData(id)->specieVec.size());
+    ASSERT_EQ("a", parfis::api::getSimData(id)->specieVec[0].name);
+    ASSERT_EQ(100, parfis::api::getSimData(id)->specieVec[0].statesPerCell);
+}
+
+/**
+ * @brief Create cells and states
+ */
+TEST(api, createCellsAndStates) {
+    uint32_t id = parfis::api::newParfis();
+    parfis::api::runCommandChain(id, "create");
+    double rSqPi = M_PI * std::pow(parfis::api::getCfgData(id)->geometrySize.x * 0.5, 2);
+    double areaCyl = rSqPi * parfis::api::getCfgData(id)->geometrySize.z;
+    double areaCub = parfis::api::getCfgData(id)->geometrySize.x * 
+        parfis::api::getCfgData(id)->geometrySize.y * parfis::api::getCfgData(id)->geometrySize.z;
+
+    uint32_t numStatesCyl = parfis::api::getSimData(id)->stateVec.size();
+    uint32_t numCells = parfis::api::getSimData(id)->cellIdVec.size();
+    uint32_t numStatesCub = numCells*parfis::api::getSimData(id)->specieVec[0].statesPerCell;
+    double areaRatio = areaCyl/areaCub;
+    double stateRatio = double(numStatesCyl)/double(numStatesCub);
+    double relativeDifference = abs(areaRatio - stateRatio)/(0.5*(areaRatio + stateRatio));
+    double precission = 5.0e-3;
+    
+    // The ratio between the number of created states in cylindrical and cubical geometry 
+    // should resemble the ratio of the volume between the two
+    std::cout << GTEST_BOX << "Created " << numStatesCyl << " states" << std::endl;
+    std::cout << GTEST_BOX << "Volume ratio " << areaRatio << std::endl;
+    std::cout << GTEST_BOX << "States ratio " << stateRatio << std::endl;
+    std::cout << GTEST_BOX << "Relative difference " << relativeDifference << 
+        " (max. allowed " << precission << ")" << std::endl;
+
+    // Relative precission is set to less than 0.5%
+    ASSERT_LE(relativeDifference, precission);
 }
 /** @} gtestAll*/

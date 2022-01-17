@@ -59,7 +59,7 @@ namespace parfis {
         Parfis& operator=(const Parfis&) = default;
         ~Parfis();
 
-        static Parfis* newParfis();
+        static Parfis* newParfis(const std::string& cfgstr = "");
 
         int initialize();
         int runCommandChain(const std::string& str);
@@ -118,7 +118,7 @@ namespace parfis {
             PARFIS_EXPORT const char* info();
             PARFIS_EXPORT const char* parfisInfo(uint32_t id);
             PARFIS_EXPORT const char* version();
-            PARFIS_EXPORT uint32_t newParfis();
+            PARFIS_EXPORT uint32_t newParfis(const char* cfgStr = "");
             PARFIS_EXPORT int setConfig(uint32_t id, const char* str);
             PARFIS_EXPORT const char* defaultConfiguration();
             PARFIS_EXPORT const char* getConfig(uint32_t id);

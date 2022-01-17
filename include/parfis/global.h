@@ -65,6 +65,8 @@ namespace parfis
         static constexpr cellId_t cellIdMax = UINT32_MAX;
         /// Id that represents that no cell exists
         static constexpr cellId_t noCellId = UINT32_MAX;
+        /// Id that represents that no state exists
+        static constexpr stateId_t noStateId = UINT32_MAX;
     };
 }
 
