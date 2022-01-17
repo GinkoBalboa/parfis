@@ -1,12 +1,12 @@
 #include <fstream>
 #include <iostream>
 #include <mutex>
-#include <math.h>
 #include "gtest/gtest.h"
 #include "global.h"
 #include "parfis.h"
 #include "define.h"
-
+#define _USE_MATH_DEFINES
+#include <math.h>
 /**
  * @defgroup gtestAll
  * @brief Tests for the c++ code using Googletest
