@@ -234,6 +234,14 @@ namespace parfis {
         int statesPerCell;
         /// Number of CfgData.timestep for one specie timestep
         int timestepRatio;
+        /// Timestep in seconds
+        double dt;
+        /// 1/dt
+        double idt;
+        /// Maximal velocity allowed for the specie in m/s
+        Vec3D<double> maxVel;
+        /// Charge/mass ratio in C/kg
+        double qm;
         /// Mass in amu
         double mass;
         /// Charge in elemetary charge units
@@ -276,6 +284,10 @@ namespace parfis {
          * in the cellVec vector
          */ 
         std::vector<cellId_t> cellIdVec;
+        /// Vector of pointer to cells that lie inside the geometry (nodeMask == 0bff)
+        std::vector<cellId_t> fullCellIdVec;
+        /// Vector of pointer to cells that are not fully inside the geometry (nodeMask != 0bff)
+        std::vector<cellId_t> boundCellIdVec;
         /// Vector of states
         std::vector<State> stateVec;
         /**

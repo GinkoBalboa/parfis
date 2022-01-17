@@ -25,6 +25,7 @@ namespace parfis
         int loadCfgData() override;
         int createStates();
         int createStatesOfSpecie(Specie& spec);
+        int moveCylindrical();
     };
 }
 

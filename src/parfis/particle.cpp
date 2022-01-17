@@ -21,6 +21,33 @@ int parfis::Particle::loadCfgData()
         m_pSimData->specieVec[i].name = strVec[i];
         getParamToValue("specie." + strVec[i] + ".statesPerCell", 
             m_pSimData->specieVec[i].statesPerCell);
+
+    }
+
+    for (auto& spec: m_pSimData->specieVec) {
+        spec.dt = double(spec.timestepRatio*m_pCfgData->timestep);
+        spec.idt = 1.0 / spec.dt;
+        spec.maxVel = {
+            double(m_pCfgData->cellSize.x) * spec.idt,
+            double(m_pCfgData->cellSize.y) * spec.idt,
+            double(m_pCfgData->cellSize.z) * spec.idt
+        };
+        spec.qm = spec.charge / spec.mass;
+        double maxEnergy = 0.5*spec.maxVel.lenSq()*spec.mass*Const::eVJ;
+
+        std::string msg = 
+            std::string("-------------------------------------\n") +
+            "specie " + spec.name + "configuration\n"
+            "mass [kg]: " + std::to_string(spec.mass) + "\n" +
+            "dt [s]: " + std::to_string(spec.dt) + "\n" +
+            "max velocity [m/s]: [" + 
+                std::to_string(spec.maxVel.x) + ", " + 
+                std::to_string(spec.maxVel.y) + ", " + 
+                std::to_string(spec.maxVel.z) + "]" + "\n" +
+            "max energy [eV]: " + std::to_string(maxEnergy) + "\n" +
+            "charge/mass ratio [C/kg]: " + std::to_string(spec.qm);
+            "-------------------------------------\n";
+        LOG(*m_pLogger, LogMask::Info, msg);
     }
 
     // Set command for creating cells
@@ -40,7 +67,7 @@ int parfis::Particle::loadCfgData()
                 // pcom->m_func = std::bind(&System::createCellsCylindrical, this);
                 pcom->m_func = [&]()->int { return createStates(); };
                 pcom->m_funcName = "Particle::createStates";
-                std::string msg = "createStates command defined with " + pcom->m_funcName;
+                std::string msg = "createStates command defined with " + pcom->m_funcName + "\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
         }
@@ -130,9 +157,41 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
         }
     }
 
-    std::string msg = "created " + std::to_string(spec.stateCount) + " states for all specie " +
+    std::string msg = "created " + std::to_string(spec.stateCount) + " states for specie " +
         spec.name + "\n";
     LOG(*m_pLogger, LogMask::Memory, msg);
 
+    return 0;
+}
+
+
+int parfis::Particle::moveCylindrical()
+{
+    Specie* spec;
+    State* state;
+    stateId_t stateId;
+    Vec3D<state_t> ds;
+
+    for (size_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
+        // Define timestep and 1/timestep for particle
+        spec = &m_pSimData->specieVec[specId];
+        ds = {
+            state_t(spec->dt*spec->maxVel.x),
+            state_t(spec->dt*spec->maxVel.y),
+            state_t(spec->dt*spec->maxVel.z)
+        };
+        // Go through full cells (no boundary conditions to wory about)
+        for (cellId_t cellId = 0; cellId < m_pSimData->fullCellIdVec.size(); cellId++) {
+            // Get the head state
+            stateId = m_pSimData->headIdVec[specId][cellId];
+            // Go through all state of the specie in one cell
+            while (stateId != Const::noStateId) {
+                state = &m_pSimData->stateVec[stateId];
+                state->pos.x += state->pos.x*ds.x;
+                state->pos.y += state->pos.y*ds.y;
+                state->pos.z += state->pos.z*ds.z;
+            }
+        }
+    }
     return 0;
 }

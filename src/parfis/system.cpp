@@ -121,6 +121,10 @@ int parfis::System::createCellsCylindrical()
                     m_pSimData->cellIdVec[
                         m_pCfgData->getAbsoluteCellId(m_pSimData->cellVec.back().pos)
                         ] = m_pSimData->cellVec.size() - 1;
+                    if (nodeMask == 0b11111111)
+                        m_pSimData->fullCellIdVec.push_back(m_pSimData->cellVec.size() - 1);
+                    else
+                        m_pSimData->boundCellIdVec.push_back(m_pSimData->cellVec.size() - 1);
                 }
             }
          }
