@@ -48,12 +48,14 @@ namespace parfis {
     typedef STATE_TYPE state_t;
     /// Type for cell id
     typedef uint32_t cellId_t;
+    /// Type for the state id
+    typedef uint32_t stateId_t;
     /// Type for cell position vector components
-    typedef uint16_t cell1D_t;
+    typedef uint16_t cellPos_t;
     /// Type for node bitwise marking
     typedef uint8_t nodeMask_t;
     /// Type for cell state
-    typedef uint8_t cellState_t;
+    typedef uint8_t cellMask_t;
 
     /**
      * @addtogroup logging
@@ -196,22 +198,48 @@ namespace parfis {
     {
         /// Bit mask for nodes inside or outside the simulation space
         nodeMask_t nodeMask;
-        /// State for the whole cell
-        cellState_t state;
+        /// Bit mask for the whole cell
+        cellMask_t cellMask;
         /// Cell position is represented with three integers x,y,z
-        Vec3D<cell1D_t> cell3D;
+        Vec3D<cellPos_t> pos;
+    };
+
+    /**
+     * @brief Specie state
+     * @details One state is defined as a point in the phase space. The next and prev 
+     * pointers work as a double linked list connecting all states that belong to a single cell.
+     */
+    struct State
+    {   
+        /// Pointer to the next state from the same cell, Const::noStateId for the last state
+        stateId_t next;
+        /// Pointer to the previous state from the same cell, Const::noStateId for the head state
+        stateId_t prev;
+        /// Position vector
+        Vec3D<state_t> pos;
+        /// Velocity vector
+        Vec3D<state_t> vel;
     };
 
     /**
      * @brief Holds information about each specie
-     * 
      */
     struct Specie
     {
+        /// Id from the specie vector
+        uint32_t id;
         /// Specie name
         std::string name;
         /// States per cell for creating initial particles
         int statesPerCell;
+        /// Number of CfgData.timestep for one specie timestep
+        int timestepRatio;
+        /// Mass in amu
+        double mass;
+        /// Charge in elemetary charge units
+        int charge;
+        /// Number of states;
+        uint32_t stateCount;
     };
 
     /**
@@ -230,11 +258,9 @@ namespace parfis {
         Vec3D<int> periodicBoundary;
         /// Number of cells in every direction
         Vec3D<int> cellCount;
-        /// Vector of species
-        std::vector<Specie> specieVec;
         /// Get absolute cell id from i,j,k
-        inline cellId_t getCellVecPosition(Vec3D<cell1D_t>& cell3D) {
-            return cellCount.x * (cellCount.y * cell3D.z + cell3D.y ) + cell3D.x;
+        inline cellId_t getAbsoluteCellId(Vec3D<cellPos_t>& cellPos) {
+            return cellCount.x * (cellCount.y * cellPos.z + cellPos.y ) + cellPos.x;
         };
     };
 
@@ -245,11 +271,22 @@ namespace parfis {
         /// Vector of cells
         std::vector<Cell> cellVec;
         /**
-         * @brief Vector of cellId pointers to the cellVec.
-         * @details Maping of absolute cell id (calculated from cellPos) to real cell id
-         * which is the position in the cellVec vector
+         * @brief Vector of pointers to the cellVec.
+         * @details Maping of absolute cell id (calculated) to real cell id which is the position 
+         * in the cellVec vector
          */ 
         std::vector<cellId_t> cellIdVec;
+        /// Vector of states
+        std::vector<State> stateVec;
+        /**
+         * @brief Vector of pointers to head states
+         * @details Head state is the first state in the doubly linked list of states that 
+         * belong to a certain cell. For every cell there are as many heads as there are 
+         * species in the simulation.
+         */
+        std::vector<std::vector<stateId_t>> headIdVec;
+        /// Vector of species
+        std::vector<Specie> specieVec;
     };
     /** @} data */
 

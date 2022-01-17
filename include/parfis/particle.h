@@ -23,7 +23,8 @@ namespace parfis
         ~Particle() = default;
 
         int loadCfgData() override;
-        int createCellsCylindrical();
+        int createStates();
+        int createStatesOfSpecie(Specie& spec);
     };
 }
 

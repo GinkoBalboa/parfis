@@ -60,7 +60,8 @@ void parfis::Parfis::initializeDomains()
             else if (line.find("<parfis::CommandChain>") != std::string::npos) {
                 commandVec = Global::getVector(line, '[', ']');
                 for (auto& cmdName : commandVec) {
-                    m_cmdChainMap.insert({cmdName, std::unique_ptr<CommandChain>(new CommandChain())});    
+                    m_cmdChainMap.insert(
+                            {cmdName, std::unique_ptr<CommandChain>(new CommandChain())});    
                     m_cmdChainMap[cmdName]->m_name = cmdName;
                     m_cmdChainMap[cmdName]->m_func = [&]()->int { return 0; };
                     m_cmdChainMap[cmdName]->m_funcName = "";
@@ -70,7 +71,8 @@ void parfis::Parfis::initializeDomains()
             else if (line.find("<parfis::Command>") != std::string::npos) {
                 std::string cmdChainName = "commandChain";
                 for (auto& cmdChain : m_cmdChainMap) {
-                    std::string sstr = line.substr(0, cmdChainName.size() + cmdChain.first.size() + 2);
+                    std::string sstr = line.substr(
+                            0, cmdChainName.size() + cmdChain.first.size() + 2);
                     if ( sstr == cmdChainName + '.' + cmdChain.first + "=") {
                         commandVec = Global::getVector(line, '[', ']');
                         Command *pcom = cmdChain.second.get();
@@ -115,10 +117,10 @@ parfis::Parfis* parfis::Parfis::getParfis(uint32_t id)
  * map Parfis::s_parfisMap.
  * @return Pointer to the created Parfis object
  */
-parfis::Parfis* parfis::Parfis::newParfis()
+parfis::Parfis* parfis::Parfis::newParfis(const std::string& cfgStr)
 {
     uint32_t id = Parfis::s_parfisMapId;
-    Parfis::s_parfisMap[id] = std::unique_ptr<Parfis>(new Parfis(id));
+    Parfis::s_parfisMap[id] = std::unique_ptr<Parfis>(new Parfis(id, cfgStr));
     Parfis::s_parfisMapId++;
     return Parfis::s_parfisMap[id].get();
 }
@@ -137,12 +139,12 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
         fname = Logger::getLogFileName(m_id, fcnt);
     }
     m_logger.initialize(fname);
-    LOG(m_logger, LogMask::Memory, std::string(__FUNCTION__) + 
-        " constructor with id = " + std::to_string(m_id) + "\n");
     if (cfgstr == "")
         m_cfgstr = DEFAULT_INITIALIZATION_STRING;
     else 
         m_cfgstr = cfgstr;
+    LOG(m_logger, LogMask::Info, std::string(__FUNCTION__) + 
+        " constructor with id = " + std::to_string(m_id) + "\n");
     initialize();
 }
 
@@ -156,8 +158,8 @@ int parfis::Parfis::initialize()
 {
     initializeDomains();
     int retval = 0;
-    for (auto& domain : m_domainMap) {
-        retval = domain.second->loadCfgData();
+    for (auto& domain : m_domainVec) {
+        retval = m_domainMap[domain]->loadCfgData();
         if (retval != 0)
             break;
     }
@@ -273,9 +275,9 @@ PARFIS_EXPORT const char* parfis::api::version()
  * @brief Creates new Parfis object and returns its id.
  * @return Id of the created object
  */
-PARFIS_EXPORT uint32_t parfis::api::newParfis()
+PARFIS_EXPORT uint32_t parfis::api::newParfis(const char * cfgStr)
 {
-    return Parfis::newParfis()->m_id;
+    return Parfis::newParfis(cfgStr)->m_id;
 }
 
 /**

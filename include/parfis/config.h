@@ -32,14 +32,14 @@ system.periodicBoundary = [0, 0, 0] <int> (0, 1)  # Boundary condition \n\
 \n\
 particle = specie <parfis::Param> (specie) # Particle parameters\n\
 particle.specie = a <parfis::Param> (*) # You can define specie name anyway you like \n\
-particle.specie.a = [statesPerCell, timestepRatio, mass, charge] <parfis::Param> # Parameters for each specie \n\
+particle.specie.a = [statesPerCell, timestepRatio, mass, charge] (statesPerCell, timestepRatio, mass, charge) <parfis::Param> # Parameters for each specie \n\
 particle.specie.a.statesPerCell = 100 <int> # Number of states (particles) per cell\n\
 particle.specie.a.timestepRatio = 1 <int> # This many system.timesteps is one timestep for the specie\n\
 particle.specie.a.mass = 4 <double> # Mass is given in a.m.u. \n\
-particle.specie.a.charge = 1 <double> # Charge is given in units of elementary charge \n\
+particle.specie.a.charge = 1 <int> # Charge is given in units of elementary charge \n\
 \n\
 commandChain = [create] <parfis::CommandChain> (create) # Command chains for the program \n\
-commandChain.create = [createCells] (createCells) <parfis::Command> # Command chain for creation of data \n\
+commandChain.create = [createCells, createParticles] (createCells, createParticles) <parfis::Command> # Command chain for creation of data \n\
 "
 /** @} configuration */
 #endif // PARFIS_CONFIG_H

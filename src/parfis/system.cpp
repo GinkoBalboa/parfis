@@ -55,7 +55,7 @@ int parfis::System::loadCfgData()
                 // pcom->m_func = std::bind(&System::createCellsCylindrical, this);
                 pcom->m_func = [&]()->int { return createCellsCylindrical(); };
                 pcom->m_funcName = "System::createCellsCylindrical";
-                std::string msg = "createCells command defined with " + pcom->m_funcName;
+                std::string msg = "createCells command defined with " + pcom->m_funcName + "\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
 
@@ -85,9 +85,9 @@ int parfis::System::createCellsCylindrical()
     nodeMask_t nodeMask;
     cellId_t cellId;
 
-    for (cell1D_t i = 0; i < m_pCfgData->cellCount.x; i++) {
+    for (cellPos_t i = 0; i < m_pCfgData->cellCount.x; i++) {
          // Find points inside the geometry
-         for (cell1D_t j = 0; j < m_pCfgData->cellCount.y; j++) {
+         for (cellPos_t j = 0; j < m_pCfgData->cellCount.y; j++) {
             xyNode = 0;
             nodePosition.x = i * m_pCfgData->cellSize.x;
             nodePosition.y = j * m_pCfgData->cellSize.y;
@@ -107,7 +107,7 @@ int parfis::System::createCellsCylindrical()
             if (xyDistSq(nodePosition, geoCenter) < radiusSquared)
                 xyNode |= 0b10001000;
 
-            for (cell1D_t k = 0; k < m_pCfgData->cellCount.z; k++) {
+            for (cellPos_t k = 0; k < m_pCfgData->cellCount.z; k++) {
                 nodeMask = xyNode;
                 if (k == 0)
                     nodeMask &= 0b11110000;
@@ -119,7 +119,7 @@ int parfis::System::createCellsCylindrical()
                 if (nodeMask) {
                     m_pSimData->cellVec.push_back({ nodeMask, 0, {i, j, k} });
                     m_pSimData->cellIdVec[
-                        m_pCfgData->getCellVecPosition(m_pSimData->cellVec.back().cell3D)
+                        m_pCfgData->getAbsoluteCellId(m_pSimData->cellVec.back().pos)
                         ] = m_pSimData->cellVec.size() - 1;
                 }
             }
@@ -127,7 +127,7 @@ int parfis::System::createCellsCylindrical()
     }
 
     std::string msg = "created " + std::to_string(m_pSimData->cellVec.size()) + 
-        " cells for cylindrical geometry";
+        " cells for cylindrical geometry\n";
     LOG(*m_pLogger, LogMask::Memory, msg);
 
     //pData->headIdVec.resize(pData->cellVec.size()*pData->specieCnt, NULLCID);
