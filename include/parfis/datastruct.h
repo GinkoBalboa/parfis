@@ -24,7 +24,7 @@
 #endif
 
 /**
- * @defgroup logging
+ * @defgroup logging Logging
  * @brief Classes and functions used for logging
  * @{
  */
@@ -134,10 +134,17 @@ namespace parfis {
         T z;
 
         /**
-         * @brief Compares if vectors are equal, that is if every component equals.
+         * @brief Compares if vectors are equal
          */
         friend bool operator==(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
             return (lhs.x == rhs.x && lhs.y == rhs.y && rhs.z == rhs.z);
+        }
+
+        /**
+         * @brief Compares if vectors are not equal
+         */
+        friend bool operator!=(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
+            return (lhs.x != rhs.x || lhs.y != rhs.y || rhs.z != rhs.z);
         }
 
         /** 
@@ -243,9 +250,13 @@ namespace parfis {
         /// Charge/mass ratio in C/kg
         double qm;
         /// Mass in amu
+        double amuMass;
+        /// Mass in kg
         double mass;
         /// Charge in elemetary charge units
-        int charge;
+        int eCharge;
+        /// Charge in Coulombs
+        double charge;
         /// Number of states;
         uint32_t stateCount;
     };
@@ -266,6 +277,8 @@ namespace parfis {
         Vec3D<int> periodicBoundary;
         /// Number of cells in every direction
         Vec3D<int> cellCount;
+        /// Specie names
+        std::vector<std::string> specieNameVec;
         /// Get absolute cell id from i,j,k
         inline cellId_t getAbsoluteCellId(Vec3D<cellPos_t>& cellPos) {
             return cellCount.x * (cellCount.y * cellPos.z + cellPos.y ) + cellPos.x;
@@ -416,6 +429,7 @@ namespace parfis {
         int initialize(const std::string& cstr);
         int configure(const std::string& cstr);
         virtual int loadCfgData() = 0;
+        virtual int loadSimData() = 0;
 
         static std::unique_ptr<Domain> generateDomain(const std::string& dname, Logger& logger, 
             CfgData& cfgData, SimData& simData, 

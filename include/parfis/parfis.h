@@ -62,6 +62,7 @@ namespace parfis {
         static Parfis* newParfis(const std::string& cfgstr = "");
 
         int initialize();
+        int loadSimData();
         int runCommandChain(const std::string& str);
         int configure(const char* str);
 
@@ -117,9 +118,11 @@ namespace parfis {
         {
             PARFIS_EXPORT const char* info();
             PARFIS_EXPORT const char* parfisInfo(uint32_t id);
+            PARFIS_EXPORT const char* getLogFileName(uint32_t id);
             PARFIS_EXPORT const char* version();
-            PARFIS_EXPORT uint32_t newParfis(const char* cfgStr = "");
+            PARFIS_EXPORT uint32_t newParfis(const char* cfgStr = "");            
             PARFIS_EXPORT int setConfig(uint32_t id, const char* str);
+            PARFIS_EXPORT int loadSimData(uint32_t id);
             PARFIS_EXPORT const char* defaultConfiguration();
             PARFIS_EXPORT const char* getConfig(uint32_t id);
             PARFIS_EXPORT const char* getConfigParam(uint32_t id, const char* key);
@@ -128,7 +131,9 @@ namespace parfis {
             PARFIS_EXPORT int deleteParfis(uint32_t id);
             PARFIS_EXPORT const std::vector<uint32_t>& getParfisIdVec();
             PARFIS_EXPORT int runCommandChain(uint32_t id, const char* key);
-        };
+            PARFIS_EXPORT const char* toStringDouble(double num);
+            PARFIS_EXPORT const char* toStringFloat(float num);
+        }
         /** @} api */
     }
 }

@@ -36,7 +36,7 @@ TEST(api, checkTimestep) {
     uint32_t id = parfis::api::newParfis();
     std::string cfgstr = parfis::api::getConfig(id);
     cfgstr.erase(std::remove_if(cfgstr.begin(), cfgstr.end(), ::isspace), cfgstr.end());
-    // This is the default timestep from full configuration
+    // This is the default timestep
     ASSERT_NE(cfgstr.find("system.timestep=1"), std::string::npos);
     cfgstr = parfis::api::getConfigParam(id, "system.timestep");
     // Check default as single param
@@ -44,6 +44,9 @@ TEST(api, checkTimestep) {
     // This is the new timestep
     parfis::api::setConfig(id, "system.timestep=0.00112e-12");
     cfgstr = parfis::api::getConfigParam(id, "system.timestep");
+    // Check as string with function that exposes Global::to_string
+    ASSERT_EQ(parfis::api::toStringDouble(1.12e-15), cfgstr);
+    // Check as double
     ASSERT_EQ(double(1.12e-15), std::stod(cfgstr, nullptr));
 }
 
@@ -78,7 +81,6 @@ TEST(api, calculateCellCount) {
     ASSERT_EQ(cellCount_x, cellCount_x_calc);
     // Set normal number of cells
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-3, 1.0e-3, 1.0e-3]");
-    ASSERT_EQ(retval, 0); 
     // Set over the limit number of cells
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-6, 1.0e-6, 1.0e-6]");
     ASSERT_NE(retval, 0);
@@ -88,6 +90,22 @@ TEST(api, calculateCellCount) {
  * @brief Create command chains and run creation chain, then check for cells
  */
 TEST(api, createCells) {
+    uint32_t id = parfis::api::newParfis();
+    std::cout << GTEST_BOX << "log file name: " << parfis::api::getLogFileName(id) << std::endl;
+    int retval = parfis::api::setConfig(id, "commandChain.create = [createCells]");
+    ASSERT_EQ(retval, 0);
+    parfis::api::loadSimData(id);
+    parfis::api::runCommandChain(id, "create");
+    ASSERT_EQ(139200, parfis::api::getSimData(id)->cellVec.size());
+    ASSERT_EQ(160000, parfis::api::getSimData(id)->cellIdVec.size());
+    // No particle creation is performed because of missins createStates command
+    ASSERT_EQ(0, parfis::api::getSimData(id)->stateVec.size());
+}
+
+/**
+ * @brief Create command chains and run creation chain, then check for cells
+ */
+TEST(api, userDefinedCfgString) {
     // First take the default configuration string
     std::string defaultStr = parfis::api::defaultConfiguration();
     // Find the creation command chain
@@ -98,9 +116,11 @@ TEST(api, createCells) {
         "commandChain.create = [createCells] <parfis::Command>");
     // Proceed as usual with creating the Parfis object
     uint32_t id = parfis::api::newParfis(defaultStr.c_str());
+    parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     ASSERT_EQ(139200, parfis::api::getSimData(id)->cellVec.size());
     ASSERT_EQ(160000, parfis::api::getSimData(id)->cellIdVec.size());
+    ASSERT_EQ(0, parfis::api::getSimData(id)->stateVec.size());
     uint64_t ptr1 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[0]);
     uint64_t ptr2 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[1]);
     // Check size alignment
@@ -112,9 +132,8 @@ TEST(api, createCells) {
  */
 TEST(api, configSpecie) {
     uint32_t id = parfis::api::newParfis();
-    ASSERT_EQ(1, parfis::api::getSimData(id)->specieVec.size());
-    ASSERT_EQ("a", parfis::api::getSimData(id)->specieVec[0].name);
-    ASSERT_EQ(100, parfis::api::getSimData(id)->specieVec[0].statesPerCell);
+    ASSERT_EQ(1, parfis::api::getCfgData(id)->specieNameVec.size());
+    ASSERT_EQ("a", parfis::api::getCfgData(id)->specieNameVec[0]);
 }
 
 /**
@@ -122,6 +141,7 @@ TEST(api, configSpecie) {
  */
 TEST(api, createCellsAndStates) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     double rSqPi = M_PI * std::pow(parfis::api::getCfgData(id)->geometrySize.x * 0.5, 2);
     double areaCyl = rSqPi * parfis::api::getCfgData(id)->geometrySize.z;
@@ -138,11 +158,12 @@ TEST(api, createCellsAndStates) {
     
     // The ratio between the number of created states in cylindrical and cubical geometry 
     // should resemble the ratio of the volume between the two
-    std::cout << GTEST_BOX << "Created " << numStatesCyl << " states" << std::endl;
-    std::cout << GTEST_BOX << "Volume ratio " << areaRatio << std::endl;
-    std::cout << GTEST_BOX << "States ratio " << stateRatio << std::endl;
-    std::cout << GTEST_BOX << "Relative difference " << relativeDifference << 
-        " (max. allowed " << precission << ")" << std::endl;
+    std::cout << GTEST_BOX << "created: " << numStatesCyl << " states" << std::endl;
+    std::cout << GTEST_BOX << "volume ratio: " << areaRatio << std::endl;
+    std::cout << GTEST_BOX << "states ratio: " << stateRatio << std::endl;
+    std::cout << GTEST_BOX << "relative difference: " << 
+        relativeDifference*100.0 << "%" << std::endl;
+    std::cout << GTEST_BOX << "max. rel. difference: " << precission*100.0 << "%" << std::endl;
 
     // Relative precission is set to less than 0.5%
     ASSERT_LE(relativeDifference, precission);

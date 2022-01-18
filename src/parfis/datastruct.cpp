@@ -274,14 +274,14 @@ int parfis::Domain::initialize(const std::string& cstr)
             pp->addChild<int>(childName);
         cp = pp->m_childMap[childName].get();
     }
-    ParamBase::setValueVec(cp, std::get<1>(keyValue));
     ParamBase::setRangeVec(cp, std::get<1>(keyString));
+    ParamBase::setValueVec(cp, std::get<1>(keyValue));
     return 0;
 }
 
 /**
  * @brief Configures initialized Domain
- * @param cstr initialization string is in the format key=value 
+ * @param cstr configuration string is in the format key=value 
  * @return Zero on success 
  */
 int parfis::Domain::configure(const std::string& cstr) 
@@ -355,7 +355,7 @@ void parfis::Logger::printLogFile()
  * @param logger reference to the logger of the Parfis object
  * @param cfgData reference to the CfgData object from the Parfis object
  * @param simData reference to the SimData object from the Parfis object
- * @param cmdMap reference to the command map from the Parfis object
+ * @param cmdChainMap reference to the command map from the Parfis object
  * @return Domain created with new
  */
 std::unique_ptr<parfis::Domain> parfis::Domain::generateDomain(const std::string& dname, 

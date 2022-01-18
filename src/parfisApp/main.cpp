@@ -5,7 +5,7 @@
  */
 /** 
  * @brief Executable terminal interface for parfis lib
- * @defgroup pafisApp
+ * @defgroup pafisApp parfisApp
  * @{
  */
 #include <iostream>

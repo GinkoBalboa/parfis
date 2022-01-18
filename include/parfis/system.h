@@ -23,6 +23,7 @@ namespace parfis
         ~System() = default;
 
         int loadCfgData() override;
+        int loadSimData() override;
         int createCellsCylindrical();
     };
 }

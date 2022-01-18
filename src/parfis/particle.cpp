@@ -12,41 +12,52 @@
 int parfis::Particle::loadCfgData()
 {
     std::string str;
-    std::vector<std::string> strVec;
-    getParamToVector("specie", strVec);
+    getParamToVector("specie", m_pCfgData->specieNameVec);
 
-    m_pSimData->specieVec.resize(strVec.size());
-    for (size_t i = 0; i < strVec.size(); i++) {
+    return 0;
+}
+
+int parfis::Particle::loadSimData()
+{
+    m_pSimData->specieVec.resize(m_pCfgData->specieNameVec.size());
+    for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
         m_pSimData->specieVec[i].id = i;
-        m_pSimData->specieVec[i].name = strVec[i];
-        getParamToValue("specie." + strVec[i] + ".statesPerCell", 
+        m_pSimData->specieVec[i].name = m_pCfgData->specieNameVec[i];
+        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".statesPerCell", 
             m_pSimData->specieVec[i].statesPerCell);
-
+        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".timestepRatio", 
+            m_pSimData->specieVec[i].timestepRatio);
+        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".amuMass", 
+            m_pSimData->specieVec[i].amuMass);
+        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".eCharge", 
+            m_pSimData->specieVec[i].eCharge);
     }
 
     for (auto& spec: m_pSimData->specieVec) {
-        spec.dt = double(spec.timestepRatio*m_pCfgData->timestep);
+        spec.mass = spec.amuMass*Const::amuKg;
+        spec.charge = spec.eCharge*Const::eCharge;
+        spec.dt = double(spec.timestepRatio)*m_pCfgData->timestep;
         spec.idt = 1.0 / spec.dt;
         spec.maxVel = {
-            double(m_pCfgData->cellSize.x) * spec.idt,
-            double(m_pCfgData->cellSize.y) * spec.idt,
-            double(m_pCfgData->cellSize.z) * spec.idt
+            m_pCfgData->cellSize.x * spec.idt,
+            m_pCfgData->cellSize.y * spec.idt,
+            m_pCfgData->cellSize.z * spec.idt
         };
-        spec.qm = spec.charge / spec.mass;
+        spec.qm = spec.charge*Const::eCharge / spec.mass;
         double maxEnergy = 0.5*spec.maxVel.lenSq()*spec.mass*Const::eVJ;
 
         std::string msg = 
-            std::string("-------------------------------------\n") +
-            "specie " + spec.name + "configuration\n"
-            "mass [kg]: " + std::to_string(spec.mass) + "\n" +
-            "dt [s]: " + std::to_string(spec.dt) + "\n" +
+            "specie " + spec.name + " configuration:\n" +
+            Const::multilineSeparator + 
+            "mass [kg]: " + Global::to_string(spec.mass) + "\n" +
+            "dt [s]: " + Global::to_string(spec.dt) + "\n" +
             "max velocity [m/s]: [" + 
-                std::to_string(spec.maxVel.x) + ", " + 
-                std::to_string(spec.maxVel.y) + ", " + 
-                std::to_string(spec.maxVel.z) + "]" + "\n" +
-            "max energy [eV]: " + std::to_string(maxEnergy) + "\n" +
-            "charge/mass ratio [C/kg]: " + std::to_string(spec.qm);
-            "-------------------------------------\n";
+                Global::to_string(spec.maxVel.x) + ", " + 
+                Global::to_string(spec.maxVel.y) + ", " + 
+                Global::to_string(spec.maxVel.z) + "]" + "\n" +
+            "max energy [eV]: " + Global::to_string(maxEnergy) + "\n" +
+            "charge/mass ratio [C/kg]: " + Global::to_string(spec.qm) + "\n" +
+            Const::multilineSeparator;
         LOG(*m_pLogger, LogMask::Info, msg);
     }
 
@@ -57,7 +68,7 @@ int parfis::Particle::loadCfgData()
     // Check if creation is defined
     if (m_pCmdChainMap->find(cmdChainName) != m_pCmdChainMap->end()) {
         // Check if cell creation is defined
-        cmdName = "createParticles";
+        cmdName = "createStates";
         if (m_pCmdChainMap->at(cmdChainName)->m_cmdMap.find(cmdName) != 
             m_pCmdChainMap->at(cmdChainName)->m_cmdMap.end()) {
             pcom = m_pCmdChainMap->at(cmdChainName)->m_cmdMap[cmdName].get();
@@ -72,7 +83,6 @@ int parfis::Particle::loadCfgData()
             }
         }
     }
-
     return 0;
 }
 
@@ -146,10 +156,8 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             pState->prev = Const::noStateId;
             headId = m_pSimData->headIdVec[spec.id][ci];
             // If it is not first state in the cell
-            if (headId != Const::noStateId) {
-                m_pSimData->stateVec[headId].prev =
-                    stateId_t(m_pSimData->stateVec.size() - 1);
-                m_pSimData->stateVec.back().next = headId;
+            if (headId != Const::noStateId) {double uCellSizeX = m_pCfgData->cellSize.x;
+    double uCellSizeY = m_pCfgData->cellSize.y;
             }
             // Set head pointer
             m_pSimData->headIdVec[spec.id][ci] = stateId_t(m_pSimData->stateVec.size() - 1);
@@ -167,29 +175,85 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
 
 int parfis::Particle::moveCylindrical()
 {
-    Specie* spec;
-    State* state;
+    Specie *pSpec;
+    State *pState;
+    Cell *pCell, *pNewCell;
+    Cell newCell;
+    cellId_t newCellId;
     stateId_t stateId;
-    Vec3D<state_t> ds;
+    Vec3D<state_t> dtvmax;
+    Vec3D<cellPos_t> newCellPos;
+    uint16_t mark;
+    // Center of the geometry
+    Vec3D<double> geoCenter = {
+        0.5 * m_pCfgData->geometrySize.x, 
+        0.5 * m_pCfgData->geometrySize.y,
+        0.5 * m_pCfgData->geometrySize.z};
+    double radiusSquared = geoCenter.x*geoCenter.x; 
+    double uCellSizeX = m_pCfgData->cellSize.x;
+    double uCellSizeY = m_pCfgData->cellSize.y;
+    double rx, ry;
 
     for (size_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
         // Define timestep and 1/timestep for particle
-        spec = &m_pSimData->specieVec[specId];
-        ds = {
-            state_t(spec->dt*spec->maxVel.x),
-            state_t(spec->dt*spec->maxVel.y),
-            state_t(spec->dt*spec->maxVel.z)
+        pSpec = &m_pSimData->specieVec[specId];
+        dtvmax = {
+            state_t(pSpec->dt*pSpec->maxVel.x),
+            state_t(pSpec->dt*pSpec->maxVel.y),
+            state_t(pSpec->dt*pSpec->maxVel.z)
         };
         // Go through full cells (no boundary conditions to wory about)
         for (cellId_t cellId = 0; cellId < m_pSimData->fullCellIdVec.size(); cellId++) {
+            // New position for traversing cells
+            pCell = &m_pSimData->cellVec[cellId];
+            newCellPos = pCell->pos;
             // Get the head state
             stateId = m_pSimData->headIdVec[specId][cellId];
-            // Go through all state of the specie in one cell
+            // Go through all states of the specie in one cell
             while (stateId != Const::noStateId) {
-                state = &m_pSimData->stateVec[stateId];
-                state->pos.x += state->pos.x*ds.x;
-                state->pos.y += state->pos.y*ds.y;
-                state->pos.z += state->pos.z*ds.z;
+                pState = &m_pSimData->stateVec[stateId];
+                pState->pos.x += pState->vel.x * dtvmax.x;
+                pState->pos.y += pState->vel.y * dtvmax.y;
+                pState->pos.z += pState->vel.z * dtvmax.z;
+            }
+            // Mark crossing cell boundaries
+            if (pState->pos.x < 0.0) {
+                pState->pos.x += 1.0;
+                newCell.pos.x -= 1;
+            }
+            else if (pState->pos.x > 1.0) {
+                pState->pos.x -= 1.0;
+                newCell.pos.x += 1;
+            }
+            if (pState->pos.y < 0.0) {
+                pState->pos.y += 1.0;
+                newCell.pos.y -= 1;
+            }
+            else if (pState->pos.y > 1.0) {
+                pState->pos.y -= 1.0;
+                newCell.pos.y += 1;
+            }
+            if (pState->pos.z < 0.0) {
+                pState->pos.z += 1.0;
+                newCell.pos.z -= 1;
+            }
+            else if (pState->pos.z > 1.0) {
+                pState->pos.z -= 1.0;
+                newCell.pos.z += 1;
+            }
+            // If cell is traversed
+            if (newCell.pos != pCell->pos) {
+                newCellId = m_pCfgData->getAbsoluteCellId(newCellPos);
+                // newCellId mustn't be Global::noCellId by definition, so if the following
+                // line segfaults something has been faulty coded
+                pNewCell = &m_pSimData->cellVec[newCellId];
+                // Check if maybe state hit a boundary in the new cell
+                if (pNewCell->nodeMask != 0xFF) {
+                    rx = uCellSizeX*(pState->pos.x + pNewCell->pos.x) - geoCenter.x;
+                    ry = uCellSizeY*(pState->pos.y + pNewCell->pos.y) - geoCenter.y;
+                    if (rx * rx + ry * ry > radiusSquared)
+                    continue;
+                }
             }
         }
     }

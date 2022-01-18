@@ -34,6 +34,12 @@ int parfis::System::loadCfgData()
         return 1;
     }
 
+    return 0;
+}
+
+ 
+int parfis::System::loadSimData()
+{
     // Create vector for cell id
     m_pSimData->cellIdVec.resize(
         m_pCfgData->cellCount.x*m_pCfgData->cellCount.y*m_pCfgData->cellCount.z, Const::noCellId);

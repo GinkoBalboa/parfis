@@ -12,6 +12,15 @@
 
 namespace parfis
 {
+    enum TraverseMark: uint8_t {
+        NegX = 0b0000000000000001,
+        PosX = 0b0000000000000010,
+        NegY = 0b0000000000000100,
+        PosY = 0b0000000000001000,
+        NegZ = 0b0000000000010000,
+        PosZ = 0b0000000000100000,
+    };
+
     struct Particle : public Domain
     {
         Particle() = default;
@@ -23,6 +32,7 @@ namespace parfis
         ~Particle() = default;
 
         int loadCfgData() override;
+        int loadSimData() override;
         int createStates();
         int createStatesOfSpecie(Specie& spec);
         int moveCylindrical();
