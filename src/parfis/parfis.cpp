@@ -141,15 +141,13 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
         fname = Logger::getLogFileName(m_id, fcnt);
     }
     m_logger.initialize(fname);
-    // First initialize with the defauls string in order to load available cfg strings
-    m_cfgstr = DEFAULT_INITIALIZATION_STRING;
-    initialize();
-
-    // If configuration string is given - load it here
-    if (cfgstr != "") {
+    
+    // If configuration string is given - use that, else use default cfg string
+    if (cfgstr != "")
         m_cfgstr = cfgstr;
-        initialize();
-    }
+    else
+        m_cfgstr = DEFAULT_INITIALIZATION_STRING;
+    initialize();
 
     LOG(m_logger, LogMask::Info, std::string(__FUNCTION__) + 
         " constructor with id = " + std::to_string(m_id) + "\n");
