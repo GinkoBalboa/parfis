@@ -28,7 +28,7 @@ of the distribution such as densities and currents are computed simultaneously o
    :caption: External links:
    :titlesonly:
 
-   Doxygen  docs<https://www.parfis.com/doxygen/index.html>
+   Doxygen docs <https://www.parfis.com/doxygen/index.html>
    GitHub repo <https://github.com/GinkoBalboa/parfis>
 
 Indices and tables
