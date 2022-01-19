@@ -124,7 +124,7 @@ TEST(api, userDefinedCfgString) {
     uint64_t ptr1 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[0]);
     uint64_t ptr2 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[1]);
     // Check size alignment
-    ASSERT_EQ(8, ptr2 - ptr1);
+    ASSERT_EQ(12, ptr2 - ptr1);
 }
 
 /**

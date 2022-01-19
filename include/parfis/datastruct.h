@@ -50,12 +50,19 @@ namespace parfis {
     typedef uint32_t cellId_t;
     /// Type for the state id
     typedef uint32_t stateId_t;
+    /// Type for the specie id
+    typedef size_t specieId_t;
     /// Type for cell position vector components
     typedef uint16_t cellPos_t;
     /// Type for node bitwise marking
-    typedef uint8_t nodeMask_t;
-    /// Type for cell state
-    typedef uint8_t cellMask_t;
+    typedef uint8_t nodeFlag_t;
+    /// Type for state flags
+    typedef uint8_t stateFlag_t;
+
+    enum StateFlag: stateFlag_t {
+        None = 0,
+        TraverseCell = 1
+    };
 
     /**
      * @addtogroup logging
@@ -68,7 +75,7 @@ namespace parfis {
      * the message. For example the comand <c>LOG(m_logger, LogMask::Info, "Test message");</c> 
      * will log if the LOG_LEVEL has set bit on position four.
      */ 
-    enum LogMask: uint32_t {
+    enum struct LogMask: uint32_t {
         /// No logging (mask: 0000)
         None = 0b0,
         /// Log error messages (mask: 0001)
@@ -107,7 +114,7 @@ namespace parfis {
          */
         static void log(Logger& logger, LogMask mask, const std::string& msg) {
             if (LOG_LEVEL > 0) {
-                if(mask & LOG_LEVEL) logger.logToStr(mask, msg);
+                if(uint32_t(mask) & LOG_LEVEL) logger.logToStr(mask, msg);
             }
         }
     };
@@ -203,10 +210,8 @@ namespace parfis {
      */
     struct Cell
     {
-        /// Bit mask for nodes inside or outside the simulation space
-        nodeMask_t nodeMask;
-        /// Bit mask for the whole cell
-        cellMask_t cellMask;
+        /// Cell id in the cellVec
+        cellId_t id;
         /// Cell position is represented with three integers x,y,z
         Vec3D<cellPos_t> pos;
     };
@@ -295,14 +300,18 @@ namespace parfis {
          * @brief Vector of pointers to the cellVec.
          * @details Maping of absolute cell id (calculated) to real cell id which is the position 
          * in the cellVec vector
-         */ 
+         */
+        /// Vector of nodeFlags for each cell in the geometry - corresponds to cellVec
+        std::vector<nodeFlag_t> nodeFlagVec;
         std::vector<cellId_t> cellIdVec;
-        /// Vector of pointer to cells that lie inside the geometry (nodeMask == 0bff)
+        /// Vector of pointer to cells that lie inside the geometry (nodeFlag == 0bff)
         std::vector<cellId_t> fullCellIdVec;
-        /// Vector of pointer to cells that are not fully inside the geometry (nodeMask != 0bff)
+        /// Vector of pointer to cells that are not fully inside the geometry (nodeFlag != 0bff)
         std::vector<cellId_t> boundCellIdVec;
         /// Vector of states
         std::vector<State> stateVec;
+        /// Vector of state flags - corresponds to stateVec
+        std::vector<stateFlag_t> stateFlagVec;
         /**
          * @brief Vector of pointers to head states
          * @details Head state is the first state in the doubly linked list of states that 

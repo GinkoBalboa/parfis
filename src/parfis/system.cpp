@@ -87,8 +87,8 @@ int parfis::System::createCellsCylindrical()
         0.5 * m_pCfgData->geometrySize.z};
     Vec3D<double> nodePosition;
     double radiusSquared = geoCenter.x*geoCenter.x; 
-    nodeMask_t xyNode;
-    nodeMask_t nodeMask;
+    nodeFlag_t xyNode;
+    nodeFlag_t nodeFlag;
     cellId_t cellId;
 
     for (cellPos_t i = 0; i < m_pCfgData->cellCount.x; i++) {
@@ -114,23 +114,24 @@ int parfis::System::createCellsCylindrical()
                 xyNode |= 0b10001000;
 
             for (cellPos_t k = 0; k < m_pCfgData->cellCount.z; k++) {
-                nodeMask = xyNode;
+                nodeFlag = xyNode;
                 if (k == 0)
-                    nodeMask &= 0b11110000;
+                    nodeFlag &= 0b11110000;
                 else if (k == m_pCfgData->cellCount.z - 1)
-                    nodeMask &= 0b00001111;
+                    nodeFlag &= 0b00001111;
 
                 // Create cells that have at least one point inside the 
                 // defined geometry (node > 0)
-                if (nodeMask) {
-                    m_pSimData->cellVec.push_back({ nodeMask, 0, {i, j, k} });
-                    m_pSimData->cellIdVec[
-                        m_pCfgData->getAbsoluteCellId(m_pSimData->cellVec.back().pos)
-                        ] = m_pSimData->cellVec.size() - 1;
-                    if (nodeMask == 0b11111111)
-                        m_pSimData->fullCellIdVec.push_back(m_pSimData->cellVec.size() - 1);
+                if (nodeFlag) {
+                    cellId = m_pSimData->cellVec.size();
+                    m_pSimData->cellVec.push_back({ cellId, {i, j, k} });
+                    m_pSimData->nodeFlagVec.push_back(nodeFlag);
+                    if (nodeFlag == 0b11111111)
+                        m_pSimData->fullCellIdVec.push_back(cellId);
                     else
-                        m_pSimData->boundCellIdVec.push_back(m_pSimData->cellVec.size() - 1);
+                        m_pSimData->boundCellIdVec.push_back(cellId);
+                    m_pSimData->cellIdVec[
+                        m_pCfgData->getAbsoluteCellId(m_pSimData->cellVec.back().pos)] = cellId;
                 }
             }
          }

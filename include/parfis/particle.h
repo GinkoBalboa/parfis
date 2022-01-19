@@ -12,15 +12,6 @@
 
 namespace parfis
 {
-    enum TraverseMark: uint8_t {
-        NegX = 0b0000000000000001,
-        PosX = 0b0000000000000010,
-        NegY = 0b0000000000000100,
-        PosY = 0b0000000000001000,
-        NegZ = 0b0000000000010000,
-        PosZ = 0b0000000000100000,
-    };
-
     struct Particle : public Domain
     {
         Particle() = default;
@@ -36,6 +27,10 @@ namespace parfis
         int createStates();
         int createStatesOfSpecie(Specie& spec);
         int moveCylindrical();
+        void markCellTraverse(State& state, Cell& cell);
+        int reflectCylindrical(State& state, Cell& cell, Vec3D<double>& geoCenter, 
+            Vec3D<state_t>& dtvmax, Vec3D<state_t>& invDtvmax, double invRadius);
+        void setNewCell(State& state, Cell& cell, Cell& newCell, specieId_t specId);
     };
 }
 

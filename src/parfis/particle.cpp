@@ -143,7 +143,8 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             pCell = &m_pSimData->cellVec[ci];
             // If the cell is not whole in the geometry check state position, 
             // and if the state is not in the geometry, don't add it
-            if (pCell->nodeMask != 0xFF && m_pCfgData->geometry == "cylindrical") {                
+            if (m_pSimData->nodeFlagVec[pCell->id] != 0xFF && 
+                m_pCfgData->geometry == "cylindrical") {                
                 rx = uCellSizeX*(state.pos.x + pCell->pos.x) - geoCenter.x;
                 ry = uCellSizeY*(state.pos.y + pCell->pos.y) - geoCenter.y;
                 if (rx * rx + ry * ry > radiusSquared)
@@ -156,8 +157,9 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             pState->prev = Const::noStateId;
             headId = m_pSimData->headIdVec[spec.id][ci];
             // If it is not first state in the cell
-            if (headId != Const::noStateId) {double uCellSizeX = m_pCfgData->cellSize.x;
-    double uCellSizeY = m_pCfgData->cellSize.y;
+            if (headId != Const::noStateId) {
+                m_pSimData->stateVec[headId].prev = stateId_t(m_pSimData->stateVec.size() - 1);
+                m_pSimData->stateVec.back().next = headId;
             }
             // Set head pointer
             m_pSimData->headIdVec[spec.id][ci] = stateId_t(m_pSimData->stateVec.size() - 1);
@@ -179,9 +181,9 @@ int parfis::Particle::moveCylindrical()
     State *pState;
     Cell *pCell, *pNewCell;
     Cell newCell;
-    cellId_t newCellId;
     stateId_t stateId;
     Vec3D<state_t> dtvmax;
+    Vec3D<state_t> invDtvmax;
     Vec3D<cellPos_t> newCellPos;
     uint16_t mark;
     // Center of the geometry
@@ -189,18 +191,21 @@ int parfis::Particle::moveCylindrical()
         0.5 * m_pCfgData->geometrySize.x, 
         0.5 * m_pCfgData->geometrySize.y,
         0.5 * m_pCfgData->geometrySize.z};
-    double radiusSquared = geoCenter.x*geoCenter.x; 
-    double uCellSizeX = m_pCfgData->cellSize.x;
-    double uCellSizeY = m_pCfgData->cellSize.y;
     double rx, ry;
-
-    for (size_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
+    double radiusSquared = geoCenter.x*geoCenter.x; 
+    double invRadius = 1.0 / geoCenter.x;
+    for (specieId_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
         // Define timestep and 1/timestep for particle
         pSpec = &m_pSimData->specieVec[specId];
         dtvmax = {
             state_t(pSpec->dt*pSpec->maxVel.x),
             state_t(pSpec->dt*pSpec->maxVel.y),
             state_t(pSpec->dt*pSpec->maxVel.z)
+        };
+        invDtvmax = {
+            state_t(1.0/(pSpec->dt*pSpec->maxVel.x)),
+            state_t(1.0/(pSpec->dt*pSpec->maxVel.y)),
+            state_t(1.0/(pSpec->dt*pSpec->maxVel.z))
         };
         // Go through full cells (no boundary conditions to wory about)
         for (cellId_t cellId = 0; cellId < m_pSimData->fullCellIdVec.size(); cellId++) {
@@ -211,51 +216,194 @@ int parfis::Particle::moveCylindrical()
             stateId = m_pSimData->headIdVec[specId][cellId];
             // Go through all states of the specie in one cell
             while (stateId != Const::noStateId) {
+                // If it was moved from some previos cell just continue
+                if (m_pSimData->stateFlagVec[stateId] == StateFlag::TraverseCell) {
+                    stateId = m_pSimData->stateVec[stateId].next;
+                    continue;
+                }
                 pState = &m_pSimData->stateVec[stateId];
                 pState->pos.x += pState->vel.x * dtvmax.x;
                 pState->pos.y += pState->vel.y * dtvmax.y;
                 pState->pos.z += pState->vel.z * dtvmax.z;
+                markCellTraverse(*pState, newCell);
+                // If cell is traversed
+                if (newCell.pos != pCell->pos) {
+                    // newCellId must not be Global::noCellId by definition, so if the following
+                    // line segfaults something has been faulty coded
+                    pNewCell = &m_pSimData->cellVec[m_pCfgData->getAbsoluteCellId(newCellPos)];                
+                    // Check if the particle hit the x-y boundary in the new cell
+                    if (m_pSimData->nodeFlagVec[pNewCell->id] != 0xFF) {
+                        rx = m_pCfgData->cellSize.x*(pState->pos.x + pNewCell->pos.x) - geoCenter.x;
+                        ry = m_pCfgData->cellSize.y*(pState->pos.y + pNewCell->pos.y) - geoCenter.y;
+                        if (rx * rx + ry * ry > radiusSquared) {
+                            // Return particle to position before the reflection
+                            pState->pos.x -= pState->vel.x * dtvmax.x;
+                            pState->pos.y -= pState->vel.y * dtvmax.y;
+                            // Do the reflection from walls
+                            reflectCylindrical(
+                                *pState, *pCell, geoCenter, dtvmax, invDtvmax, invRadius);
+                            // Mark new cell traverse (can happen)
+                            markCellTraverse(*pState, newCell);
+                        }
+                    }
+                    // Set state list for new cell
+                    setNewCell(*pState, *pCell, *pNewCell, specId);
+                }
+                stateId = m_pSimData->stateVec[stateId].next;
             }
-            // Mark crossing cell boundaries
-            if (pState->pos.x < 0.0) {
-                pState->pos.x += 1.0;
-                newCell.pos.x -= 1;
-            }
-            else if (pState->pos.x > 1.0) {
-                pState->pos.x -= 1.0;
-                newCell.pos.x += 1;
-            }
-            if (pState->pos.y < 0.0) {
-                pState->pos.y += 1.0;
-                newCell.pos.y -= 1;
-            }
-            else if (pState->pos.y > 1.0) {
-                pState->pos.y -= 1.0;
-                newCell.pos.y += 1;
-            }
-            if (pState->pos.z < 0.0) {
-                pState->pos.z += 1.0;
-                newCell.pos.z -= 1;
-            }
-            else if (pState->pos.z > 1.0) {
-                pState->pos.z -= 1.0;
-                newCell.pos.z += 1;
-            }
-            // If cell is traversed
-            if (newCell.pos != pCell->pos) {
-                newCellId = m_pCfgData->getAbsoluteCellId(newCellPos);
-                // newCellId mustn't be Global::noCellId by definition, so if the following
-                // line segfaults something has been faulty coded
-                pNewCell = &m_pSimData->cellVec[newCellId];
-                // Check if maybe state hit a boundary in the new cell
-                if (pNewCell->nodeMask != 0xFF) {
-                    rx = uCellSizeX*(pState->pos.x + pNewCell->pos.x) - geoCenter.x;
-                    ry = uCellSizeY*(pState->pos.y + pNewCell->pos.y) - geoCenter.y;
-                    if (rx * rx + ry * ry > radiusSquared)
+        }
+        // Go through bound cells (check boundary crossing every time)
+        for (cellId_t cellId = 0; cellId < m_pSimData->boundCellIdVec.size(); cellId++) {
+            // New position for traversing cells
+            pCell = &m_pSimData->cellVec[cellId];
+            newCellPos = pCell->pos;
+            // Get the head state
+            stateId = m_pSimData->headIdVec[specId][cellId];
+            // Go through all states of the specie in one cell
+            while (stateId != Const::noStateId) {
+                // If it was moved from some previos cell just continue
+                if (m_pSimData->stateFlagVec[stateId] == StateFlag::TraverseCell) {
+                    stateId = m_pSimData->stateVec[stateId].next;
                     continue;
+                }
+                pState = &m_pSimData->stateVec[stateId];
+                pState->pos.x += pState->vel.x * dtvmax.x;
+                pState->pos.y += pState->vel.y * dtvmax.y;
+                pState->pos.z += pState->vel.z * dtvmax.z;
+                // Check if the particle hit the x-y boundary
+                if (m_pSimData->nodeFlagVec[pNewCell->id] != 0xFF) {
+                    rx = m_pCfgData->cellSize.x*(pState->pos.x + pNewCell->pos.x) - geoCenter.x;
+                    ry = m_pCfgData->cellSize.y*(pState->pos.y + pNewCell->pos.y) - geoCenter.y;
+                    if (rx * rx + ry * ry > radiusSquared) {
+                        // Return particle to position before the reflection
+                        pState->pos.x -= pState->vel.x * dtvmax.x;
+                        pState->pos.y -= pState->vel.y * dtvmax.y;
+                        // Do the reflection from walls
+                        reflectCylindrical(
+                            *pState, *pCell, geoCenter, dtvmax, invDtvmax, invRadius);
+                        // Mark new cell traverse (can happen)
+                        markCellTraverse(*pState, newCell);
+                    }
                 }
             }
         }
     }
     return 0;
+}
+
+void parfis::Particle::markCellTraverse(State& state, Cell& cell)
+{
+    // Mark crossing cell boundaries
+    if (state.pos.x < 0.0) {
+        state.pos.x += 1.0;
+        cell.pos.x -= 1;
+    }
+    else if (state.pos.x > 1.0) {
+        state.pos.x -= 1.0;
+        cell.pos.x += 1;
+    }
+    if (state.pos.y < 0.0) {
+        state.pos.y += 1.0;
+        cell.pos.y -= 1;
+    }
+    else if (state.pos.y > 1.0) {
+        state.pos.y -= 1.0;
+        cell.pos.y += 1;
+    }
+    if (state.pos.z < 0.0) {
+        state.pos.z += 1.0;
+        cell.pos.z -= 1;
+    }
+    else if (state.pos.z > 1.0) {
+        state.pos.z -= 1.0;
+        cell.pos.z += 1;
+    }
+}
+
+int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>& geoCenter, 
+    Vec3D<state_t>& dtvmax, Vec3D<state_t>& invDtvmax, double invRadius) 
+{
+    bool reflect = true;
+    int retval = 0;
+    while (reflect) {
+        // First we find point of reflection
+        double rx = m_pCfgData->cellSize.x*(state.pos.x + cell.pos.x) - geoCenter.x;
+        double ry = m_pCfgData->cellSize.y*(state.pos.y + cell.pos.y) - geoCenter.y;
+        state_t vx = state.vel.x*dtvmax.x;
+        state_t vy = state.vel.y*dtvmax.y;
+        double a = 2.0*(vx*vx + vy * vy);
+        double b = 2.0*(rx*vx + ry * vy);
+        double c = rx * rx + ry * ry - geoCenter.x*geoCenter.x;
+        state_t delt = state_t((sqrt(b*b - 2.0*a*c) - b) / a);
+        // Push particle to point of reflection (rx, ry)
+        state.pos.x += vx * delt;
+        state.pos.y += vy * delt;
+        rx = m_pCfgData->cellSize.x*(state.pos.x + cell.pos.x) - geoCenter.x;
+        ry = m_pCfgData->cellSize.y*(state.pos.y + cell.pos.y) - geoCenter.y;
+        // Cosine and sine of rotation
+        double cr = rx * invRadius;
+        double sr = ry * invRadius;
+        // Reflected velocity vector in the rotated coord. sys.
+        double ux = -vx * cr - vy * sr;
+        double uy = vy * cr - vx * sr;
+        // Set velocity and position vector of the rotated coord. sys.
+        vx = state_t(ux * cr - uy * sr);
+        vy = state_t(uy * cr + ux * sr);
+        // Push particle to final position
+        delt = 1.0 - delt;
+        state.pos.x += vx * delt;
+        state.pos.y += vy * delt;
+        state.vel.x = vx * invDtvmax.x;
+        state.vel.y = vy * invDtvmax.y;
+        // If traectory is close to tangent reflection can happen 
+        // multiple times in a single timestep
+        rx = m_pCfgData->cellSize.x*(state.pos.x + cell.pos.x) - geoCenter.x;
+        ry = m_pCfgData->cellSize.y*(state.pos.y + cell.pos.y) - geoCenter.y;
+        if (rx * rx + ry * ry > geoCenter.x*geoCenter.x) {
+            // Reflect back to the boundary and repeat reflection process
+            state.pos.x -= vx * delt;
+            state.pos.y -= vy * delt;
+            retval++;
+        }
+        else {
+            reflect = false;
+        }
+    }
+    return retval;
+}
+
+void parfis::Particle::setNewCell(State& state, Cell& cell, Cell& newCell, specieId_t specId)
+{
+    // Take stateId which is the id of the state (there is no other way to acces its id but
+    // in relative to its prev and next pointers)
+    stateId_t stateId;
+    // If the state is not the head state (has prev)
+    if (state.prev != Const::noStateId) {
+        stateId = m_pSimData->stateVec[state.prev].next;
+        // Connect prev and next from the old cell (from prev to next)
+        m_pSimData->stateVec[state.prev].next = state.next;
+    }
+    // If the state is a head state (doesn't have prev)
+    else {
+        stateId = m_pSimData->headIdVec[specId][cell.id];
+        // Connect head pointer to prev from the old cell
+        m_pSimData->headIdVec[specId][cell.id] = state.next;
+    }
+
+    // If the state is not the last state (has next)
+    if (state.next != Const::noStateId) {
+        // Connect prev and next from the old cell (from next to prev)
+        m_pSimData->stateVec[state.next].prev = state.prev;
+    }
+
+    // Set new cell values for the state (state becomes head in the new cell)
+    state.prev = Const::noStateId;
+    state.next = m_pSimData->headIdVec[specId][newCell.id];
+    m_pSimData->headIdVec[specId][newCell.id] = stateId;
+
+    // If there was a head before (in the new cell) then set its prev pointer to the new head
+    if (state.next != Const::noStateId)
+        m_pSimData->stateVec[state.next].prev = stateId;
+
+    m_pSimData->stateFlagVec[stateId] = StateFlag::TraverseCell;
 }
