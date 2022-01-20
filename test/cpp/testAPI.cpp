@@ -84,6 +84,7 @@ TEST(api, calculateCellCount) {
     // Set over the limit number of cells
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-6, 1.0e-6, 1.0e-6]");
     ASSERT_NE(retval, 0);
+    parfis::api::deleteParfis(id);
 }
 
 /**
@@ -100,6 +101,7 @@ TEST(api, createCells) {
     ASSERT_EQ(160000, parfis::api::getSimData(id)->cellIdVec.size());
     // No particle creation is performed because of missins createStates command
     ASSERT_EQ(0, parfis::api::getSimData(id)->stateVec.size());
+    parfis::api::deleteParfis(id);
 }
 
 /**
@@ -124,7 +126,8 @@ TEST(api, userDefinedCfgString) {
     uint64_t ptr1 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[0]);
     uint64_t ptr2 = reinterpret_cast<uint64_t>(&parfis::api::getSimData(id)->cellVec[1]);
     // Check size alignment
-    ASSERT_EQ(12, ptr2 - ptr1);
+    ASSERT_EQ(6, ptr2 - ptr1);
+    parfis::api::deleteParfis(id);
 }
 
 /**
@@ -134,6 +137,7 @@ TEST(api, configSpecie) {
     uint32_t id = parfis::api::newParfis();
     ASSERT_EQ(1, parfis::api::getCfgData(id)->specieNameVec.size());
     ASSERT_EQ("a", parfis::api::getCfgData(id)->specieNameVec[0]);
+    parfis::api::deleteParfis(id);
 }
 
 /**
@@ -167,5 +171,17 @@ TEST(api, createCellsAndStates) {
 
     // Relative precission is set to less than 0.5%
     ASSERT_LE(relativeDifference, precission);
+    parfis::api::deleteParfis(id);
+}
+
+/**
+ * @brief Push states
+ */
+TEST(api, pushStates) {
+    uint32_t id = parfis::api::newParfis();
+    parfis::api::loadSimData(id);
+    parfis::api::runCommandChain(id, "create");
+    // parfis::api::runCommandChain(id, "evolve");
+    parfis::api::deleteParfis(id);
 }
 /** @} gtestAll*/

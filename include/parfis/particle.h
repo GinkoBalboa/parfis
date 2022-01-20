@@ -26,11 +26,12 @@ namespace parfis
         int loadSimData() override;
         int createStates();
         int createStatesOfSpecie(Specie& spec);
-        int moveCylindrical();
+        int pushStatesCylindrical();
         void markCellTraverse(State& state, Cell& cell);
         int reflectCylindrical(State& state, Cell& cell, Vec3D<double>& geoCenter, 
             Vec3D<state_t>& dtvmax, Vec3D<state_t>& invDtvmax, double invRadius);
-        void setNewCell(State& state, Cell& cell, Cell& newCell, specieId_t specId);
+        void setNewCell(State& state, Cell& cell, Cell& newCell, 
+            cellId_t cellId, cellId_t newCellId, specieId_t specId);
     };
 }
 

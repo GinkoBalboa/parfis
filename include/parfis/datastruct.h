@@ -59,9 +59,15 @@ namespace parfis {
     /// Type for state flags
     typedef uint8_t stateFlag_t;
 
-    enum StateFlag: stateFlag_t {
-        None = 0,
-        TraverseCell = 1
+    struct StateFlag {
+        constexpr static stateFlag_t None = 0;
+        constexpr static stateFlag_t PushedState = 1;
+    };
+
+    struct NodeFlag {
+        constexpr static nodeFlag_t InsideGeo = 0b11111111;
+        constexpr static nodeFlag_t NegZBound = 0b11110000;
+        constexpr static nodeFlag_t PosZBound = 0b00001111;        
     };
 
     /**
@@ -210,8 +216,6 @@ namespace parfis {
      */
     struct Cell
     {
-        /// Cell id in the cellVec
-        cellId_t id;
         /// Cell position is represented with three integers x,y,z
         Vec3D<cellPos_t> pos;
     };

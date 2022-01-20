@@ -124,7 +124,7 @@ int parfis::System::createCellsCylindrical()
                 // defined geometry (node > 0)
                 if (nodeFlag) {
                     cellId = m_pSimData->cellVec.size();
-                    m_pSimData->cellVec.push_back({ cellId, {i, j, k} });
+                    m_pSimData->cellVec.push_back({ i, j, k });
                     m_pSimData->nodeFlagVec.push_back(nodeFlag);
                     if (nodeFlag == 0b11111111)
                         m_pSimData->fullCellIdVec.push_back(cellId);
