@@ -181,7 +181,12 @@ TEST(api, pushStates) {
     uint32_t id = parfis::api::newParfis();
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
-    // parfis::api::runCommandChain(id, "evolve");
+    std::cout << GTEST_BOX << "progress: "<< std::flush;
+    for (uint32_t i = 0; i<100; i++) {
+        if (i%5 == 0) std::cout << "|" << std::flush;
+        parfis::api::runCommandChain(id, "evolve");
+    }
+    std::cout << " 100%" << std::endl;
     parfis::api::deleteParfis(id);
 }
 /** @} gtestAll*/

@@ -67,7 +67,7 @@ namespace parfis {
     struct NodeFlag {
         constexpr static nodeFlag_t InsideGeo = 0b11111111;
         constexpr static nodeFlag_t NegZBound = 0b11110000;
-        constexpr static nodeFlag_t PosZBound = 0b00001111;        
+        constexpr static nodeFlag_t PosZBound = 0b00001111;
     };
 
     /**

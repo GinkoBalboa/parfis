@@ -253,14 +253,54 @@ int parfis::Particle::pushStatesCylindrical()
                 pState->pos.x += pState->vel.x * dtvmax.x;
                 pState->pos.y += pState->vel.y * dtvmax.y;
                 pState->pos.z += pState->vel.z * dtvmax.z;
-                markCellTraverse(*pState, newCell);
+                traverseCell(*pState, newCell);
                 // If cell is traversed
                 if (newCell.pos != pCell->pos) {
+                    // if state got out of the geometry then reflect/reemit it, state can't
+                    // traverse more than one cell so we check if it is in the cell that is the
+                    // first one outside the geo                    
+                    if (newCell.pos.x == m_pCfgData->cellCount.x || newCell.pos.x == 0xFFFF ||
+                        newCell.pos.y == m_pCfgData->cellCount.y || newCell.pos.y == 0xFFFF) {
+                            // Return particles back to position before the reflection
+                            pState->pos.x -= pState->vel.x * dtvmax.x;
+                            pState->pos.y -= pState->vel.y * dtvmax.y;
+                            // Do the reflection from walls
+                            reflectCylindrical(
+                                *pState, *pCell, geoCenter, dtvmax, invDtvmax, invRadius);
+                        newCell.pos.x = pCell->pos.x;
+                        newCell.pos.y = pCell->pos.y;
+                        traverseXYCell(*pState, newCell);
+                    }
+                    // Now check the z-boundary
+                    if (newCell.pos.z == m_pCfgData->cellCount.z) {
+                        // Periodic boundary - torus like geometry
+                        if (m_pCfgData->periodicBoundary.z) {
+                            newCell.pos.z = 0;
+                        }
+                        // Reflection from z-bound
+                        else {
+                            pState->pos.z  = 1.0 - pState->pos.z;
+                            pState->vel.z *= -1.0;
+                            newCell.pos.z = m_pCfgData->cellCount.z - 1;
+                        }
+                    }
+                    else if (newCell.pos.z == 0xFFFF) {
+                        // Periodic boundary - torus like geometry
+                        if (m_pCfgData->periodicBoundary.z) {
+                            newCell.pos.z = m_pCfgData->cellCount.z - 1;
+                        }
+                        // Reflection from z-bound
+                        else {
+                            pState->pos.z = 1.0 - pState->pos.z;
+                            pState->vel.z *= -1.0;
+                            newCell.pos.z = 0;
+                        }
+                    }
+                        
                     // newCellId must exist (no Global::noCellId, no id that doesn't exist) 
                     // so if the following line segfaults something has been faulty coded
-                    newCellId = m_pCfgData->getAbsoluteCellId(newCell.pos);
-                    /// @todo Here fix for m_pSimData->nodeFlagVec[newCellId] == 0
-                    // Check if the particle hit the x-y boundary in the new cell
+                    newCellId = m_pSimData->cellIdVec[m_pCfgData->getAbsoluteCellId(newCell.pos)];
+                    /// @todo Here fix for newCellId == 0
                     if (m_pSimData->nodeFlagVec[newCellId] != NodeFlag::InsideGeo &&
                         (m_pSimData->nodeFlagVec[newCellId] != NodeFlag::NegZBound ||
                          m_pSimData->nodeFlagVec[newCellId] != NodeFlag::PosZBound)) {
@@ -273,12 +313,14 @@ int parfis::Particle::pushStatesCylindrical()
                             // Do the reflection from walls
                             reflectCylindrical(
                                 *pState, *pCell, geoCenter, dtvmax, invDtvmax, invRadius);
+                            newCell.pos.x = pCell->pos.x;
+                            newCell.pos.y = pCell->pos.y;
                             // Mark new cell traverse (it can happen after reflection)
-                            markCellTraverse(*pState, newCell);
+                            traverseXYCell(*pState, newCell);
                         }
                     }
                     // Set states linked list for the old cell and the new cell
-                    setNewCell(*pState, *pCell, newCell, cellId, newCellId, specId);
+                    setNewCell(*pState, stateId, *pCell, newCell, cellId, newCellId, specId);
                 }
                 stateId = m_pSimData->stateVec[stateId].next;
             }
@@ -330,7 +372,7 @@ int parfis::Particle::pushStatesCylindrical()
     return 0;
 }
 
-void parfis::Particle::markCellTraverse(State& state, Cell& newCell)
+void parfis::Particle::traverseCell(State& state, Cell& newCell)
 {
     // Mark crossing cell boundaries
     if (state.pos.x < 0.0) {
@@ -356,6 +398,27 @@ void parfis::Particle::markCellTraverse(State& state, Cell& newCell)
     else if (state.pos.z > 1.0) {
         state.pos.z -= 1.0;
         newCell.pos.z += 1;
+    }
+}
+
+void parfis::Particle::traverseXYCell(State& state, Cell& newCell)
+{
+    // Mark crossing cell boundaries
+    if (state.pos.x < 0.0) {
+        state.pos.x += 1.0;
+        newCell.pos.x -= 1;
+    }
+    else if (state.pos.x > 1.0) {
+        state.pos.x -= 1.0;
+        newCell.pos.x += 1;
+    }
+    if (state.pos.y < 0.0) {
+        state.pos.y += 1.0;
+        newCell.pos.y -= 1;
+    }
+    else if (state.pos.y > 1.0) {
+        state.pos.y -= 1.0;
+        newCell.pos.y += 1;
     }
 }
 
@@ -411,12 +474,9 @@ int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>
     return retval;
 }
 
-void parfis::Particle::setNewCell(State& state, Cell& cell, Cell& newCell, 
+void parfis::Particle::setNewCell(State& state, stateId_t stateId, Cell& cell, Cell& newCell, 
     cellId_t cellId, cellId_t newCellId, specieId_t specId)
 {
-    // Take stateId which is the id of the state (there is no other way to acces its id but
-    // in relative to its prev and next pointers)
-    stateId_t stateId;
     // If the state is not the head state (has prev)
     if (state.prev != Const::noStateId) {
         stateId = m_pSimData->stateVec[state.prev].next;
