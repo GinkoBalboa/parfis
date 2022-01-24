@@ -236,6 +236,12 @@ function (run_sphinx_build)
         "${SPHINX_SOURCE_DIR}"
         "${SPHINX_HTML_DIR}"
     COMMENT "Building HTML documentation with Sphinx")
-
     add_dependencies(doc_sphinx doc_doxygen)
+
+    add_custom_target(copy-doxygen-html-files ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+        ${parfis_SOURCE_DIR}/build/doc/doxygen/html/ 
+        ${parfis_SOURCE_DIR}/build/doc/sphinx/html/doxygen/
+        DEPENDS doc_sphinx)
+
 endfunction (run_sphinx_build)

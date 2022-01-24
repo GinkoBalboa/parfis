@@ -24,7 +24,7 @@
 #endif
 
 /**
- * @defgroup logging
+ * @defgroup logging Logging
  * @brief Classes and functions used for logging
  * @{
  */
@@ -50,12 +50,25 @@ namespace parfis {
     typedef uint32_t cellId_t;
     /// Type for the state id
     typedef uint32_t stateId_t;
+    /// Type for the specie id
+    typedef size_t specieId_t;
     /// Type for cell position vector components
     typedef uint16_t cellPos_t;
     /// Type for node bitwise marking
-    typedef uint8_t nodeMask_t;
-    /// Type for cell state
-    typedef uint8_t cellMask_t;
+    typedef uint8_t nodeFlag_t;
+    /// Type for state flags
+    typedef uint8_t stateFlag_t;
+
+    struct StateFlag {
+        constexpr static stateFlag_t None = 0;
+        constexpr static stateFlag_t PushedState = 1;
+    };
+
+    struct NodeFlag {
+        constexpr static nodeFlag_t InsideGeo = 0b11111111;
+        constexpr static nodeFlag_t NegZBound = 0b11110000;
+        constexpr static nodeFlag_t PosZBound = 0b00001111;
+    };
 
     /**
      * @addtogroup logging
@@ -68,7 +81,7 @@ namespace parfis {
      * the message. For example the comand <c>LOG(m_logger, LogMask::Info, "Test message");</c> 
      * will log if the LOG_LEVEL has set bit on position four.
      */ 
-    enum LogMask: uint32_t {
+    enum struct LogMask: uint32_t {
         /// No logging (mask: 0000)
         None = 0b0,
         /// Log error messages (mask: 0001)
@@ -107,7 +120,7 @@ namespace parfis {
          */
         static void log(Logger& logger, LogMask mask, const std::string& msg) {
             if (LOG_LEVEL > 0) {
-                if(mask & LOG_LEVEL) logger.logToStr(mask, msg);
+                if(uint32_t(mask) & LOG_LEVEL) logger.logToStr(mask, msg);
             }
         }
     };
@@ -134,10 +147,17 @@ namespace parfis {
         T z;
 
         /**
-         * @brief Compares if vectors are equal, that is if every component equals.
+         * @brief Compares if vectors are equal
          */
         friend bool operator==(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
             return (lhs.x == rhs.x && lhs.y == rhs.y && rhs.z == rhs.z);
+        }
+
+        /**
+         * @brief Compares if vectors are not equal
+         */
+        friend bool operator!=(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
+            return (lhs.x != rhs.x || lhs.y != rhs.y || rhs.z != rhs.z);
         }
 
         /** 
@@ -196,10 +216,6 @@ namespace parfis {
      */
     struct Cell
     {
-        /// Bit mask for nodes inside or outside the simulation space
-        nodeMask_t nodeMask;
-        /// Bit mask for the whole cell
-        cellMask_t cellMask;
         /// Cell position is represented with three integers x,y,z
         Vec3D<cellPos_t> pos;
     };
@@ -234,10 +250,22 @@ namespace parfis {
         int statesPerCell;
         /// Number of CfgData.timestep for one specie timestep
         int timestepRatio;
+        /// Timestep in seconds
+        double dt;
+        /// 1/dt
+        double idt;
+        /// Maximal velocity allowed for the specie in m/s
+        Vec3D<double> maxVel;
+        /// Charge/mass ratio in C/kg
+        double qm;
         /// Mass in amu
+        double amuMass;
+        /// Mass in kg
         double mass;
         /// Charge in elemetary charge units
-        int charge;
+        int eCharge;
+        /// Charge in Coulombs
+        double charge;
         /// Number of states;
         uint32_t stateCount;
     };
@@ -258,6 +286,8 @@ namespace parfis {
         Vec3D<int> periodicBoundary;
         /// Number of cells in every direction
         Vec3D<int> cellCount;
+        /// Specie names
+        std::vector<std::string> specieNameVec;
         /// Get absolute cell id from i,j,k
         inline cellId_t getAbsoluteCellId(Vec3D<cellPos_t>& cellPos) {
             return cellCount.x * (cellCount.y * cellPos.z + cellPos.y ) + cellPos.x;
@@ -274,10 +304,23 @@ namespace parfis {
          * @brief Vector of pointers to the cellVec.
          * @details Maping of absolute cell id (calculated) to real cell id which is the position 
          * in the cellVec vector
-         */ 
+         */
+        /// Vector of nodeFlags for each cell in the geometry - corresponds to cellVec
+        std::vector<nodeFlag_t> nodeFlagVec;
         std::vector<cellId_t> cellIdVec;
+        /**
+         * @brief Vector of pointer to cells of group A
+         * @details Groups are used to classify cells, for examples cells that lie fully inside
+         * the geometry (group A) and those that don't (group B). In different cases the 
+         * classification can have different meanings.
+         */
+        std::vector<cellId_t> cellIdAVec;
+        /// Vector of pointer to cells of group B
+        std::vector<cellId_t> cellIdBVec;
         /// Vector of states
         std::vector<State> stateVec;
+        /// Vector of state flags - corresponds to stateVec
+        std::vector<stateFlag_t> stateFlagVec;
         /**
          * @brief Vector of pointers to head states
          * @details Head state is the first state in the doubly linked list of states that 
@@ -404,6 +447,7 @@ namespace parfis {
         int initialize(const std::string& cstr);
         int configure(const std::string& cstr);
         virtual int loadCfgData() = 0;
+        virtual int loadSimData() = 0;
 
         static std::unique_ptr<Domain> generateDomain(const std::string& dname, Logger& logger, 
             CfgData& cfgData, SimData& simData, 

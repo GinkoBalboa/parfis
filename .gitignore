@@ -50,15 +50,15 @@ _deps
 build/
 lib/
 
+# Build generated files
+include/parfis/version.h
+doc/sphinx/source/conf.py
+
 # Sphinx build directories
 _build
 
 # User settings
 .vscode
-
-# Google test
-test/googletest
-gtestAll
 
 # Log files
 *.log

@@ -16,6 +16,7 @@
 /// Main namespace of the library
 namespace parfis 
 {
+    /// Global functions
     struct Global {
         /// Get current date and time in the format YYYY-MM-DD HH:mm:ss
         static std::string currentDateTime();
@@ -56,11 +57,13 @@ namespace parfis
         /// One electronvolt in joules [J]
         static constexpr double eVJ = 6.2415090744608e18;
         /// Version string
-        static uint32_t logLevel;
+        static const uint32_t logLevel;
         /// Version string
         static const char* version;
         /// Git tag string
         static const char* gitTag;
+        /// Multiline string starts and ends with this separator
+        static const std::string multilineSeparator;
         /// Maximum number of cell ids for cellIdVec containter
         static constexpr cellId_t cellIdMax = UINT32_MAX;
         /// Id that represents that no cell exists

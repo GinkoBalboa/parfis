@@ -86,7 +86,7 @@ void parfis::Parfis::initializeDomains()
                     }
                 }
             }
-            // Everythin else is domain configuration
+            // Everything else is domain configuration
             else {
                 for (auto& domain : m_domainVec) {
                     std::string sstr = line.substr(0, domain.size() + 1);
@@ -103,6 +103,7 @@ void parfis::Parfis::initializeDomains()
 
 }
 
+/// @todo Write doxy
 parfis::Parfis* parfis::Parfis::getParfis(uint32_t id) 
 {
     auto it = Parfis::s_parfisMap.find(id);
@@ -127,7 +128,8 @@ parfis::Parfis* parfis::Parfis::newParfis(const std::string& cfgStr)
 
 /**
  * @brief Constructor with an id
- * @param id Id of the created object
+ * @param id of the created object
+ * @param cfgstr configuration string ("" by default)
  */
 parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
     m_id(id)
@@ -139,13 +141,21 @@ parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
         fname = Logger::getLogFileName(m_id, fcnt);
     }
     m_logger.initialize(fname);
-    if (cfgstr == "")
-        m_cfgstr = DEFAULT_INITIALIZATION_STRING;
-    else 
+    
+    // If configuration string is given - use that, else use default cfg string
+    if (cfgstr != "")
         m_cfgstr = cfgstr;
+    else
+        m_cfgstr = DEFAULT_INITIALIZATION_STRING;
+    initialize();
+
     LOG(m_logger, LogMask::Info, std::string(__FUNCTION__) + 
         " constructor with id = " + std::to_string(m_id) + "\n");
-    initialize();
+    std::string msg = Const::multilineSeparator;
+    msg += m_cfgstr;
+    msg += Const::multilineSeparator;
+    LOG(m_logger, LogMask::Info, std::string(__FUNCTION__) + 
+        " configuration string:\n" + msg);
 }
 
 /**
@@ -163,6 +173,22 @@ int parfis::Parfis::initialize()
         if (retval != 0)
             break;
     }
+    return retval;
+}
+
+int parfis::Parfis::loadSimData()
+{
+    int retval = 0;
+    for (auto& domain : m_domainVec) {
+        retval = m_domainMap[domain]->loadSimData();
+        if (retval != 0)
+            break;
+    }
+    std::string msg = Const::multilineSeparator;
+    msg += parfis::api::getConfig(m_id);
+    msg += Const::multilineSeparator;
+    LOG(m_logger, LogMask::Info, std::string(__FUNCTION__) + 
+        " configuration string:\n" + msg);
     return retval;
 }
 
@@ -190,15 +216,52 @@ int parfis::Parfis::runCommandChain(const std::string& chainChainName)
  */
 int parfis::Parfis::configure(const char* str) 
 {
+    int retval = 0;
     std::string cstr = Global::removeWhitespace(str);
     size_t fdot = cstr.find('.');
     std::string dname = cstr.substr(0, fdot);
     Domain* dptr = Parfis::getDomain(dname);
-    if (dptr == nullptr)
-        return -1;
-    int retval = 0;
-    retval = dptr->configure(cstr);
-    retval = dptr->loadCfgData();
+    if (dptr == nullptr) {
+        if (dname == "commandChain") {
+            // This is reconfiguration of commandChain definition
+            if (cstr[fdot] == '=') {
+                std::vector<std::string> commandVec = Global::getVector(cstr, '[', ']');
+                m_cmdChainMap.clear();
+                for (auto& cmdName : commandVec) {
+                    m_cmdChainMap.insert(
+                        {cmdName, std::unique_ptr<CommandChain>(new CommandChain())});    
+                    m_cmdChainMap[cmdName]->m_name = cmdName;
+                    m_cmdChainMap[cmdName]->m_func = [&]()->int { return 0; };
+                    m_cmdChainMap[cmdName]->m_funcName = "";
+                }
+            }
+            else {
+                // This is reconfiguration of one commandChain
+                for (auto& cmdChain : m_cmdChainMap) {
+                    std::string sstr = cstr.substr(0, dname.size() + cmdChain.first.size() + 2);
+                    if ( sstr == dname + '.' + cmdChain.first + "=") {
+                        std::vector<std::string> commandVec = Global::getVector(cstr, '[', ']');
+                        Command *pcom = cmdChain.second.get();
+                        cmdChain.second->m_cmdMap.clear();
+                        for (auto& cmdName : commandVec) {
+                            // Insert into map of commands and connect with chain
+                            cmdChain.second->m_cmdMap.insert({
+                                cmdName, std::unique_ptr<Command>(new Command(cmdName))});
+                            pcom->setNext(*cmdChain.second->m_cmdMap[cmdName].get());
+                            pcom = cmdChain.second->m_cmdMap[cmdName].get();
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            retval = -1;
+        }
+    }
+    else {
+        retval = dptr->configure(cstr);
+        retval = dptr->loadCfgData();
+    }
     return retval;
 }
 
@@ -262,6 +325,12 @@ PARFIS_EXPORT const char* parfis::api::parfisInfo(uint32_t id)
     return APIStaticString.c_str();
 }
 
+PARFIS_EXPORT const char* parfis::api::getLogFileName(uint32_t id)
+{
+    static std::string APIStaticString = Parfis::s_parfisMap[id]->m_logger.m_fname;
+    return APIStaticString.c_str();
+}
+
 /**
  * @brief Returns version string
  * @return The version string
@@ -297,6 +366,14 @@ PARFIS_EXPORT int parfis::api::setConfig(uint32_t id, const char* str)
     else if (retval != 0)
         return 3;
     return 0;
+}
+
+PARFIS_EXPORT int parfis::api::loadSimData(uint32_t id)
+{
+    if (Parfis::getParfis(id) == nullptr) 
+        return 1;
+    int retval = Parfis::getParfis(id)->loadSimData();
+    return retval;
 }
 
 /**
@@ -442,4 +519,28 @@ PARFIS_EXPORT const std::vector<uint32_t>& parfis::api::getParfisIdVec()
 PARFIS_EXPORT int parfis::api::runCommandChain(uint32_t id, const char* key) 
 {
     return Parfis::getParfis(id)->runCommandChain(key);
+}
+
+/**\n
+ * @brief Expose the custom Global::to_string conversion from double
+ * @param num double number to be converted to string
+ * @return const char* representation of the number
+ */
+PARFIS_EXPORT const char* parfis::api::toStringDouble(double num)
+{
+    static std::string APIStaticString = Global::to_string(num);
+
+    return APIStaticString.c_str();
+}
+
+/**
+ * @brief Expose the custom Global::to_string conversion from float
+ * @param num float number to be converted to string
+ * @return const char* representation of the number
+ */
+PARFIS_EXPORT const char* parfis::api::toStringFloat(float num)
+{
+    static std::string APIStaticString = Global::to_string(num);
+
+    return APIStaticString.c_str();
 }

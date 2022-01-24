@@ -48,7 +48,7 @@ You can add build options through command-line arguments with the call to cmake.
 - ``BUILD_GTESTALL`` (default ``OFF``). Builds executable ``gtestAll`` that runs all google tests.
   The location of the executable is ``/build/bin/gtestAll``.
 - ``PARFIS_LOG_LEVEL`` (default 0). Bitmask for the Logger, corresponds to bitmasks defined in 
-  :c:enum:`parfis::LogMask`.
+  :cpp:enum:`parfis::LogMask`.
 
 For example: 
   If we want to build debug version with full logging for the first four levels we can use the 

@@ -1,13 +1,15 @@
 #include <sstream>
 #include <iomanip>
 #include <stdio.h>
+#include <ctype.h>
 #include "parfis.h"
 #include "global.h"
 #include "version.h"
 
 const char* parfis::Const::version = VERSION;
 const char* parfis::Const::gitTag = GIT_TAG;
-uint32_t parfis::Const::logLevel = LOG_LEVEL;
+const uint32_t parfis::Const::logLevel = LOG_LEVEL;
+const std::string parfis::Const::multilineSeparator = "---------------------------------------\n";
 
 /**
  * @brief Get current date and time as a string
@@ -31,7 +33,7 @@ std::string parfis::Global::currentDateTime()
 std::string parfis::Global::removeWhitespace(const std::string& str)
 {
     std::string cstr = str;
-    cstr.erase(std::remove_if(cstr.begin(), cstr.end(), ::isspace), cstr.end());
+    cstr.erase(std::remove_if(cstr.begin(), cstr.end(), isspace), cstr.end());
     return cstr;
 }
 
@@ -47,6 +49,7 @@ std::tuple<std::string, std::string> parfis::Global::splitKeyValue(const std::st
     return {str.substr(0,eqPos), str.substr(eqPos+1, endPos-eqPos-1)};
 }
 
+/// @todo Write doxy
 std::tuple<std::string, std::string> parfis::Global::splitKeyString(const std::string& str)
 {
     size_t eqPos = str.find('=');
