@@ -308,10 +308,15 @@ namespace parfis {
         /// Vector of nodeFlags for each cell in the geometry - corresponds to cellVec
         std::vector<nodeFlag_t> nodeFlagVec;
         std::vector<cellId_t> cellIdVec;
-        /// Vector of pointer to cells that lie inside the geometry (nodeFlag == 0bff)
-        std::vector<cellId_t> fullCellIdVec;
-        /// Vector of pointer to cells that are not fully inside the geometry (nodeFlag != 0bff)
-        std::vector<cellId_t> boundCellIdVec;
+        /**
+         * @brief Vector of pointer to cells of group A
+         * @details Groups are used to classify cells, for examples cells that lie fully inside
+         * the geometry (group A) and those that don't (group B). In different cases the 
+         * classification can have different meanings.
+         */
+        std::vector<cellId_t> cellIdAVec;
+        /// Vector of pointer to cells of group B
+        std::vector<cellId_t> cellIdBVec;
         /// Vector of states
         std::vector<State> stateVec;
         /// Vector of state flags - corresponds to stateVec

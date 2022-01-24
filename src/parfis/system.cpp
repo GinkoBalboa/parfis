@@ -126,10 +126,13 @@ int parfis::System::createCellsCylindrical()
                     cellId = m_pSimData->cellVec.size();
                     m_pSimData->cellVec.push_back({ i, j, k });
                     m_pSimData->nodeFlagVec.push_back(nodeFlag);
+                    // For cylindrical we split to cells that have states that can go 
+                    // off the boundary (reflection checking) and those that can't go outside
+                    // the boundary
                     if (nodeFlag == 0b11111111)
-                        m_pSimData->fullCellIdVec.push_back(cellId);
+                        m_pSimData->cellIdAVec.push_back(cellId);
                     else
-                        m_pSimData->boundCellIdVec.push_back(cellId);
+                        m_pSimData->cellIdBVec.push_back(cellId);
                     m_pSimData->cellIdVec[
                         m_pCfgData->getAbsoluteCellId(m_pSimData->cellVec.back().pos)] = cellId;
                 }
