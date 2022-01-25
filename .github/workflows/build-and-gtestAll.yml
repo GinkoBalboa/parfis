@@ -15,7 +15,7 @@ jobs:
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
     - name: Make build dir, run cmake and make
-      shell: bash -l {0}
+      shell: bash
       run: |
         mkdir build
         cd build
@@ -38,7 +38,7 @@ jobs:
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
     - name: Make build dir, run cmake and make
-      shell: bash -l {0}
+      shell: bash
       run: |
         mkdir build
         cd build
@@ -55,7 +55,7 @@ jobs:
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
     - name: Make build dir, run cmake and make
-      shell: bash -l {0}
+      shell: bash
       run: |
         mkdir build
         cd build
@@ -72,7 +72,7 @@ jobs:
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
     - name: Make build dir, run cmake and make
-      shell: bash -l {0}
+      shell: bash
       run: |
         mkdir build
         cd build
