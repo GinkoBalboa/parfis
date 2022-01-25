@@ -86,6 +86,6 @@ jobs:
         cd python-package
         python --version
         python setup.py bdist_wheel
-        pip install -v ./dist/parfis-*.tar.gz
+        pip install --force-reinstall -v ./dist/parfis-*.whl
         cd ..
         python -c 'import parfis'
