@@ -7,78 +7,85 @@ on:
   
 jobs:
 
-  build-release-ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@master
-      with:
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
-    - name: Make build dir, run cmake and make
-      shell: bash
-      run: |
-        mkdir build
-        cd build
-        cmake ..
-        make
-        cd ..
-    - name: Upload libparfis.so
-      uses: actions/upload-artifact@v2
-      with:
-        name: libparfis.so  
-        path: build/lib/parfis/libparfis.so
-        if-no-files-found: error
-        retention-days: 1
-    - name: Run gtestAll
-      run: build/bin/gtestAll/gtestAll
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # os: [ubuntu-latest, windows-latest]
+        # version: [Release, Debug]
+        os: [ubuntu-latest]
+        version: [Release]
 
-  build-debug-ubuntu:
-    runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
-      with:
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
-    - name: Make build dir, run cmake and make
-      shell: bash
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DBUILD_DEBUG=ON
-        make
-    - name: Run gestAlld
-      run: build/bin/gtestAll/gtestAlld
 
-  build-release-windows:
-    runs-on: windows-latest
-    steps:
     - name: Checkout
       uses: actions/checkout@master
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
-    - name: Make build dir, run cmake and make
+
+    - name: Make build dir
       shell: bash
+      run: mkdir build
+
+    - if: ${{ matrix.version=='Release' }}
+      name: Build Release
       run: |
-        mkdir build
         cd build
         cmake ..
         cmake --build . --config Release
-    - name: Run gtestAll.exe
-      run: build/bin/gtestAll/gtestAll.exe
+        cd ..
+      # name: Upload libparfis.so
+      # uses: actions/upload-artifact@v2
+      # with:
+      #   name: libparfis.so  
+      #   path: build/lib/parfis/libparfis.so
+      #   if-no-files-found: error
+      #   retention-days: 1
 
-  build-debug-windows:
-    runs-on: windows-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@master
-      with:
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
-    - name: Make build dir, run cmake and make
-      shell: bash
+    - if: ${{ matrix.version=='Debug' }}
+      name: Build Debug
       run: |
-        mkdir build
         cd build
         cmake .. -DBUILD_DEBUG=ON
         cmake --build . --config Debug
-    - name: Run gestAlld.exe
+        cd ..
+
+    # Running gtestAll
+    
+    - if: ${{ matrix.version=='Release' && matrix.os=='ubuntu-latest'}} 
+      name: gtestAll
+      run: build/bin/gtestAll/gtestAll
+    
+    - if: ${{ matrix.version=='Debug' && matrix.os=='ubuntu-latest'}} 
+      name: gtestAlld
+      run: build/bin/gtestAll/gtestAlld
+    
+    - if: ${{ matrix.version=='Release' && matrix.os=='windows-latest'}} 
+      name: gtestAll.exe
+      run: build/bin/gtestAl/gtestAll.exe
+
+    - if: ${{ matrix.version=='Debug' && matrix.os=='windows-latest'}} 
+      name: gtestAlld.exe
       run: build/bin/gtestAll/gtestAlld.exe
+
+    # Runnning python tests
+
+  python-sdist-test:
+    runs-on: ubuntu-latest
+    name: Test installing Parfis Python source package on Ubuntu
+    steps:
+    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+        python-version: '3.8'
+    - name: Build and install Parfis
+      shell: bash
+      run: |
+        # echo
+        cd python-package
+        python --version
+        python setup.py bdist_wheel
+        pip install -v ./dist/parfis-*.tar.gz
+        cd ..
+        python -c 'import parfis'
