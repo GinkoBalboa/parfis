@@ -24,7 +24,8 @@ jobs:
     - name: Upload libparfis.so
       uses: actions/upload-artifact@v2
       with:
-        name: libparfis.so
+        name: libparfis.so        
+        working-directory: ./
         path: ./build/bin/lib/parfis/libparfis.so
         retention-days: 1
     - name: Run Test
