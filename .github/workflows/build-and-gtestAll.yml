@@ -8,6 +8,7 @@ on:
 jobs:
 
   build-release-ubuntu:
+    working-directory: ./
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -25,7 +26,6 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: libparfis.so        
-        working-directory: ./
         path: ./build/bin/lib/parfis/libparfis.so
         retention-days: 1
     - name: Run Test
