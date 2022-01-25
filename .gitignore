@@ -62,3 +62,8 @@ _build
 
 # Log files
 *.log
+
+# Python distribution
+python-package/dist
+python-package/build
+python-package/parfis.egg-info
