@@ -106,16 +106,22 @@ if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)
         GIT_TAG main
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/build/lib/googletest 
                    -DBUILD_SHARED_LIBS=ON
+		   -DCMAKE_DEBUG_POSTFIX=d
         BUILD_COMMAND ""
         BUILD_ALWAYS 1
         INSTALL_COMMAND cmake --build . --target install --config ${CMAKE_BUILD_TYPE}
     )
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_library(gtest SHARED IMPORTED)
+    set_target_properties(gtest PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/googletest/lib)
     if(UNIX)
-        set_target_properties(gtest PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/googletest/lib)
-        set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/libgtest.so)
-        set_target_properties(gtest PROPERTIES FILE_NAME libgtest.so)
+	if(BUILD_DEBUG)
+            set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/libgtest.so)
+	    set_target_properties(gtest PROPERTIES FILE_NAME libgtest.so)
+	else()
+            set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/libgtestd.so)
+	    set_target_properties(gtest PROPERTIES FILE_NAME libgtestd.so)
+	endif()
     elseif(WIN32)
         set_target_properties(gtest PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/googletest/bin)
         if(BUILD_DEBUG)
