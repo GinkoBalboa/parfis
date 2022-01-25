@@ -21,9 +21,9 @@ jobs:
         cd build
         cmake ..
         make
+        cd ..
     - name: Upload libparfis.so
       uses: actions/upload-artifact@v2
-      working-directory: ./
       with:
         name: libparfis.so        
         path: ./build/bin/lib/parfis/libparfis.so
