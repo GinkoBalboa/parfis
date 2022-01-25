@@ -106,8 +106,6 @@ if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)
         GIT_TAG main
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/build/lib/googletest 
                    -DBUILD_SHARED_LIBS=ON
-		           -DCMAKE_DEBUG_POSTFIX=d
-                   -DDEBUG_POSTFIX=d
         BUILD_COMMAND ""
         BUILD_ALWAYS 1
         INSTALL_COMMAND cmake --build . --target install --config ${CMAKE_BUILD_TYPE}
