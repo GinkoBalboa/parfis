@@ -62,7 +62,12 @@ if(BUILD_PARFISAPP)
     add_dependencies(parfisApp parfis)
     get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
     get_target_property(PARFIS_FILE_NAME parfis FILE_NAME)
-    # Copy shared libs under win
+    # Copy shared libs for the python-package
+    add_custom_command(TARGET parfisApp POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
+        ${parfis_SOURCE_DIR}/python-package/parfis/clib/${PARFIS_FILE_NAME})
+    # Copy shared libs under win for the parfisApp
     if(WIN32)
         add_custom_command(TARGET parfisApp POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy 

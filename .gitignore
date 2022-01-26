@@ -30,7 +30,6 @@
 *.exe
 *.out
 *.app
-/parfisApp
 
 # CMake
 CMakeLists.txt.user
@@ -67,3 +66,4 @@ _build
 python-package/dist
 python-package/build
 python-package/parfis.egg-info
+__pycache__

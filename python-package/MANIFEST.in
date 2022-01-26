@@ -1,1 +1,4 @@
-include build/lib/parfis/parfis.dll
+include parfis/clib/parfis.dll
+include parfis/clib/libparfis.so
+include parfis/clib/parfisd.dll
+include parfis/clib/libparfisd.so

@@ -1,16 +1,15 @@
 import sys
 import os
-import numpy as np
 from ctypes import *
 import platform
 
 class Parfis:
     """[summary]
     """
-    parfislib = None
+    lib = None
 
     # By default we consider linux os with lib in release
-    linuxReleaseLib = os.path.join(os.path.dirname(__file__), "../../../build/lib/parfis/libparfis.so")
+    linuxReleaseLib = os.path.join(os.path.dirname(__file__), "libparfis.so")
     linuxDebugLib = os.path.join(os.path.dirname(__file__), "../../../build/lib/parfis/libparfisd.so")
     winReleaseLib = os.path.join(os.path.dirname(__file__), "../../../build/lib/parfis/parfis.dll")
     winDebugLib = os.path.join(os.path.dirname(__file__), "../../../build/lib/parfis/parfisd.dll")
@@ -27,7 +26,7 @@ class Parfis:
         """
 
         # If lib is loaded do nothing
-        if Parfis.parfislib is not None:
+        if Parfis.lib is not None:
             return
 
         loadlib = None
@@ -55,16 +54,16 @@ class Parfis:
         elif mode == 'Debug':
             loaddll = debugLib
 
-        Parfis.parfisdll = cdll.LoadLibrary(loaddll)
+        Parfis.lib = cdll.LoadLibrary(loaddll)
 
         print(f"Successfully loaded: {loaddll}")
 
-        Parfis.parfisdll.info.argtypes = None
-        Parfis.parfisdll.info.restype = c_char_p
+        Parfis.lib.info.argtypes = None
+        Parfis.lib.info.restype = c_char_p
 
     @staticmethod
     def info() -> str:
-        return Parfis.parfisdll.info().decode()
+        return Parfis.lib.info().decode()
 
 if __name__ == "__main__":
 
