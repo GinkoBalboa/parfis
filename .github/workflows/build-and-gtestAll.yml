@@ -62,7 +62,7 @@ jobs:
     
     - if: ${{ matrix.version=='Release' && matrix.os=='windows-latest'}} 
       name: gtestAll.exe
-      run: build/bin/gtestAl/gtestAll.exe
+      run: build/bin/gtestAll/gtestAll.exe
 
     - if: ${{ matrix.version=='Debug' && matrix.os=='windows-latest'}} 
       name: gtestAlld.exe
