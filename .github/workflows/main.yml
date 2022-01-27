@@ -90,6 +90,14 @@ jobs:
     needs: build-and-gtest
     runs-on: ubuntu-latest
     steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
 
     - if: ${{ matrix.os=='ubuntu-latest'}} 
       name: Download libparfis.so
@@ -104,13 +112,6 @@ jobs:
       with:
         name: parfis.dll
         path: python-package/parfis/clib
-
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
 
     - name: Build and install Parfis
       shell: bash
