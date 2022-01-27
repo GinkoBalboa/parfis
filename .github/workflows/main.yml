@@ -119,7 +119,7 @@ jobs:
       shell: bash
       run: |
         python --version
-        pip install wheel ctypes
+        pip install wheel
         cd python-package
         python test01.py
         python setup.py bdist_wheel
