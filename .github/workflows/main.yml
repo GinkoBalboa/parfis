@@ -90,7 +90,6 @@ jobs:
     name: Make PyPI package 
     needs: build-and-gtest
     runs-on: ubuntu-latest
-    name: 
     steps:
     - name: Setup Python
       uses: actions/setup-python@v2
