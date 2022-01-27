@@ -3,15 +3,12 @@ import os
 from ctypes import *
 
 class Parfis:
+
     lib = None
+    libPath = None
 
+    currPath = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
     
-    # By default we consider linux os with lib in release
-    linuxReleaseLib = os.path.join(os.path.dirname(__file__), "libparfis.so")
-    linuxDebugLib = os.path.join(os.path.dirname(__file__), "libparfisd.so")
-    winReleaseLib = os.path.join(os.path.dirname(__file__), "parfis.dll")
-    winDebugLib = os.path.join(os.path.dirname(__file__), "parfisd.dll")
-
     @staticmethod
     def load_lib(mode='Release'):
         """ Loads speciffic library version
@@ -27,21 +24,26 @@ class Parfis:
         if Parfis.lib is not None:
             return
 
+        linuxReleaseLib = os.path.join(Parfis.currPath, "libparfis.so")
+        linuxDebugLib = os.path.join(Parfis.currPath, "libparfisd.so")
+        winReleaseLib = os.path.join(Parfis.currPath, "parfis.dll")
+        winDebugLib = os.path.join(Parfis.currPath, "parfisd.dll")
+
         pathBackup = os.environ['PATH'].split(os.pathsep)
 
         releaseLib = ""
         debugLib = ""
         # Checking platform.system() gets it wrong under docker, so just look for files
-        if os.path.isfile(Parfis.linuxReleaseLib) or os.path.isfile(Parfis.linuxDebugLib):
+        if os.path.isfile(linuxReleaseLib) or os.path.isfile(linuxDebugLib):
             print("Detected Linux library file")
-            releaseLib = Parfis.linuxReleaseLib
-            debugLib = Parfis.linuxDebugLib
-        elif os.path.isfile(Parfis.winReleaseLib) or os.path.isfile(Parfis.winDebugLib):
+            releaseLib = linuxReleaseLib
+            debugLib = linuxDebugLib
+        elif os.path.isfile(winReleaseLib) or os.path.isfile(winDebugLib):
             print("Detected Windows library file")
-            releaseLib = Parfis.winReleaseLib
-            debugLib = Parfis.winDebugLib
+            releaseLib = winReleaseLib
+            debugLib = winDebugLib
         else:
-            print("Library file not found, exiting!")
+            print("Library file not found!")
             exit(1)
 
         if mode == 'Copy':
@@ -66,7 +68,7 @@ class Parfis:
 
         Parfis.lib = cdll.LoadLibrary(libPath)
 
-        print(f"Successfully loaded: {libPath}")
+        print(f"Successfully loaded lib file")
 
         Parfis.lib.info.argtypes = None
         Parfis.lib.info.restype = c_char_p
