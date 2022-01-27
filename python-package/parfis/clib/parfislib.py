@@ -39,8 +39,8 @@ class Parfis:
             releaseLib = Parfis.winReleaseLib
             debugLib = Parfis.winDebugLib
         else:
-            print("Library doesn't exists, exiting!")
-            exit(0)
+            print("Library file not found, exiting!")
+            exit(1)
 
         if mode == 'Copy':
             gettrace = getattr(sys, 'gettrace', None)

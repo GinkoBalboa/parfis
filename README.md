@@ -1,6 +1,6 @@
 # Parfis
 
-[![build-and-test Actions Status](https://github.com/GinkoBalboa/parfis/workflows/build-and-test/badge.svg)](https://github.com/GinkoBalboa/parfis/actions)
+[![build-and-test Actions Status](https://github.com/GinkoBalboa/parfis/workflows/main/badge.svg)](https://github.com/GinkoBalboa/parfis/actions)
 
 Parfis is an acronym for PARticles and FIeld Simulator. Parfis is written in 
 C++ with Python bindings. The algorithm is based upon the particle-in-cell 

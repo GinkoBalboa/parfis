@@ -67,7 +67,7 @@ jobs:
         name: libparfis.so
         path: build/lib/parfis/libparfis.so
         if-no-files-found: error
-        retention-days: 0
+        retention-days: 1
 
     - if: ${{ matrix.config=='Release' && matrix.os=='windows-latest'}} 
       name: Upload parfis.dll
@@ -76,7 +76,7 @@ jobs:
         name: parfis.dll
         path: build/lib/parfis/parfis.dll
         if-no-files-found: error
-        retention-days: 0
+        retention-days: 1
 
   pypi-and-pytest:
 
@@ -110,7 +110,6 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        submodules: 'true'
         python-version: ${{ matrix.python-version }}
 
     - name: Build and install Parfis

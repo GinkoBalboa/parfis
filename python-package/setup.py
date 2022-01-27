@@ -47,10 +47,10 @@ if __name__ == '__main__':
         classifiers=[
             "Development Status :: 1 - Planning",
             "Intended Audience :: Science/Research",
-            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
             "Programming Language :: C++",
             "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
             "Operating System :: Microsoft :: Windows :: Windows 10",
