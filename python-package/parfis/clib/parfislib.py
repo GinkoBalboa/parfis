@@ -4,8 +4,6 @@ from ctypes import *
 import platform
 
 class Parfis:
-    """[summary]
-    """
     lib = None
 
     # By default we consider linux os with lib in release
@@ -29,14 +27,11 @@ class Parfis:
         if Parfis.lib is not None:
             return
 
-        loadlib = None
-
-        print(f"Platform system: {platform.system()}")
-
-        if platform.system() == 'Linux':
+        # Checking platform.system() gets it wrong under docker, so just look for files
+        if os.path.isfile(Parfis.linuxReleaseLib) or os.path.isfile(Parfis.linuxDebugLib):
             releaseLib = Parfis.linuxReleaseLib
             debugLib = Parfis.linuxDebugLib
-        elif platform.system() == 'Windows':
+        elif os.path.isfile(Parfis.winReleaseLib) or os.path.isfile(Parfis.winDebugLib):
             releaseLib = Parfis.winReleaseLib
             debugLib = Parfis.winDebugLib
 
