@@ -117,7 +117,7 @@ jobs:
 
     - name: Build and install Parfis
       shell: bash
-      run: |
+      - run: |
         python --version
         python -m pip install wheel
         cd python-package
@@ -125,7 +125,7 @@ jobs:
         run: python setup.py bdist_wheel --plat-name win_amd64
       - if: ${{ matrix.os=='ubuntu-latest'}}
         run: python setup.py bdist_wheel --plat-name linux_x86_64
-      run: python -m pip install --force-reinstall -v ./dist/parfis-*.whl
+      - run: python -m pip install --force-reinstall -v ./dist/parfis-*.whl
 
     - name: Run tests
         python test/pytest/test01.py
