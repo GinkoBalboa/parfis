@@ -1,9 +1,6 @@
 import sys
 import os
 from ctypes import *
-import platform
-
-os.add_dll_directory(os.path.dirname(__file__))
 
 class Parfis:
     lib = None
@@ -30,6 +27,8 @@ class Parfis:
         if Parfis.lib is not None:
             return
 
+        pathBackup = os.environ['PATH'].split(os.pathsep)
+
         releaseLib = ""
         debugLib = ""
         # Checking platform.system() gets it wrong under docker, so just look for files
@@ -48,21 +47,26 @@ class Parfis:
         if mode == 'Copy':
             gettrace = getattr(sys, 'gettrace', None)
             if gettrace is None and os.path.isfile(releaseLib):
-                loadlib = releaseLib
+                libPath = releaseLib
             elif gettrace() and os.path.isfile(debugLib):
-                loadlib = debugLib
+                libPath = debugLib
             elif os.path.isfile(releaseLib):
-                loadlib = releaseLib
+                libPath = releaseLib
         elif mode == 'Release':
-            loadlib = releaseLib
+            libPath = releaseLib
         elif mode == 'Debug':
-            loadlib = debugLib
+            libPath = debugLib
 
-        print(f"Lib file to load: {loadlib}")
+        # needed when the lib is linked with non-system-available
+        # dependencies
+        os.environ['PATH'] = os.pathsep.join(
+            pathBackup + [os.path.dirname(libPath)])
 
-        Parfis.lib = cdll.LoadLibrary(loadlib)
+        print(f"Lib file to load: {libPath}")
 
-        print(f"Successfully loaded: {loadlib}")
+        Parfis.lib = cdll.LoadLibrary(libPath)
+
+        print(f"Successfully loaded: {libPath}")
 
         Parfis.lib.info.argtypes = None
         Parfis.lib.info.restype = c_char_p
