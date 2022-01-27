@@ -118,9 +118,9 @@ jobs:
     - name: Build and install Parfis
       shell: bash
       - run: |
-        python --version
-        python -m pip install wheel
-        cd python-package
+          python --version
+          python -m pip install wheel
+          cd python-package
       - if: ${{ matrix.os=='windows-latest'}}
         run: python setup.py bdist_wheel --plat-name win_amd64
       - if: ${{ matrix.os=='ubuntu-latest'}}
