@@ -10,9 +10,9 @@ class Parfis:
 
     # By default we consider linux os with lib in release
     linuxReleaseLib = os.path.join(os.path.dirname(__file__), "libparfis.so")
-    linuxDebugLib = os.path.join(os.path.dirname(__file__), "../../../build/lib/parfis/libparfisd.so")
-    winReleaseLib = os.path.join(os.path.dirname(__file__), "../../../build/lib/parfis/parfis.dll")
-    winDebugLib = os.path.join(os.path.dirname(__file__), "../../../build/lib/parfis/parfisd.dll")
+    linuxDebugLib = os.path.join(os.path.dirname(__file__), "libparfisd.so")
+    winReleaseLib = os.path.join(os.path.dirname(__file__), "parfis.dll")
+    winDebugLib = os.path.join(os.path.dirname(__file__), "parfisd.dll")
 
     @staticmethod
     def load_lib(mode='Release'):

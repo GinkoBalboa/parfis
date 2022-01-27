@@ -45,19 +45,19 @@ jobs:
     # Run gtestAll
     
     - if: ${{ matrix.config=='Release' && matrix.os=='ubuntu-latest'}} 
-      name: gtestAll
+      name: Run gtestAll
       run: build/bin/gtestAll/gtestAll
     
     - if: ${{ matrix.config=='Debug' && matrix.os=='ubuntu-latest'}} 
-      name: gtestAlld
+      name: Run gtestAlld
       run: build/bin/gtestAll/gtestAlld
     
     - if: ${{ matrix.config=='Release' && matrix.os=='windows-latest'}} 
-      name: gtestAll.exe
+      name: Run gtestAll.exe
       run: build/bin/gtestAll/gtestAll.exe
 
     - if: ${{ matrix.config=='Debug' && matrix.os=='windows-latest'}} 
-      name: gtestAlld.exe
+      name: Run gtestAlld.exe
       run: build/bin/gtestAll/gtestAlld.exe
 
     # Upload artifacts
@@ -87,12 +87,16 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         config: [Release]
 
+    name: Make PyPI package 
     needs: build-and-gtest
     runs-on: ubuntu-latest
     name: 
     steps:
-    - uses: actions/setup-python@v2
-    - uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+
+    - name: Checkout
+      uses: actions/checkout@v2
       with:
         submodules: 'true'
         python-version: '3.8'
