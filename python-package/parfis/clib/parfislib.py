@@ -27,13 +27,20 @@ class Parfis:
         if Parfis.lib is not None:
             return
 
+        releaseLib = ""
+        debugLib = ""
         # Checking platform.system() gets it wrong under docker, so just look for files
         if os.path.isfile(Parfis.linuxReleaseLib) or os.path.isfile(Parfis.linuxDebugLib):
+            print("Detected Linux library file")
             releaseLib = Parfis.linuxReleaseLib
             debugLib = Parfis.linuxDebugLib
         elif os.path.isfile(Parfis.winReleaseLib) or os.path.isfile(Parfis.winDebugLib):
+            print("Detected Windows library file")
             releaseLib = Parfis.winReleaseLib
             debugLib = Parfis.winDebugLib
+        else:
+            print("Library doesn't exists, exiting!")
+            exit(0)
 
         if mode == 'Copy':
             gettrace = getattr(sys, 'gettrace', None)
@@ -43,9 +50,6 @@ class Parfis:
                 loadlib = debugLib
             elif os.path.isfile(releaseLib):
                 loadlib = releaseLib
-            else:
-                print("Library doesn't exists, exiting!")
-                exit(0)
         elif mode == 'Release':
             loadlib = releaseLib
         elif mode == 'Debug':
