@@ -3,9 +3,12 @@ import os
 from ctypes import *
 import platform
 
+os.add_dll_directory(os.path.dirname(__file__))
+
 class Parfis:
     lib = None
 
+    
     # By default we consider linux os with lib in release
     linuxReleaseLib = os.path.join(os.path.dirname(__file__), "libparfis.so")
     linuxDebugLib = os.path.join(os.path.dirname(__file__), "libparfisd.so")
