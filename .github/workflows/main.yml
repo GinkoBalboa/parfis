@@ -133,5 +133,5 @@ jobs:
 
     - name: Install wheel and run tests
       run: |
-        pip install --force-reinstall -v --find-links=/python-package/dist/ parfis
+        pip install --force-reinstall -v --find-links=./python-package/dist/ parfis
         python test/pytest/test01.py
