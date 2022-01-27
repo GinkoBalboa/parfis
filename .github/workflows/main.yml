@@ -118,11 +118,11 @@ jobs:
     - name: Build and install Parfis
       shell: bash
       run: |
-        python --version
-        pip install wheel
+        python3 --version
+        python3 -m pip install wheel
         cd python-package
-        python test01.py
-        python setup.py bdist_wheel
-        pip install --force-reinstall -v ./dist/parfis-*.whl
+        python3 test01.py
+        python3 setup.py bdist_wheel
+        python3 -m pip install --force-reinstall -v ./dist/parfis-*.whl
         cd ..
-        python test/pytest/test01.py
+        python3 test/pytest/test01.py
