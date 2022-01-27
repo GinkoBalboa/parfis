@@ -41,22 +41,24 @@ class Parfis:
         if mode == 'Copy':
             gettrace = getattr(sys, 'gettrace', None)
             if gettrace is None and os.path.isfile(releaseLib):
-                    loaddll = releaseLib
+                loadlib = releaseLib
             elif gettrace() and os.path.isfile(debugLib):
-                loaddll = debugLib
+                loadlib = debugLib
             elif os.path.isfile(releaseLib):
-                loaddll = releaseLib
+                loadlib = releaseLib
             else:
                 print("Library doesn't exists, exiting!")
                 exit(0)
         elif mode == 'Release':
-            loaddll = releaseLib
+            loadlib = releaseLib
         elif mode == 'Debug':
-            loaddll = debugLib
+            loadlib = debugLib
 
-        Parfis.lib = cdll.LoadLibrary(loaddll)
+        print(f"Lib file to load: {loadlib}")
 
-        print(f"Successfully loaded: {loaddll}")
+        Parfis.lib = cdll.LoadLibrary(loadlib)
+
+        print(f"Successfully loaded: {loadlib}")
 
         Parfis.lib.info.argtypes = None
         Parfis.lib.info.restype = c_char_p
