@@ -11,8 +11,8 @@ jobs:
   
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        config: [Release, Debug]
+        os: [windows-latest]
+        config: [Release]
 
     name: Build and run gtestAll
     runs-on: ${{ matrix.os }}
@@ -82,13 +82,13 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [windows-latest]
         config: [Release]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7']
 
     name: Make PyPI package 
     needs: build-and-gtest
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
 
     - name: Checkout
@@ -118,11 +118,11 @@ jobs:
     - name: Build and install Parfis
       shell: bash
       run: |
-        python3 --version
-        python3 -m pip install wheel
+        python --version
+        python -m pip install wheel
         cd python-package
-        python3 test01.py
-        python3 setup.py bdist_wheel
-        python3 -m pip install --force-reinstall -v ./dist/parfis-*.whl
+        python test01.py
+        python setup.py bdist_wheel --universal
+        python -m pip install --force-reinstall -v ./dist/parfis-*.whl
         cd ..
-        python3 test/pytest/test01.py
+        python test/pytest/test01.py
