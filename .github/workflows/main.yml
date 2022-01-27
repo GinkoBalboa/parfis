@@ -11,8 +11,8 @@ jobs:
   
     strategy:
       matrix:
-        os: [windows-latest]
-        config: [Release]
+        os: [ubuntu-latest, windows-latest]
+        config: [Release, Debug]
 
     name: Build and run gtestAll
     runs-on: ${{ matrix.os }}
@@ -115,17 +115,25 @@ jobs:
         name: parfis.dll
         path: python-package/parfis/clib
 
-    - name: Build and install Parfis
+    - if: ${{ matrix.os=='ubuntu-latest'}}
+      name: Create pypi wheel linux
       shell: bash
-      - run: |
-          python --version
-          python -m pip install wheel
-          cd python-package
-      - if: ${{ matrix.os=='windows-latest'}}
-        run: python setup.py bdist_wheel --plat-name win_amd64
-      - if: ${{ matrix.os=='ubuntu-latest'}}
-        run: python setup.py bdist_wheel --plat-name linux_x86_64
-      - run: python -m pip install --force-reinstall -v ./dist/parfis-*.whl
+      run: |
+        python --version
+        python -m pip install wheel
+        cd python-package
+        python setup.py bdist_wheel --plat-name linux_x86_64
 
-    - name: Run tests
+    - if: ${{ matrix.os=='windows-latest'}}
+      name: Create pypi wheel win
+      shell: bash
+      run: |
+        python --version
+        python -m pip install wheel
+        cd python-package
+        python setup.py bdist_wheel --plat-name win_amd64
+
+    - name: Install wheel and run tests
+      run: |
+        python -m pip install --force-reinstall -v ./dist/parfis-*.whl
         python test/pytest/test01.py
