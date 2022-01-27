@@ -18,9 +18,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest rep
+        fetch-depth: 0
 
     - name: Make build dir
       shell: bash
@@ -90,9 +90,11 @@ jobs:
     needs: build-and-gtest
     runs-on: ubuntu-latest
     steps:
-    
+
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Setup Python
       uses: actions/setup-python@v2
@@ -119,6 +121,7 @@ jobs:
         python --version
         pip install wheel
         cd python-package
+        python test01.py
         python setup.py bdist_wheel
         pip install --force-reinstall -v ./dist/parfis-*.whl
         cd ..
