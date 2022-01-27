@@ -31,6 +31,8 @@ class Parfis:
 
         loadlib = None
 
+        print(f"Platform system: {platform.system()}")
+
         if platform.system() == 'Linux':
             releaseLib = Parfis.linuxReleaseLib
             debugLib = Parfis.linuxDebugLib
