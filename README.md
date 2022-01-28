@@ -1,6 +1,6 @@
 # Parfis
 
-[![build-and-test Actions Status](https://github.com/GinkoBalboa/parfis/workflows/build-and-test/badge.svg)](https://github.com/GinkoBalboa/parfis/actions)
+[![build-and-test Actions Status](https://github.com/GinkoBalboa/parfis/workflows/main/badge.svg)](https://github.com/GinkoBalboa/parfis/actions)
 
 Parfis is an acronym for PARticles and FIeld Simulator. Parfis is written in 
 C++ with Python bindings. The algorithm is based upon the particle-in-cell 
@@ -11,28 +11,16 @@ densities and currents are computed simultaneously on Eulerian (stationary)
 mesh points.
 
 
-## Build from source
+## Building from source
 
-Build configuration is produced with CMake. After obtaining the source run the 
-following commands corresponding to your OS.
+The build configuration is generated with CMake. After obtaining the source from the
+GitHub repo, run the CMake commands shown here.
 
-### Building on Linux and other UNIX like systems
+### Building on Linux and Windows
 
-For Linux we use the following commands:
+Building on Linux and Windows is the same, presumably you have CMake installed:
 
 ``` bash
-$ cd parfis
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make
-```
-
-### Building on Windows
-
-For Windows we have:
-
-``` console
 $ cd parfis
 $ mkdir build
 $ cd build

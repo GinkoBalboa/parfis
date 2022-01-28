@@ -30,7 +30,6 @@
 *.exe
 *.out
 *.app
-/parfisApp
 
 # CMake
 CMakeLists.txt.user
@@ -62,3 +61,9 @@ _build
 
 # Log files
 *.log
+
+# Python distribution
+python-package/dist
+python-package/build
+python-package/parfis.egg-info
+__pycache__

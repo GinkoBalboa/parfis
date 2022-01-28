@@ -62,7 +62,12 @@ if(BUILD_PARFISAPP)
     add_dependencies(parfisApp parfis)
     get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
     get_target_property(PARFIS_FILE_NAME parfis FILE_NAME)
-    # Copy shared libs under win
+    # Copy shared libs for the python-package
+    add_custom_command(TARGET parfisApp POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
+        ${parfis_SOURCE_DIR}/python-package/parfis/clib/${PARFIS_FILE_NAME})
+    # Copy shared libs under win for the parfisApp
     if(WIN32)
         add_custom_command(TARGET parfisApp POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy 
@@ -118,13 +123,8 @@ if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)
         set_target_properties(gtest PROPERTIES FILE_NAME libgtest.so)
     elseif(WIN32)
         set_target_properties(gtest PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/googletest/bin)
-        if(BUILD_DEBUG)
-            set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/gtestd.lib)
-            set_target_properties(gtest PROPERTIES FILE_NAME gtestd.dll)
-        else()
-            set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/gtest.lib)
-            set_target_properties(gtest PROPERTIES FILE_NAME gtest.dll)
-        endif()
+        set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/gtest.lib)
+        set_target_properties(gtest PROPERTIES FILE_NAME gtest.dll)
     endif()
 endif()
 

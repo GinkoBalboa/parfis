@@ -1,0 +1,137 @@
+name: Build and test parfis library and python module
+
+on:
+  pull_request:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+jobs:
+
+  build-and-gtest:
+  
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        config: [Release, Debug]
+
+    name: Build and run gtestAll
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Make build dir
+      shell: bash
+      run: mkdir build
+
+    - if: ${{ matrix.config=='Release' }}
+      name: Build Release
+      run: |
+        cd build
+        cmake ..
+        cmake --build . --config Release
+
+    - if: ${{ matrix.config=='Debug' }}
+      name: Build Debug
+      run: |
+        cd build
+        cmake .. -DBUILD_DEBUG=ON
+        cmake --build . --config Debug
+
+    # Run gtestAll
+    
+    - if: ${{ matrix.config=='Release' && matrix.os=='ubuntu-latest'}} 
+      name: Run gtestAll
+      run: build/bin/gtestAll/gtestAll
+    
+    - if: ${{ matrix.config=='Debug' && matrix.os=='ubuntu-latest'}} 
+      name: Run gtestAlld
+      run: build/bin/gtestAll/gtestAlld
+    
+    - if: ${{ matrix.config=='Release' && matrix.os=='windows-latest'}} 
+      name: Run gtestAll.exe
+      run: build/bin/gtestAll/gtestAll.exe
+
+    - if: ${{ matrix.config=='Debug' && matrix.os=='windows-latest'}} 
+      name: Run gtestAlld.exe
+      run: build/bin/gtestAll/gtestAlld.exe
+
+    # Upload artifacts
+
+    - if: ${{ matrix.config=='Release' && matrix.os=='ubuntu-latest'}} 
+      name: Upload libparfis.so
+      uses: actions/upload-artifact@v2
+      with:
+        name: libparfis.so
+        path: build/lib/parfis/libparfis.so
+        if-no-files-found: error
+        retention-days: 1
+
+    - if: ${{ matrix.config=='Release' && matrix.os=='windows-latest'}} 
+      name: Upload parfis.dll
+      uses: actions/upload-artifact@v2
+      with:
+        name: parfis.dll
+        path: build/lib/parfis/parfis.dll
+        if-no-files-found: error
+        retention-days: 1
+
+  pypi-and-pytest:
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        config: [Release]
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+
+    name: Make PyPI package 
+    needs: build-and-gtest
+    runs-on: ${{ matrix.os }}
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - if: ${{ matrix.os=='ubuntu-latest'}} 
+      name: Download libparfis.so
+      uses: actions/download-artifact@v2
+      with:
+        name: libparfis.so
+        path: python-package/parfis/clib
+
+    - if: ${{ matrix.os=='windows-latest'}} 
+      name: Download parfis.dll
+      uses: actions/download-artifact@v2
+      with:
+        name: parfis.dll
+        path: python-package/parfis/clib
+
+    - if: ${{ matrix.os=='ubuntu-latest'}}
+      name: Create pypi wheel linux
+      shell: bash
+      run: |
+        pip install -v wheel
+        cd python-package
+        python setup.py bdist_wheel --plat-name linux_x86_64
+
+    - if: ${{ matrix.os=='windows-latest'}}
+      name: Create pypi wheel win
+      shell: bash
+      run: |
+        pip install -v wheel
+        cd python-package
+        python setup.py bdist_wheel --plat-name win_amd64
+
+    - name: Install wheel and run tests
+      run: |
+        pip install --force-reinstall -v --find-links=./python-package/dist/ --no-index parfis
+        python test/pytest/test01.py
