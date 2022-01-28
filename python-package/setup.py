@@ -22,9 +22,6 @@ if __name__ == '__main__':
     # From internet:
     #   pip install parfis
 
-    # From source tree `xgboost/python-package`:
-    #   python setup.py bdist_wheel && pip install <wheel-name>
-
     with open("README.md", "r") as fh:
         long_description = fh.read()
 
@@ -37,7 +34,6 @@ if __name__ == '__main__':
         packages=setuptools.find_packages(include=['parfis', 'parfis.*']),
         #package_data={"parfis": ['data/config/api_1.ini']},
         include_package_data=True,
-        platforms=["Windows 10 x64"],
         # extras_require={'plotting': ['matplotlib'],
         #                 'data': ['numpy'],
         #                 'testing':['unittest']},
