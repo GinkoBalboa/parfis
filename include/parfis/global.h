@@ -60,6 +60,8 @@ namespace parfis
         static const uint32_t logLevel;
         /// Version string
         static const char* version;
+        /// Build configuration
+        static const char* buildConfig;
         /// Git tag string
         static const char* gitTag;
         /// Multiline string starts and ends with this separator

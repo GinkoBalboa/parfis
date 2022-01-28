@@ -134,4 +134,4 @@ jobs:
     - name: Install wheel and run tests
       run: |
         pip install --force-reinstall -v --find-links=./python-package/dist/ --no-index parfis
-        python test/pytest/test01.py
+        python -m unittest discover -s ./test/pytest/ -p "test*.py"

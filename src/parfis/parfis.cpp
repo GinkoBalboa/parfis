@@ -289,6 +289,7 @@ PARFIS_EXPORT const char* parfis::api::info()
         str = "parfis::state_t = unknown";
     str += "\nparfis::logLevel = " + std::to_string(Const::logLevel);
     str += "\nparfis::version = " + std::string(Const::version);
+    str += "\nparfis::buildConfig = " + std::string(Const::buildConfig);
     str += "\nparfis::gitTag = " + std::string(Const::gitTag);
     int pfSize = int(Parfis::s_parfisMap.size());
     str += "\nParfis object count = " + std::to_string(pfSize);

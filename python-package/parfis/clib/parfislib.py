@@ -46,17 +46,24 @@ class Parfis:
             print("Library file not found!")
             exit(1)
 
+        loadRelease = True
         if mode == 'Copy':
             gettrace = getattr(sys, 'gettrace', None)
-            if gettrace is None and os.path.isfile(releaseLib):
-                libPath = releaseLib
-            elif gettrace() and os.path.isfile(debugLib):
-                libPath = debugLib
-            elif os.path.isfile(releaseLib):
-                libPath = releaseLib
-        elif mode == 'Release':
-            libPath = releaseLib
+            if gettrace() and os.path.isfile(debugLib):
+                loadRelease == False
         elif mode == 'Debug':
+            loadRelease = False
+
+        if loadRelease and not os.path.isfile(releaseLib):
+            print(f"Requested Release lib: {releaseLib} wasn't found falling back to Debug lib")
+            loadRelease = False
+        if not loadRelease and not os.path.isfile(debugLib):
+            print(f"Requested Debug lib: {debugLib} wasn't found falling back to Release lib")
+            loadRelease = True
+
+        if loadRelease:
+            libPath = releaseLib
+        else:
             libPath = debugLib
 
         # needed when the lib is linked with non-system-available

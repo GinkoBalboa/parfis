@@ -134,6 +134,11 @@ function(set_version)
     string(STRIP "${VERSION}" VERSION)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
 
+    set(BUILD_CONFIG_STR "Release")
+    if(BUILD_DEBUG)
+        set(BUILD_CONFIG_STR "Debug")
+    endif()
+
     set(VERSION_H "\
 #ifndef PARFIS_VERSION_H
 #define PARFIS_VERSION_H
@@ -141,6 +146,7 @@ function(set_version)
 #define GIT_TAG \"${GIT_TAG}\"
 #define GIT_BRANCH \"${GIT_BRANCH}\"
 #define VERSION \"${VERSION}\"
+#define BUILD_CONFIG \"${BUILD_CONFIG_STR}\"
 #endif // PARFIS_VERSION_H
 ")
 
