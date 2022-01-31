@@ -127,8 +127,10 @@ function(set_version)
 
     string(STRIP "${GIT_REV}" GIT_REV)
     # GIT_REV string has quotes
-    string(REPLACE "\'" "" GIT_REV ${GIT_REV})
-    string(REPLACE "\"" "" GIT_REV ${GIT_REV})
+    if(NOT "${GIT_REV}" STREQUAL "")
+        string(REPLACE "\'" "" GIT_REV ${GIT_REV})
+        string(REPLACE "\"" "" GIT_REV ${GIT_REV})
+    endif()
     string(STRIP "${GIT_DIFF}" GIT_DIFF)
     string(STRIP "${GIT_TAG}" GIT_TAG)
     string(STRIP "${VERSION}" VERSION)

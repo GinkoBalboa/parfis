@@ -474,6 +474,19 @@ PARFIS_EXPORT const parfis::CfgData* parfis::api::getCfgData(uint32_t id)
 }
 
 /**
+ * @brief Returns pointer to the PyCfgData of the Parfis object given by id
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT const parfis::PyCfgData* parfis::api::getPyCfgData(uint32_t id)
+{
+    Parfis * pfis = Parfis::getParfis(id);
+    CfgData * cfgData = &pfis->m_cfgData;
+    PyCfgData * pyData = &pfis->m_cfgData.pyCfgData;
+    pfis->m_cfgData.setPyCfgData();
+    return &pfis->m_cfgData.pyCfgData;
+}
+
+/**
  * @brief Returns pointer to the SimData of the Parfis object given by id
  * @param id of the Parfis object
  */
@@ -492,6 +505,20 @@ PARFIS_EXPORT int parfis::api::deleteParfis(uint32_t id)
     if (Parfis::getParfis(id) == nullptr) 
         return 1;
     Parfis::s_parfisMap.erase(id);
+    return 0;
+}
+
+/**
+ * @brief Deletes all Parfis objects
+ * @return Zero on success 
+ */
+PARFIS_EXPORT int parfis::api::deleteAll()
+{
+    std::vector<uint32_t> keysToErase;
+    for (auto& pfis: Parfis::s_parfisMap)
+        keysToErase.push_back(pfis.first);
+    for (auto idtoerase: keysToErase)
+        Parfis::s_parfisMap.erase(idtoerase);
     return 0;
 }
 

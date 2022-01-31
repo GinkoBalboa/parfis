@@ -127,8 +127,10 @@ namespace parfis {
             PARFIS_EXPORT const char* getConfig(uint32_t id);
             PARFIS_EXPORT const char* getConfigParam(uint32_t id, const char* key);
             PARFIS_EXPORT const CfgData* getCfgData(uint32_t id);
+            PARFIS_EXPORT const PyCfgData* getPyCfgData(uint32_t id);
             PARFIS_EXPORT const SimData* getSimData(uint32_t id);
             PARFIS_EXPORT int deleteParfis(uint32_t id);
+            PARFIS_EXPORT int deleteAll();
             PARFIS_EXPORT const std::vector<uint32_t>& getParfisIdVec();
             PARFIS_EXPORT int runCommandChain(uint32_t id, const char* key);
             PARFIS_EXPORT const char* toStringDouble(double num);

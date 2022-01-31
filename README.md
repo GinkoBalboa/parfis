@@ -1,5 +1,7 @@
 # Parfis
 
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/GinkoBalboa/parfis)
+![GitHub](https://img.shields.io/github/license/GinkoBalboa/parfis)
 [![Build and test Actions Status](https://github.com/GinkoBalboa/parfis/actions/workflows/main.yml/badge.svg)](https://github.com/GinkoBalboa/parfis/actions)
 
 Parfis is an acronym for Particles and Field Simulator. Parfis is written in 

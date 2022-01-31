@@ -2,6 +2,8 @@ import sys
 import os
 from ctypes import *
 
+from .datastruct import PyCfgData
+
 class Parfis:
 
     lib = None
@@ -80,9 +82,44 @@ class Parfis:
         Parfis.lib.info.argtypes = None
         Parfis.lib.info.restype = c_char_p
 
+        Parfis.lib.newParfis.argtypes = [c_char_p]
+        Parfis.lib.newParfis.restype = c_uint32
+
+        Parfis.lib.deleteParfis.argtypes = [c_uint32]
+        Parfis.lib.deleteParfis.restype = c_int
+
+        Parfis.lib.deleteAll.argtypes = None
+        Parfis.lib.deleteAll.restype = c_int
+
+        Parfis.lib.getCfgData.argtypes = [c_uint32]
+        Parfis.lib.getCfgData.restype = POINTER(PyCfgData)
+        
+        Parfis.lib.loadSimData.argtypes = [c_uint32]
+        Parfis.lib.loadSimData.restype = c_int
+
     @staticmethod
     def info() -> str:
         return Parfis.lib.info().decode()
+    
+    @staticmethod
+    def newParfis(cfgStr: str  = "") -> int:
+        return Parfis.lib.newParfis(cfgStr.encode())
+
+    @staticmethod
+    def deleteParfis(id: int) -> int:
+        return Parfis.lib.deleteParfis(id)
+
+    @staticmethod
+    def deleteAll() -> int:
+        return Parfis.lib.deleteAll()
+
+    @staticmethod
+    def getCfgData(id: int) -> POINTER(PyCfgData):
+        return cast(Parfis.lib.getPyCfgData(id), POINTER(PyCfgData))
+
+    @staticmethod
+    def loadSimData(id: int) -> int:
+        return Parfis.lib.loadSimData(id)
 
 if __name__ == "__main__":
 

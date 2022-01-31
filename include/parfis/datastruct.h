@@ -271,6 +271,32 @@ namespace parfis {
     };
 
     /**
+     * @brief Structure used instead of std::vector for python bindings
+     * @tparam T type of vector
+     */
+    template <class T>
+    struct PyVec 
+    {
+        T* ptr;
+        size_t size;
+    };
+
+    /**
+     * @brief Configuration data in format suitable for Python ctypes
+     * 
+     */
+    struct PyCfgData
+    {
+        const char* geometry;
+        double timestep;
+        Vec3D<double>* geometrySize;
+        Vec3D<double>* cellSize;
+        Vec3D<int>* periodicBoundary;
+        Vec3D<int>* cellCount;
+        PyVec<const char> specieNameVec;
+    };
+
+    /**
      * @brief Configuration parameters data
      */
     struct CfgData {
@@ -288,9 +314,22 @@ namespace parfis {
         Vec3D<int> cellCount;
         /// Specie names
         std::vector<std::string> specieNameVec;
+        /// PyCfgData points to data of this object
+        PyCfgData pyCfgData;
         /// Get absolute cell id from i,j,k
         inline cellId_t getAbsoluteCellId(Vec3D<cellPos_t>& cellPos) {
             return cellCount.x * (cellCount.y * cellPos.z + cellPos.y ) + cellPos.x;
+        };
+        /// Set PyCfgData
+        inline void setPyCfgData() {
+            pyCfgData.geometry = geometry.c_str();
+            pyCfgData.timestep = timestep;
+            pyCfgData.geometrySize = &geometrySize;
+            pyCfgData.cellSize = &cellSize;
+            pyCfgData.periodicBoundary = &periodicBoundary;
+            pyCfgData.cellCount = &cellCount;
+            pyCfgData.specieNameVec.ptr = specieNameVec[0].c_str();
+            pyCfgData.specieNameVec.size = specieNameVec.size();
         };
     };
 

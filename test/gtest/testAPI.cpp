@@ -51,7 +51,7 @@ TEST(api, checkTimestep) {
 }
 
 /**
- * @brief Creates three new parfis objects and deletes one from the middle
+ * @brief Creates three new parfis objects and deletes one from the middle, then delete all
  */
 TEST(api, deleteParfis)
 {
@@ -62,6 +62,8 @@ TEST(api, deleteParfis)
     idVec.push_back(parfis::api::newParfis());
     parfis::api::deleteParfis(1);
     ASSERT_EQ(sizeBefore + 2, parfis::api::getParfisIdVec().size());
+    parfis::api::deleteAll();
+    ASSERT_EQ(0, parfis::api::getParfisIdVec().size());
 }
 
 /**

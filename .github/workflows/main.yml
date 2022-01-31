@@ -1,4 +1,4 @@
-name: Build and test parfis library and python module
+name: Build and test
 
 on:
   pull_request:
@@ -132,6 +132,8 @@ jobs:
         python setup.py bdist_wheel --plat-name win_amd64
 
     - name: Install wheel and run tests
+      # Use the following command if you install locally for testing
+      # pip install -e ./python-package --force-reinstall -v
       run: |
         pip install --force-reinstall -v --find-links=./python-package/dist/ --no-index parfis
-        python -m unittest discover -s ./test/pytest/ -p "test*.py"
+        python -m unittest discover -s ./test/pytest/ -p "test*.py" -v
