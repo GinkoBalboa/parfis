@@ -8,11 +8,11 @@ class TestApi(unittest.TestCase):
     def setUpClass(cls):
         Parfis.load_lib()
 
-    def setUp(self) -> None:
-        Parfis.load_lib()
+    # def setUp(self) -> None:
+    #     Parfis.load_lib()
 
-    def tearDown(self) -> None:
-        Parfis.deleteAll()
+    # def tearDown(self) -> None:
+    #     Parfis.deleteAll()
 
     def test_info(self) -> None:
         '''No Parfis objects, just check general program settings.
@@ -46,7 +46,7 @@ class TestApi(unittest.TestCase):
         self.assertTrue(f"Parfis object id = [{parIds[0]}, {parIds[2]}, {parIds[3]}]" in parInfo)
 
     def test_get_cfg_data(self) -> None:
-        '''Check cfg data getter works
+        '''Check if cfg data getter works
         '''
         parId = Parfis.newParfis()
         ptrCfgData = Parfis.getCfgData(parId)
