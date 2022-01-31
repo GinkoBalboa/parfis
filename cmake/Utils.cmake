@@ -90,6 +90,7 @@ function(set_properties target type)
 endfunction(set_properties)
 
 function(set_version)
+    set(GIT_REV "no-rev")
     execute_process(
         COMMAND git log --pretty=format:'%h' -n 1
         OUTPUT_VARIABLE GIT_REV ERROR_QUIET)

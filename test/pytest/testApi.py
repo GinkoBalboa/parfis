@@ -11,8 +11,8 @@ class TestApi(unittest.TestCase):
     # def setUp(self) -> None:
     #     Parfis.load_lib()
 
-    # def tearDown(self) -> None:
-    #     Parfis.deleteAll()
+    def tearDown(self) -> None:
+        Parfis.deleteAll()
 
     def test_info(self) -> None:
         '''No Parfis objects, just check general program settings.
@@ -49,7 +49,7 @@ class TestApi(unittest.TestCase):
         '''Check if cfg data getter works
         '''
         parId = Parfis.newParfis()
-        ptrCfgData = Parfis.getCfgData(parId)
+        ptrCfgData = Parfis.getPyCfgData(parId)
         self.assertEqual(1.0, ptrCfgData[0].timestep)
         self.assertEqual(0.02, ptrCfgData[0].geometrySize[0].x)
         self.assertEqual(0.02, ptrCfgData[0].geometrySize[0].y)
