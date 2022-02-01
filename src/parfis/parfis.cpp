@@ -259,6 +259,7 @@ int parfis::Parfis::configure(const char* str)
         }
     }
     else {
+        // This is reconfiguration of a variable or a parameter
         retval = dptr->configure(cstr);
         retval = dptr->loadCfgData();
     }

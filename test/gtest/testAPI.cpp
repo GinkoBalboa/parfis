@@ -143,6 +143,56 @@ TEST(api, configSpecie) {
 }
 
 /**
+ * @brief Reconfigure and add specie
+ */
+TEST(api, reconfigSpecie) {
+    uint32_t id = parfis::api::newParfis();
+    ASSERT_EQ(1, parfis::api::getCfgData(id)->specieNameVec.size());
+    ASSERT_EQ("a", parfis::api::getCfgData(id)->specieNameVec[0]);
+    // Set two species
+    parfis::api::setConfig(id, "particle.specie = [electron, atom] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.timestepRatio = 1 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.amuMass = 0.00054858 <double>");
+    parfis::api::setConfig(id, "particle.specie.electron.eCharge = -1 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.atom.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
+    parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
+    ASSERT_EQ(2, parfis::api::getCfgData(id)->specieNameVec.size());
+    ASSERT_EQ("electron", parfis::api::getCfgData(id)->specieNameVec[0]);
+    ASSERT_EQ("atom", parfis::api::getCfgData(id)->specieNameVec[1]);
+    // Check as double
+    ASSERT_EQ(double(4), std::stod(parfis::api::getConfigParam(id, "particle.specie.atom.amuMass"), nullptr));
+    parfis::api::deleteParfis(id);
+}
+
+/**
+ * @brief Test PyCfgData
+ */
+TEST(api, pyCfgData) {
+    uint32_t id = parfis::api::newParfis();
+    // Set two species
+    parfis::api::setConfig(id, "particle.specie = [electron, atom] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.timestepRatio = 1 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.amuMass = 0.00054858 <double>");
+    parfis::api::setConfig(id, "particle.specie.electron.eCharge = -1 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.atom.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
+    parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
+    ASSERT_EQ(2, parfis::api::getPyCfgData(id)->specieNameVec.size);
+    ASSERT_EQ("electron", parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]);
+    ASSERT_EQ("atom", parfis::api::getPyCfgData(id)->specieNameVec.ptr[1]);
+    parfis::api::deleteParfis(id);
+}
+
+/**
  * @brief Create cells and states
  */
 TEST(api, createCellsAndStates) {

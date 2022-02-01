@@ -32,7 +32,7 @@ system.periodicBoundary = [0, 0, 0] <int> (0, 1)  # Boundary condition \n\
 \n\
 particle = specie <parfis::Param> (specie) # Particle parameters\n\
 particle.specie = a <parfis::Param> (*) # You can define specie name anyway you like \n\
-particle.specie.a = [statesPerCell, timestepRatio, mass, charge] (statesPerCell, timestepRatio, amuMass, eCharge) <parfis::Param> # Parameters for each specie \n\
+particle.specie.a = [statesPerCell, timestepRatio, amuMass, eCharge] (statesPerCell, timestepRatio, amuMass, eCharge) <parfis::Param> # Parameters for each specie \n\
 particle.specie.a.statesPerCell = 10 <int> # Number of states (particles) per cell\n\
 particle.specie.a.timestepRatio = 1 <int> # This many system.timesteps is one timestep for the specie\n\
 particle.specie.a.amuMass = 4 <double> # Mass is given in a.m.u. \n\

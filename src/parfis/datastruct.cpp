@@ -246,6 +246,17 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     return pp;
 }
 
+void parfis::CfgData::setPyCfgData()
+{
+    pyCfgData.specieNameVec = specieNameVec;
+    pyCfgData.geometry = geometry.c_str();
+    pyCfgData.timestep = timestep;
+    pyCfgData.geometrySize = &geometrySize;
+    pyCfgData.cellSize = &cellSize;
+    pyCfgData.periodicBoundary = &periodicBoundary;
+    pyCfgData.cellCount = &cellCount;
+}
+
 /**
  * @brief Initializes Domain from DEFAULT_INITIALIZATION_STRING
  * @param cstr initialization string is in the format key=value<type>(range). Value 
@@ -264,8 +275,11 @@ int parfis::Domain::initialize(const std::string& cstr)
         cp = pp;
     }
     else {
-        if (cstr.find("<parfis::Param>") != std::string::npos)
+        if (cstr.find("<parfis::Param>") != std::string::npos) {
+            if (pp->m_childMap.find(childName) != pp->m_childMap.end())
+                pp->m_childMap.erase(childName);
             pp->addChild<std::string>(childName);
+        }
         else if (cstr.find("<std::string>") != std::string::npos)
             pp->addChild<std::string>(childName);
         else if (cstr.find("<double>") != std::string::npos)
@@ -289,6 +303,9 @@ int parfis::Domain::configure(const std::string& cstr)
     std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(cstr);
     std::string childName = Global::childName(std::get<0>(keyValue));
     Param<std::string>* pp = getParent(std::get<0>(keyValue));
+    // If reconfiguration is ongoing then childMap must be reassembled
+    if (pp->m_childMap.find(childName) == pp->m_childMap.end())
+        initialize(cstr);
     ParamBase::setValueVec(pp->m_childMap[childName].get(), std::get<1>(keyValue));
     return 0;
 }

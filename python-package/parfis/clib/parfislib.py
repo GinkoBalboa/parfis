@@ -93,9 +93,13 @@ class Parfis:
 
         Parfis.lib.getPyCfgData.argtypes = [c_uint32]
         Parfis.lib.getPyCfgData.restype = POINTER(PyCfgData)
+
+        Parfis.lib.setConfig.argtypes = [c_uint32, c_char_p]
+        Parfis.lib.setConfig.restype = c_int
         
         Parfis.lib.loadSimData.argtypes = [c_uint32]
         Parfis.lib.loadSimData.restype = c_int
+
 
     @staticmethod
     def info() -> str:
@@ -118,8 +122,8 @@ class Parfis:
         return Parfis.lib.getPyCfgData(id)
 
     @staticmethod
-    def loadSimData(id: int) -> int:
-        return Parfis.lib.loadSimData(id)
+    def setConfig(id: int, kvStr: str) -> int:
+        return Parfis.lib.setConfig(id, kvStr.encode())
 
 if __name__ == "__main__":
 

@@ -281,6 +281,25 @@ namespace parfis {
         size_t size;
     };
 
+    struct PyStringVec : public PyVec<const char*>
+    {   
+        std::vector<const char *> vec;
+
+        PyStringVec& operator=(const std::vector<std::string>& strVec) {
+            vec.clear();
+            for (auto & str: strVec)
+                vec.push_back(str.c_str());
+            ptr = &vec[0];
+            std::cout << "&vec[0] = " << &vec[0] << std::endl;
+            std::cout << "&vec[1] = " << &vec[1] << std::endl;
+            std::cout << "ptr = " << ptr << std::endl;
+            std::cout << "ptr[0] = " << ptr[0] << std::endl;
+            std::cout << "ptr[1] = " << ptr[1] << std::endl;
+            size = vec.size();
+            return *this;
+        }
+    };
+
     /**
      * @brief Configuration data in format suitable for Python ctypes
      * 
@@ -293,7 +312,7 @@ namespace parfis {
         Vec3D<double>* cellSize;
         Vec3D<int>* periodicBoundary;
         Vec3D<int>* cellCount;
-        PyVec<const char> specieNameVec;
+        PyStringVec specieNameVec;
     };
 
     /**
@@ -321,16 +340,7 @@ namespace parfis {
             return cellCount.x * (cellCount.y * cellPos.z + cellPos.y ) + cellPos.x;
         };
         /// Set PyCfgData
-        inline void setPyCfgData() {
-            pyCfgData.geometry = geometry.c_str();
-            pyCfgData.timestep = timestep;
-            pyCfgData.geometrySize = &geometrySize;
-            pyCfgData.cellSize = &cellSize;
-            pyCfgData.periodicBoundary = &periodicBoundary;
-            pyCfgData.cellCount = &cellCount;
-            pyCfgData.specieNameVec.ptr = specieNameVec[0].c_str();
-            pyCfgData.specieNameVec.size = specieNameVec.size();
-        };
+        void setPyCfgData();
     };
 
     /**
