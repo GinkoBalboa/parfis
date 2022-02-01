@@ -168,11 +168,6 @@ int parfis::Parfis::initialize()
 {
     initializeDomains();
     int retval = 0;
-    for (auto& domain : m_domainVec) {
-        retval = m_domainMap[domain]->loadCfgData();
-        if (retval != 0)
-            break;
-    }
     return retval;
 }
 
@@ -181,6 +176,17 @@ int parfis::Parfis::loadSimData()
     int retval = 0;
     for (auto& domain : m_domainVec) {
         retval = m_domainMap[domain]->loadSimData();
+        if (retval != 0)
+            break;
+    }
+    return retval;
+}
+
+int parfis::Parfis::loadCfgData()
+{
+    int retval = 0;
+    for (auto& domain : m_domainVec) {
+        retval = m_domainMap[domain]->loadCfgData();
         if (retval != 0)
             break;
     }
@@ -261,7 +267,6 @@ int parfis::Parfis::configure(const char* str)
     else {
         // This is reconfiguration of a variable or a parameter
         retval = dptr->configure(cstr);
-        retval = dptr->loadCfgData();
     }
     return retval;
 }
@@ -378,6 +383,14 @@ PARFIS_EXPORT int parfis::api::loadSimData(uint32_t id)
     return retval;
 }
 
+PARFIS_EXPORT int parfis::api::loadCfgData(uint32_t id)
+{
+    if (Parfis::getParfis(id) == nullptr) 
+        return 1;
+    int retval = Parfis::getParfis(id)->loadCfgData();
+    return retval;
+}
+
 /**
  * @brief Returns the default configuration hardcoded in DEFAULT_INITIALIZATION_STRING.
  * @return The default configuration 
@@ -475,6 +488,19 @@ PARFIS_EXPORT const parfis::CfgData* parfis::api::getCfgData(uint32_t id)
 }
 
 /**
+ * @brief Loads the PyCfgData
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT int parfis::api::setPyCfgData(uint32_t id)
+{
+    Parfis * pfis = Parfis::getParfis(id);
+    CfgData * cfgData = &pfis->m_cfgData;
+    PyCfgData * pyData = &pfis->m_cfgData.pyCfgData;
+    pfis->m_cfgData.setPyCfgData();
+    return 0;
+}
+
+/**
  * @brief Returns pointer to the PyCfgData of the Parfis object given by id
  * @param id of the Parfis object
  */
@@ -483,7 +509,6 @@ PARFIS_EXPORT const parfis::PyCfgData* parfis::api::getPyCfgData(uint32_t id)
     Parfis * pfis = Parfis::getParfis(id);
     CfgData * cfgData = &pfis->m_cfgData;
     PyCfgData * pyData = &pfis->m_cfgData.pyCfgData;
-    pfis->m_cfgData.setPyCfgData();
     return &pfis->m_cfgData.pyCfgData;
 }
 

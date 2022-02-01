@@ -72,6 +72,7 @@ TEST(api, deleteParfis)
  */
 TEST(api, calculateCellCount) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     int retval = 0;
     // Get number of cells in the x direction
     int cellCount_x = parfis::api::getCfgData(id)->cellCount.x;
@@ -83,8 +84,11 @@ TEST(api, calculateCellCount) {
     ASSERT_EQ(cellCount_x, cellCount_x_calc);
     // Set normal number of cells
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-3, 1.0e-3, 1.0e-3]");
+    retval = parfis::api::loadCfgData(id);
+    ASSERT_EQ(retval, 0);
     // Set over the limit number of cells
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-6, 1.0e-6, 1.0e-6]");
+    retval = parfis::api::loadCfgData(id);
     ASSERT_NE(retval, 0);
     parfis::api::deleteParfis(id);
 }
@@ -94,6 +98,7 @@ TEST(api, calculateCellCount) {
  */
 TEST(api, createCells) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     std::cout << GTEST_BOX << "log file name: " << parfis::api::getLogFileName(id) << std::endl;
     int retval = parfis::api::setConfig(id, "commandChain.create = [createCells]");
     ASSERT_EQ(retval, 0);
@@ -120,6 +125,7 @@ TEST(api, userDefinedCfgString) {
         "commandChain.create = [createCells] <parfis::Command>");
     // Proceed as usual with creating the Parfis object
     uint32_t id = parfis::api::newParfis(defaultStr.c_str());
+    parfis::api::loadCfgData(id);
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     ASSERT_EQ(139200, parfis::api::getSimData(id)->cellVec.size());
@@ -137,6 +143,7 @@ TEST(api, userDefinedCfgString) {
  */
 TEST(api, configSpecie) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     ASSERT_EQ(1, parfis::api::getCfgData(id)->specieNameVec.size());
     ASSERT_EQ("a", parfis::api::getCfgData(id)->specieNameVec[0]);
     parfis::api::deleteParfis(id);
@@ -147,6 +154,8 @@ TEST(api, configSpecie) {
  */
 TEST(api, reconfigSpecie) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
+    parfis::api::setPyCfgData(id);
     ASSERT_EQ(1, parfis::api::getCfgData(id)->specieNameVec.size());
     ASSERT_EQ("a", parfis::api::getCfgData(id)->specieNameVec[0]);
     // Set two species
@@ -161,6 +170,8 @@ TEST(api, reconfigSpecie) {
     parfis::api::setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>");
     parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
     parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
+    parfis::api::loadCfgData(id);
+    parfis::api::setPyCfgData(id);
     ASSERT_EQ(2, parfis::api::getCfgData(id)->specieNameVec.size());
     ASSERT_EQ("electron", parfis::api::getCfgData(id)->specieNameVec[0]);
     ASSERT_EQ("atom", parfis::api::getCfgData(id)->specieNameVec[1]);
@@ -186,6 +197,10 @@ TEST(api, pyCfgData) {
     parfis::api::setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>");
     parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
     parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
+    int retval;
+    retval = parfis::api::loadCfgData(id);
+    ASSERT_EQ(0, retval);
+    parfis::api::setPyCfgData(id);
     ASSERT_EQ(2, parfis::api::getPyCfgData(id)->specieNameVec.size);
     ASSERT_EQ(std::string("electron"), std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]));
     ASSERT_EQ(std::string("atom"), std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[1]));
@@ -197,6 +212,7 @@ TEST(api, pyCfgData) {
  */
 TEST(api, createCellsAndStates) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     double rSqPi = M_PI * std::pow(parfis::api::getCfgData(id)->geometrySize.x * 0.5, 2);
@@ -231,6 +247,7 @@ TEST(api, createCellsAndStates) {
  */
 TEST(api, pushStates) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     std::cout << GTEST_BOX << "progress: "<< std::flush;

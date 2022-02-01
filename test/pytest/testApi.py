@@ -49,6 +49,8 @@ class TestApi(unittest.TestCase):
         '''Check if cfg data getter works
         '''
         parId = Parfis.newParfis()
+        Parfis.loadCfgData(parId)
+        Parfis.setPyCfgData(parId)
         ptrCfgData = Parfis.getPyCfgData(parId)
         self.assertEqual(1.0, ptrCfgData[0].timestep)
         self.assertEqual((0.02, 0.02, 0.4), ptrCfgData[0].geometrySize[0].asTuple())
@@ -61,6 +63,8 @@ class TestApi(unittest.TestCase):
         '''Check reconfiguration of specie data
         '''
         id = Parfis.newParfis()
+        Parfis.loadCfgData(id)
+        Parfis.setPyCfgData(id)
         ptrCfgData = Parfis.getPyCfgData(id)
         self.assertEqual(1, ptrCfgData[0].specieNameVec.size)
         self.assertEqual(["a"], ptrCfgData[0].specieNameVec.asList())
@@ -75,6 +79,8 @@ class TestApi(unittest.TestCase):
         Parfis.setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>")
         Parfis.setConfig(id, "particle.specie.atom.amuMass = 4 <double>")
         Parfis.setConfig(id, "particle.specie.atom.eCharge = 0 <int>")
+        Parfis.loadCfgData(id)
+        Parfis.setPyCfgData(id)
         ptrCfgData = Parfis.getPyCfgData(id)
         self.assertEqual(2, ptrCfgData[0].specieNameVec.size)
         self.assertEqual(["electron", "atom"], ptrCfgData[0].specieNameVec.asList())

@@ -91,11 +91,17 @@ class Parfis:
         Parfis.lib.deleteAll.argtypes = None
         Parfis.lib.deleteAll.restype = c_int
 
+        Parfis.lib.setPyCfgData.argtypes = [c_uint32]
+        Parfis.lib.setPyCfgData.restype = c_int
+
         Parfis.lib.getPyCfgData.argtypes = [c_uint32]
         Parfis.lib.getPyCfgData.restype = POINTER(PyCfgData)
 
         Parfis.lib.setConfig.argtypes = [c_uint32, c_char_p]
         Parfis.lib.setConfig.restype = c_int
+
+        Parfis.lib.loadCfgData.argtypes = [c_uint32]
+        Parfis.lib.loadCfgData.restype = c_int
         
         Parfis.lib.loadSimData.argtypes = [c_uint32]
         Parfis.lib.loadSimData.restype = c_int
@@ -120,6 +126,14 @@ class Parfis:
     @staticmethod
     def getPyCfgData(id: int) -> POINTER(PyCfgData):
         return Parfis.lib.getPyCfgData(id)
+
+    @staticmethod
+    def setPyCfgData(id: int) -> int:
+        return Parfis.lib.setPyCfgData(id)
+
+    @staticmethod
+    def loadCfgData(id: int) -> int:
+        return Parfis.lib.loadCfgData(id)
 
     @staticmethod
     def setConfig(id: int, kvStr: str) -> int:

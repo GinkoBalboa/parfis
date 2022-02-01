@@ -63,6 +63,7 @@ namespace parfis {
 
         int initialize();
         int loadSimData();
+        int loadCfgData();
         int runCommandChain(const std::string& str);
         int configure(const char* str);
 
@@ -122,7 +123,9 @@ namespace parfis {
             PARFIS_EXPORT const char* version();
             PARFIS_EXPORT uint32_t newParfis(const char* cfgStr = "");            
             PARFIS_EXPORT int setConfig(uint32_t id, const char* str);
+            PARFIS_EXPORT int loadCfgData(uint32_t id);
             PARFIS_EXPORT int loadSimData(uint32_t id);
+            PARFIS_EXPORT int setPyCfgData(uint32_t id);
             PARFIS_EXPORT const char* defaultConfiguration();
             PARFIS_EXPORT const char* getConfig(uint32_t id);
             PARFIS_EXPORT const char* getConfigParam(uint32_t id, const char* key);

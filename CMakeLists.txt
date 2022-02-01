@@ -13,6 +13,7 @@ option(BUILD_DOXYGEN "Build documentation C++ code using Doxygen." OFF)
 option(BUILD_SPHINX "Build documentation using Sphinx." OFF)
 option(BUILD_GOOGLE_TEST "Build google test" OFF)
 option(BUILD_GTESTALL "Build gtestAll" ON)
+option(COPY_LIB_PYTHON "Copy parfis lib for python module" OFF)
 
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -63,10 +64,12 @@ if(BUILD_PARFISAPP)
     get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
     get_target_property(PARFIS_FILE_NAME parfis FILE_NAME)
     # Copy shared libs for the python-package
-    add_custom_command(TARGET parfisApp POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
-        ${parfis_SOURCE_DIR}/python-package/parfis/clib/${PARFIS_FILE_NAME})
+    if(COPY_LIB_PYTHON)
+        add_custom_command(TARGET parfisApp POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy 
+            ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
+            ${parfis_SOURCE_DIR}/python-package/parfis/clib/${PARFIS_FILE_NAME})
+    endif()
     # Copy shared libs under win for the parfisApp
     if(WIN32)
         add_custom_command(TARGET parfisApp POST_BUILD
