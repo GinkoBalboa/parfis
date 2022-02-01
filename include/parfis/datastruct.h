@@ -290,11 +290,6 @@ namespace parfis {
             for (auto & str: strVec)
                 vec.push_back(str.c_str());
             ptr = &vec[0];
-            std::cout << "&vec[0] = " << &vec[0] << std::endl;
-            std::cout << "&vec[1] = " << &vec[1] << std::endl;
-            std::cout << "ptr = " << ptr << std::endl;
-            std::cout << "ptr[0] = " << ptr[0] << std::endl;
-            std::cout << "ptr[1] = " << ptr[1] << std::endl;
             size = vec.size();
             return *this;
         }

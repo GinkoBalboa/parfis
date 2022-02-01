@@ -248,13 +248,13 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
 
 void parfis::CfgData::setPyCfgData()
 {
-    pyCfgData.specieNameVec = specieNameVec;
     pyCfgData.geometry = geometry.c_str();
     pyCfgData.timestep = timestep;
     pyCfgData.geometrySize = &geometrySize;
     pyCfgData.cellSize = &cellSize;
     pyCfgData.periodicBoundary = &periodicBoundary;
     pyCfgData.cellCount = &cellCount;
+    pyCfgData.specieNameVec = specieNameVec;
 }
 
 /**

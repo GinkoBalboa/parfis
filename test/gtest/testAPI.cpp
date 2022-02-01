@@ -187,8 +187,8 @@ TEST(api, pyCfgData) {
     parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
     parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
     ASSERT_EQ(2, parfis::api::getPyCfgData(id)->specieNameVec.size);
-    ASSERT_EQ("electron", parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]);
-    ASSERT_EQ("atom", parfis::api::getPyCfgData(id)->specieNameVec.ptr[1]);
+    ASSERT_EQ(std::string("electron"), std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]));
+    ASSERT_EQ(std::string("atom"), std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[1]));
     parfis::api::deleteParfis(id);
 }
 
