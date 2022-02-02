@@ -493,11 +493,16 @@ PARFIS_EXPORT const parfis::CfgData* parfis::api::getCfgData(uint32_t id)
  */
 PARFIS_EXPORT int parfis::api::setPyCfgData(uint32_t id)
 {
-    Parfis * pfis = Parfis::getParfis(id);
-    CfgData * cfgData = &pfis->m_cfgData;
-    PyCfgData * pyData = &pfis->m_cfgData.pyCfgData;
-    pfis->m_cfgData.setPyCfgData();
-    return 0;
+    return Parfis::getParfis(id)->m_cfgData.setPyCfgData();
+}
+
+/**
+ * @brief Loads the PySimData
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT int parfis::api::setPySimData(uint32_t id)
+{
+    return Parfis::getParfis(id)->m_simData.setPySimData();
 }
 
 /**
@@ -506,10 +511,16 @@ PARFIS_EXPORT int parfis::api::setPyCfgData(uint32_t id)
  */
 PARFIS_EXPORT const parfis::PyCfgData* parfis::api::getPyCfgData(uint32_t id)
 {
-    Parfis * pfis = Parfis::getParfis(id);
-    CfgData * cfgData = &pfis->m_cfgData;
-    PyCfgData * pyData = &pfis->m_cfgData.pyCfgData;
-    return &pfis->m_cfgData.pyCfgData;
+    return &Parfis::getParfis(id)->m_cfgData.pyCfgData;
+}
+
+/**
+ * @brief Returns pointer to the PySimData of the Parfis object given by id
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT const parfis::PySimData* parfis::api::getPySimData(uint32_t id)
+{
+    return &Parfis::getParfis(id)->m_simData.pySimData;
 }
 
 /**

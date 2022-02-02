@@ -1,5 +1,7 @@
 import unittest
+import math
 from parfis import Parfis
+
 # from parfis import PyCfgData
 
 class TestApi(unittest.TestCase):
@@ -84,6 +86,34 @@ class TestApi(unittest.TestCase):
         ptrCfgData = Parfis.getPyCfgData(id)
         self.assertEqual(2, ptrCfgData[0].specieNameVec.size)
         self.assertEqual(["electron", "atom"], ptrCfgData[0].specieNameVec.asList())
+
+    def test_createCommandChain(self) -> None:
+        '''Check creation of cells and states
+        '''
+        id = Parfis.newParfis()
+        Parfis.setConfig(id, "particle.specie = [electron] <parfis::Param>")
+        Parfis.setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>")
+        Parfis.setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>")
+        Parfis.setConfig(id, "particle.specie.electron.timestepRatio = 1 <int>")
+        Parfis.setConfig(id, "particle.specie.electron.amuMass = 0.00054858 <double>")
+        Parfis.setConfig(id, "particle.specie.electron.eCharge = -1 <int>")
+        Parfis.loadCfgData(id)
+        Parfis.loadSimData(id)
+        Parfis.runCommandChain(id, "create")
+        Parfis.setPyCfgData(id)
+        ptrCfgData = Parfis.getPyCfgData(id)
+        rSqPi = math.pi * ptrCfgData[0].geometrySize[0].x**2
+        volCyl = rSqPi * ptrCfgData[0].geometrySize[0].z
+        volCylAbs = (
+            ptrCfgData[0].geometrySize[0].x*
+            ptrCfgData[0].geometrySize[0].y*
+            ptrCfgData[0].geometrySize[0].z
+        )
+        volRatio = volCyl/volCylAbs
+        Parfis.setPySimData(id)
+        ptrSimData = Parfis.getPySimData(id)
+        numStatesCyl = ptrSimData[0].stateVec.size
+        numCells = ptrSimData[0].cellIdVec.size
 
 if __name__ == '__main__':
     unittest.main()

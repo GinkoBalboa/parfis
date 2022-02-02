@@ -126,12 +126,14 @@ namespace parfis {
             PARFIS_EXPORT int loadCfgData(uint32_t id);
             PARFIS_EXPORT int loadSimData(uint32_t id);
             PARFIS_EXPORT int setPyCfgData(uint32_t id);
+            PARFIS_EXPORT int setPySimData(uint32_t id);
             PARFIS_EXPORT const char* defaultConfiguration();
             PARFIS_EXPORT const char* getConfig(uint32_t id);
             PARFIS_EXPORT const char* getConfigParam(uint32_t id, const char* key);
             PARFIS_EXPORT const CfgData* getCfgData(uint32_t id);
             PARFIS_EXPORT const PyCfgData* getPyCfgData(uint32_t id);
             PARFIS_EXPORT const SimData* getSimData(uint32_t id);
+            PARFIS_EXPORT const PySimData* getPySimData(uint32_t id);
             PARFIS_EXPORT int deleteParfis(uint32_t id);
             PARFIS_EXPORT int deleteAll();
             PARFIS_EXPORT const std::vector<uint32_t>& getParfisIdVec();

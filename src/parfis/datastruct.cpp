@@ -246,7 +246,7 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     return pp;
 }
 
-void parfis::CfgData::setPyCfgData()
+int parfis::CfgData::setPyCfgData()
 {
     pyCfgData.geometry = geometry.c_str();
     pyCfgData.timestep = timestep;
@@ -255,6 +255,15 @@ void parfis::CfgData::setPyCfgData()
     pyCfgData.periodicBoundary = &periodicBoundary;
     pyCfgData.cellCount = &cellCount;
     pyCfgData.specieNameVec = specieNameVec;
+    return 0;
+}
+
+int parfis::SimData::setPySimData()
+{
+    pySimData.stateVec = stateVec;
+    pySimData.cellIdVec = cellIdVec;
+    pySimData.specieVec = specieVec;
+    return 0;
 }
 
 /**

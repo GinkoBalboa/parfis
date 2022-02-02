@@ -2,7 +2,7 @@ import sys
 import os
 from ctypes import *
 
-from .datastruct import PyCfgData
+from .datastruct import PyCfgData, PySimData
 
 class Parfis:
 
@@ -97,6 +97,12 @@ class Parfis:
         Parfis.lib.getPyCfgData.argtypes = [c_uint32]
         Parfis.lib.getPyCfgData.restype = POINTER(PyCfgData)
 
+        Parfis.lib.setPySimData.argtypes = [c_uint32]
+        Parfis.lib.setPySimData.restype = c_int
+
+        Parfis.lib.getPySimData.argtypes = [c_uint32]
+        Parfis.lib.getPySimData.restype = POINTER(PySimData)
+
         Parfis.lib.setConfig.argtypes = [c_uint32, c_char_p]
         Parfis.lib.setConfig.restype = c_int
 
@@ -106,6 +112,8 @@ class Parfis:
         Parfis.lib.loadSimData.argtypes = [c_uint32]
         Parfis.lib.loadSimData.restype = c_int
 
+        Parfis.lib.runCommandChain.argtypes = [c_uint32, c_char_p]
+        Parfis.lib.runCommandChain.restype = c_int
 
     @staticmethod
     def info() -> str:
@@ -132,12 +140,28 @@ class Parfis:
         return Parfis.lib.setPyCfgData(id)
 
     @staticmethod
+    def getPySimData(id: int) -> POINTER(PySimData):
+        return Parfis.lib.getPySimData(id)
+
+    @staticmethod
+    def setPySimData(id: int) -> int:
+        return Parfis.lib.setPySimData(id)
+
+    @staticmethod
     def loadCfgData(id: int) -> int:
         return Parfis.lib.loadCfgData(id)
 
     @staticmethod
     def setConfig(id: int, kvStr: str) -> int:
         return Parfis.lib.setConfig(id, kvStr.encode())
+
+    @staticmethod
+    def loadSimData(id: int) -> int:
+        return Parfis.lib.loadSimData(id)
+
+    @staticmethod
+    def runCommandChain(id: int, cmdStr: str) -> int:
+        return Parfis.lib.runCommandChain(id, cmdStr.encode())
 
 if __name__ == "__main__":
 

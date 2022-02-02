@@ -14,6 +14,7 @@ option(BUILD_SPHINX "Build documentation using Sphinx." OFF)
 option(BUILD_GOOGLE_TEST "Build google test" OFF)
 option(BUILD_GTESTALL "Build gtestAll" ON)
 option(COPY_LIB_PYTHON "Copy parfis lib for python module" OFF)
+option(SETUP_PYTHON_MODULE "Setup python module" ON)
 
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -95,6 +96,11 @@ endif()
 if(BUILD_SPHINX)
     message("Building sphinx")
     run_sphinx_build()
+endif()
+
+if(SETUP_PYTHON_MODULE)
+    message("Generate setup.py")
+    generate_setup_python()
 endif()
 
 # State type float or double

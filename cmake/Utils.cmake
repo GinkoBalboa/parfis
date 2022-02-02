@@ -254,3 +254,12 @@ function (run_sphinx_build)
         DEPENDS doc_sphinx)
 
 endfunction (run_sphinx_build)
+
+
+# This sets up the setup.py for the python module
+function(generate_setup_python)
+    configure_file(
+        ${parfis_SOURCE_DIR}/python-package/setup.py.in
+        ${parfis_SOURCE_DIR}/python-package/setup.py
+        @ONLY)
+endfunction(generate_setup_python)

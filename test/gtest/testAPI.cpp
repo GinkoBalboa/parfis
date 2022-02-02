@@ -216,22 +216,22 @@ TEST(api, createCellsAndStates) {
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     double rSqPi = M_PI * std::pow(parfis::api::getCfgData(id)->geometrySize.x * 0.5, 2);
-    double areaCyl = rSqPi * parfis::api::getCfgData(id)->geometrySize.z;
-    double areaCub = parfis::api::getCfgData(id)->geometrySize.x * 
+    double volCyl = rSqPi * parfis::api::getCfgData(id)->geometrySize.z;
+    double volCub = parfis::api::getCfgData(id)->geometrySize.x * 
         parfis::api::getCfgData(id)->geometrySize.y * parfis::api::getCfgData(id)->geometrySize.z;
 
     uint32_t numStatesCyl = parfis::api::getSimData(id)->stateVec.size();
     uint32_t numCells = parfis::api::getSimData(id)->cellIdVec.size();
     uint32_t numStatesCub = numCells*parfis::api::getSimData(id)->specieVec[0].statesPerCell;
-    double areaRatio = areaCyl/areaCub;
+    double volRatio = volCyl/volCub;
     double stateRatio = double(numStatesCyl)/double(numStatesCub);
-    double relativeDifference = abs(areaRatio - stateRatio)/(0.5*(areaRatio + stateRatio));
+    double relativeDifference = abs(volRatio - stateRatio)/(0.5*(volRatio + stateRatio));
     double precission = 5.0e-3;
     
     // The ratio between the number of created states in cylindrical and cubical geometry 
     // should resemble the ratio of the volume between the two
     std::cout << GTEST_BOX << "created: " << numStatesCyl << " states" << std::endl;
-    std::cout << GTEST_BOX << "volume ratio: " << areaRatio << std::endl;
+    std::cout << GTEST_BOX << "volume ratio: " << volRatio << std::endl;
     std::cout << GTEST_BOX << "states ratio: " << stateRatio << std::endl;
     std::cout << GTEST_BOX << "relative difference: " << 
         relativeDifference*100.0 << "%" << std::endl;

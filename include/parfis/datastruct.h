@@ -277,8 +277,14 @@ namespace parfis {
     template <class T>
     struct PyVec 
     {
-        T* ptr;
+        const T* ptr;
         size_t size;
+
+        PyVec<T>& operator=(const std::vector<T>& tVec) {
+            ptr = &tVec[0];
+            size = tVec.size();
+            return *this;
+        }
     };
 
     struct PyStringVec : public PyVec<const char*>
@@ -335,7 +341,18 @@ namespace parfis {
             return cellCount.x * (cellCount.y * cellPos.z + cellPos.y ) + cellPos.x;
         };
         /// Set PyCfgData
-        void setPyCfgData();
+        int setPyCfgData();
+    };
+
+    /**
+     * @brief Simulation data in format suitable for Python ctypes
+     * 
+     */
+    struct PySimData
+    {
+        PyVec<State> stateVec;
+        PyVec<cellId_t> cellIdVec;
+        PyVec<Specie> specieVec;
     };
 
     /**
@@ -374,6 +391,10 @@ namespace parfis {
         std::vector<std::vector<stateId_t>> headIdVec;
         /// Vector of species
         std::vector<Specie> specieVec;
+        /// PySimData points to data of this object
+        PySimData pySimData;
+        /// Set PyCfgData
+        int setPySimData();
     };
     /** @} data */
 
