@@ -366,7 +366,28 @@ PARFIS_EXPORT int parfis::api::setConfig(uint32_t id, const char* str)
 {
     if (Parfis::getParfis(id) == nullptr) 
         return 1;
-    int retval = Parfis::getParfis(id)->configure(str);
+    int retval = 0;
+    std::string cfgStr = str;
+    size_t start = 0;
+    size_t end = cfgStr.find('\n', start);
+    if (end == std::string::npos) {
+        // One line cfgStr
+        retval = Parfis::getParfis(id)->configure(str);
+    }
+    else {
+        // Mulit line cfgStr
+        std::string line;
+        line = cfgStr.substr(start, end - start + 1);
+        while(line.size() > 0) {
+            retval = Parfis::getParfis(id)->configure(line.c_str());
+            start = end + 1;
+            end = cfgStr.find('\n', start);
+            if (end == std::string::npos)
+                line.clear();
+            else
+                line = cfgStr.substr(start, end - start + 1); 
+        }
+    }
     // Domain name not recognized
     if (retval == -1)
         return 2;

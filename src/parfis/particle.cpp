@@ -22,7 +22,7 @@ int parfis::Particle::loadSimData()
     m_pSimData->specieVec.resize(m_pCfgData->specieNameVec.size());
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
         m_pSimData->specieVec[i].id = i;
-        m_pSimData->specieVec[i].name = m_pCfgData->specieNameVec[i];
+        m_pSimData->specieVec[i].name = m_pCfgData->specieNameVec[i].c_str();
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".statesPerCell", 
             m_pSimData->specieVec[i].statesPerCell);
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".timestepRatio", 
@@ -47,7 +47,7 @@ int parfis::Particle::loadSimData()
         double maxEnergy = 0.5*spec.maxVel.lenSq()*spec.mass*Const::eVJ;
 
         std::string msg = 
-            "specie " + spec.name + " configuration:\n" +
+            "specie " + std::string(spec.name) + " configuration:\n" +
             Const::multilineSeparator + 
             "mass [kg]: " + Global::to_string(spec.mass) + "\n" +
             "dt [s]: " + Global::to_string(spec.dt) + "\n" +

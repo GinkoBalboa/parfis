@@ -227,6 +227,7 @@ void parfis::Domain::getParamToVector(const std::string& key, std::vector<T>& ve
     for(i=0; i<inhvec.size() - 1; i++) {
         pp = pp->m_childMap[inhvec[i]].get();
     }
+    vecRef.clear();
     vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
 }
 

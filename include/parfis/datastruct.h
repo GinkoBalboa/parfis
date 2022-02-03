@@ -245,7 +245,7 @@ namespace parfis {
         /// Id from the specie vector
         uint32_t id;
         /// Specie name
-        std::string name;
+        const char * name;
         /// States per cell for creating initial particles
         int statesPerCell;
         /// Number of CfgData.timestep for one specie timestep
@@ -287,11 +287,15 @@ namespace parfis {
         }
     };
 
-    struct PyStringVec : public PyVec<const char*>
+    template<>
+    struct PyVec<std::string>
     {   
+        const char ** ptr;
+        size_t size;
+
         std::vector<const char *> vec;
 
-        PyStringVec& operator=(const std::vector<std::string>& strVec) {
+        PyVec<std::string>& operator=(const std::vector<std::string>& strVec) {
             vec.clear();
             for (auto & str: strVec)
                 vec.push_back(str.c_str());
@@ -313,7 +317,7 @@ namespace parfis {
         Vec3D<double>* cellSize;
         Vec3D<int>* periodicBoundary;
         Vec3D<int>* cellCount;
-        PyStringVec specieNameVec;
+        PyVec<std::string> specieNameVec;
     };
 
     /**

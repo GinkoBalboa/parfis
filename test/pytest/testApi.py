@@ -1,3 +1,4 @@
+from ctypes import c_double, c_float
 import unittest
 import math
 from parfis import Parfis
@@ -91,18 +92,22 @@ class TestApi(unittest.TestCase):
         '''Check creation of cells and states
         '''
         id = Parfis.newParfis()
-        Parfis.setConfig(id, "particle.specie = [electron] <parfis::Param>")
-        Parfis.setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>")
-        Parfis.setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>")
-        Parfis.setConfig(id, "particle.specie.electron.timestepRatio = 1 <int>")
-        Parfis.setConfig(id, "particle.specie.electron.amuMass = 0.00054858 <double>")
-        Parfis.setConfig(id, "particle.specie.electron.eCharge = -1 <int>")
+        cfgStr = """
+            particle.specie = [electron] <parfis::Param>
+            particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>
+            particle.specie.electron.statesPerCell = 10 <int>
+            particle.specie.electron.timestepRatio = 1 <int>
+            particle.specie.electron.amuMass = 0.00054858 <double>
+            particle.specie.electron.eCharge = -1 <int>
+        """
+        Parfis.setConfig(id, cfgStr)
         Parfis.loadCfgData(id)
         Parfis.loadSimData(id)
         Parfis.runCommandChain(id, "create")
+        
         Parfis.setPyCfgData(id)
         ptrCfgData = Parfis.getPyCfgData(id)
-        rSqPi = math.pi * ptrCfgData[0].geometrySize[0].x**2
+        rSqPi = math.pi * (0.5*ptrCfgData[0].geometrySize[0].x)**2
         volCyl = rSqPi * ptrCfgData[0].geometrySize[0].z
         volCylAbs = (
             ptrCfgData[0].geometrySize[0].x*
@@ -110,10 +115,18 @@ class TestApi(unittest.TestCase):
             ptrCfgData[0].geometrySize[0].z
         )
         volRatio = volCyl/volCylAbs
+
         Parfis.setPySimData(id)
         ptrSimData = Parfis.getPySimData(id)
+        self.assertEqual("electron", ptrSimData[0].specieVec.ptr[0].name.decode())
         numStatesCyl = ptrSimData[0].stateVec.size
         numCells = ptrSimData[0].cellIdVec.size
+        numStatesCub = numCells * ptrSimData[0].specieVec.ptr[0].statesPerCell
+        stateRatio = numStatesCyl/numStatesCub
+        relativeDifference = abs(volRatio - stateRatio)/(0.5*(volRatio + stateRatio))
+        precission = 5.0e-3
+        self.assertLess(relativeDifference, precission)
 
 if __name__ == '__main__':
+
     unittest.main()

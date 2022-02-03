@@ -26,12 +26,19 @@ class Vec3D_int(Structure, Vec3D):
         ('z', c_int)
     ]
 
+stateId_t = c_uint32
+state_t = c_float
+
+def Vec3D(cType):
+    if cType == c_float:
+        return Vec3D_float
+
 class State(Structure):
     _fields_ = [
-        ('next', c_uint32),
-        ('prev', c_uint32),
-        ('pos', Vec3D_float),
-        ('vel', Vec3D_float)
+        ('next', stateId_t),
+        ('prev', stateId_t),
+        ('pos', Vec3D(state_t)),
+        ('vel', Vec3D(state_t))
     ]
 
 class Specie(Structure):

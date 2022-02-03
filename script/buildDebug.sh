@@ -7,7 +7,7 @@ if [[ $? != 0 ]]; then
 fi
 rm -rf ./* ./.cmake
 rm ../*.log
-rm ../python-package/parfis/libparfis.so
-cmake .. -DCOPY_LIB_PYTHON=ON
-cmake --build . --config Release
-./bin/gtestAll/gtestAll
+rm ../python-package/parfis/libparfisd.so
+cmake .. -DCOPY_LIB_PYTHON=ON -DBUILD_DEBUG=ON
+cmake --build . --config Debug
+./bin/gtestAll/gtestAlld

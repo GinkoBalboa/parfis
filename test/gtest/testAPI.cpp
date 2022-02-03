@@ -243,6 +243,41 @@ TEST(api, createCellsAndStates) {
 }
 
 /**
+ * @brief Test PySimData
+ */
+TEST(api, pySimData) {
+    uint32_t id = parfis::api::newParfis();
+    // Set two species
+    std::string cfgStr = "\n\n\
+        \n\n\
+        particle.specie = [electron] <parfis::Param>\n\
+        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>\n\
+        particle.specie.electron.statesPerCell = 10 <int>\n\
+        particle.specie.electron.timestepRatio = 1 <int>\n\
+        particle.specie.electron.amuMass = 0.00054858 <double>\n\
+        particle.specie.electron.eCharge = -1 <int>\n\
+    ";
+    parfis::api::setConfig(id, cfgStr.c_str());
+    parfis::api::loadCfgData(id);
+    parfis::api::loadSimData(id);
+    parfis::api::runCommandChain(id, "create");
+    parfis::api::setPyCfgData(id);
+    ASSERT_EQ(1, parfis::api::getPyCfgData(id)->specieNameVec.size);
+    ASSERT_EQ(std::string("electron"), 
+        std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]));
+    parfis::api::setPySimData(id);
+    ASSERT_EQ(std::string("electron"), 
+        std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].name));
+    ASSERT_EQ(parfis::api::getSimData(id)->stateVec.size(), 
+        parfis::api::getPySimData(id)->stateVec.size);
+    ASSERT_EQ(parfis::api::getSimData(id)->cellIdVec.size(), 
+        parfis::api::getPySimData(id)->cellIdVec.size);
+    ASSERT_EQ(parfis::api::getSimData(id)->specieVec[0].statesPerCell, 
+        parfis::api::getPySimData(id)->specieVec.ptr[0].statesPerCell);
+    parfis::api::deleteParfis(id);
+}
+
+/**
  * @brief Push states
  */
 TEST(api, pushStates) {
