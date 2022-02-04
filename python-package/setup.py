@@ -8,14 +8,6 @@ from platform import system
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, CURRENT_DIR)
 
-def lib_name() -> str:
-    '''Return platform dependent shared object name.'''
-    if system() == 'Linux' or system().upper().endswith('BSD'):
-        name = 'libpafis.so'
-    elif system() == 'Windows':
-        name = 'pafis.dll'
-    return name
-
 if __name__ == '__main__':
     
     # Supported commands:

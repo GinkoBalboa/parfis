@@ -30,7 +30,24 @@ class TestApi(unittest.TestCase):
         parInfo = Parfis.info()
         self.assertTrue("Parfis object count = 1" in parInfo)
         self.assertTrue(f"Parfis object id = [{parId}]" in parInfo)
-        Parfis.deleteParfis(parId)
+
+    def test_load_different_lib(self) -> None:
+        '''Change lib and back again
+        '''
+        Parfis.newParfis()
+        parInfo = Parfis.info()
+        self.assertTrue(f"parfis::state_t = {TestApi.stateType}" in parInfo)
+        Parfis.deleteAll()
+        for i in range(2):
+            if TestApi.stateType == 'float':
+                TestApi.stateType = 'double'
+            else: 
+                TestApi.stateType = 'float'
+            Parfis.load_lib(stateType=TestApi.stateType)
+            Parfis.newParfis()
+            parInfo = Parfis.info()
+            self.assertTrue(f"parfis::state_t = {TestApi.stateType}" in parInfo)
+            Parfis.deleteAll()
 
     def test_delete_parfis(self) -> None:
         '''Create four new parfis objects and delete one of them
