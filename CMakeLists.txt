@@ -37,11 +37,15 @@ else ()
     message("Build shared lib")
     add_library(parfis SHARED)
     add_compile_definitions(PARFIS_SHARED_LIB)
-    set_properties(parfis SHARED)
-    set_target_properties(parfis PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/parfis)
-endif ()
+    if(PARFIS_STATE_TYPE_DOUBLE)
+        set_properties(parfis SHARED "64")
+    else()
+        set_properties(parfis SHARED "32")
+    endif()
+endif()
 target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
 set_target_properties(parfis PROPERTIES PUBLIC_HEADER "parfis.h")
+set_target_properties(parfis PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/parfis)
 target_include_directories(parfis PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
   $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
@@ -58,7 +62,7 @@ if(BUILD_PARFISAPP)
         $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
     )
     set_output_directory(parfisApp ${parfis_SOURCE_DIR}/build/bin/parfisApp)
-    set_properties(parfisApp EXECUTABLE)
+    set_properties(parfisApp EXECUTABLE "")
     add_dependencies(parfisApp parfis)
     target_link_libraries(parfisApp PRIVATE parfis)
     add_dependencies(parfisApp parfis)
@@ -113,18 +117,20 @@ endif()
 
 # Google test
 if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)
-    message("Build googletest")
-    include(ExternalProject)
-    ExternalProject_Add(googletest
-        GIT_REPOSITORY https://github.com/google/googletest
-        GIT_TAG main
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/build/lib/googletest 
-                   -DBUILD_SHARED_LIBS=ON
-        BUILD_COMMAND ""
-        BUILD_ALWAYS 1
-        INSTALL_COMMAND cmake --build . --target install --config ${CMAKE_BUILD_TYPE}
-    )
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    if (BUILD_GOOGLE_TEST)
+        message("Build googletest")
+        include(ExternalProject)
+        ExternalProject_Add(googletest
+            GIT_REPOSITORY https://github.com/google/googletest
+            GIT_TAG main
+            CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/build/lib/googletest 
+                    -DBUILD_SHARED_LIBS=ON
+            BUILD_COMMAND ""
+            BUILD_ALWAYS 1
+            INSTALL_COMMAND cmake --build . --target install --config ${CMAKE_BUILD_TYPE}
+        )
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    endif()
     add_library(gtest SHARED IMPORTED)
     if(UNIX)
         set_target_properties(gtest PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/googletest/lib)

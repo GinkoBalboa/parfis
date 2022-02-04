@@ -7,12 +7,12 @@ from parfis import Parfis
 
 class TestApi(unittest.TestCase):
 
+    stateType = 'double'
+
     @classmethod
     def setUpClass(cls):
-        Parfis.load_lib()
-
-    # def setUp(self) -> None:
-    #     Parfis.load_lib()
+        print(f"setUpClass: {TestApi.stateType}")
+        Parfis.load_lib(stateType=TestApi.stateType)
 
     def tearDown(self) -> None:
         Parfis.deleteAll()
@@ -126,6 +126,20 @@ class TestApi(unittest.TestCase):
         relativeDifference = abs(volRatio - stateRatio)/(0.5*(volRatio + stateRatio))
         precission = 5.0e-3
         self.assertLess(relativeDifference, precission)
+
+    def test_evolveCommandChain(self) -> None:
+        '''Push states for 100 times
+        '''
+        id = Parfis.newParfis()
+        Parfis.loadCfgData(id)
+        Parfis.loadSimData(id)
+        Parfis.runCommandChain(id, "create")
+        retval = 0
+        for i in range(100):
+            retval = Parfis.runCommandChain(id, "evolve")
+            if retval != 0: 
+                break
+        self.assertEqual(retval, 0)
 
 if __name__ == '__main__':
 

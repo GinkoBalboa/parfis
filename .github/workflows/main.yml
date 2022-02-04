@@ -13,6 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         config: [Release, Debug]
+        state_t: [float, double]
 
     name: Build and run gtestAll
     runs-on: ${{ matrix.os }}
@@ -26,18 +27,32 @@ jobs:
       shell: bash
       run: mkdir build
 
-    - if: ${{ matrix.config=='Release' }}
-      name: Build Release
+    - if: ${{ matrix.config=='Release' && matrix.state_t=='float' }}
+      name: Build Release float
       run: |
         cd build
-        cmake ..
+        cmake .. -DBUILD_GOOGLE_TEST=ON
         cmake --build . --config Release
 
-    - if: ${{ matrix.config=='Debug' }}
+    - if: ${{ matrix.config=='Release' && matrix.state_t=='double' }}
+      name: Build Release double
+      run: |
+        cd build
+        cmake .. -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GOOGLE_TEST=ON
+        cmake --build . --config Release
+
+    - if: ${{ matrix.config=='Debug' && matrix.state_t=='float' }}
       name: Build Debug
       run: |
         cd build
-        cmake .. -DBUILD_DEBUG=ON
+        cmake .. -DBUILD_DEBUG=ON -DBUILD_GOOGLE_TEST=ON
+        cmake --build . --config Debug
+
+    - if: ${{ matrix.config=='Debug' && matrix.state_t=='double' }}
+      name: Build Debug
+      run: |
+        cd build
+        cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GOOGLE_TEST=ON
         cmake --build . --config Debug
 
     # Run gtestAll
@@ -60,21 +75,39 @@ jobs:
 
     # Upload artifacts
 
-    - if: ${{ matrix.config=='Release' && matrix.os=='ubuntu-latest'}} 
-      name: Upload libparfis.so
+    - if: ${{ matrix.config=='Release' && matrix.os=='ubuntu-latest' && matrix.state_t=='float' }} 
+      name: Upload libparfis32.so
       uses: actions/upload-artifact@v2
       with:
-        name: libparfis.so
-        path: build/lib/parfis/libparfis.so
+        name: libparfis32.so
+        path: build/lib/parfis/libparfis32.so
         if-no-files-found: error
         retention-days: 1
 
-    - if: ${{ matrix.config=='Release' && matrix.os=='windows-latest'}} 
-      name: Upload parfis.dll
+    - if: ${{ matrix.config=='Release' && matrix.os=='ubuntu-latest' && matrix.state_t=='double' }} 
+      name: Upload libparfis64.so
       uses: actions/upload-artifact@v2
       with:
-        name: parfis.dll
-        path: build/lib/parfis/parfis.dll
+        name: libparfis64.so
+        path: build/lib/parfis/libparfis64.so
+        if-no-files-found: error
+        retention-days: 1
+
+    - if: ${{ matrix.config=='Release' && matrix.os=='windows-latest' && matrix.state_t=='float' }} 
+      name: Upload parfis32.dll
+      uses: actions/upload-artifact@v2
+      with:
+        name: parfis32.dll
+        path: build/lib/parfis/parfis32.dll
+        if-no-files-found: error
+        retention-days: 1
+
+    - if: ${{ matrix.config=='Release' && matrix.os=='windows-latest' && matrix.state_t=='double' }} 
+      name: Upload parfis64.dll
+      uses: actions/upload-artifact@v2
+      with:
+        name: parfis64.dll
+        path: build/lib/parfis/parfis64.dll
         if-no-files-found: error
         retention-days: 1
 
@@ -102,17 +135,31 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - if: ${{ matrix.os=='ubuntu-latest'}} 
-      name: Download libparfis.so
+      name: Download libparfis32.so
       uses: actions/download-artifact@v2
       with:
-        name: libparfis.so
+        name: libparfis32.so
+        path: python-package/parfis/clib
+
+    - if: ${{ matrix.os=='ubuntu-latest'}} 
+      name: Download libparfis64.so
+      uses: actions/download-artifact@v2
+      with:
+        name: libparfis64.so
         path: python-package/parfis/clib
 
     - if: ${{ matrix.os=='windows-latest'}} 
-      name: Download parfis.dll
+      name: Download parfis32.dll
       uses: actions/download-artifact@v2
       with:
-        name: parfis.dll
+        name: parfis32.dll
+        path: python-package/parfis/clib
+
+    - if: ${{ matrix.os=='windows-latest'}} 
+      name: Download parfis64.dll
+      uses: actions/download-artifact@v2
+      with:
+        name: parfis64.dll
         path: python-package/parfis/clib
 
     - if: ${{ matrix.os=='ubuntu-latest'}}
@@ -136,4 +183,5 @@ jobs:
       # pip install -e ./python-package --force-reinstall -v
       run: |
         pip install --force-reinstall -v --find-links=./python-package/dist/ --no-index parfis
-        python -m unittest discover -s ./test/pytest/ -p "test*.py" -v
+        python ./test/pytest/runAll.py float
+        python ./test/pytest/runAll.py double

@@ -1,4 +1,8 @@
-include parfis/clib/parfis.dll
-include parfis/clib/libparfis.so
-include parfis/clib/parfisd.dll
-include parfis/clib/libparfisd.so
+include parfis/clib/parfis32.dll
+include parfis/clib/libparfis32.so
+include parfis/clib/parfis32d.dll
+include parfis/clib/libparfis32d.so
+include parfis/clib/parfis64.dll
+include parfis/clib/libparfis64.so
+include parfis/clib/parfis64d.dll
+include parfis/clib/libparfis64d.so

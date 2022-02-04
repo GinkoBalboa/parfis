@@ -8,11 +8,12 @@ class Parfis:
 
     lib = None
     libPath = None
+    state_t = None
 
     currPath = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
     
     @staticmethod
-    def load_lib(mode='Release'):
+    def load_lib(mode='Release', stateType='double'):
         """ Loads speciffic library version
 
         Args:
@@ -20,31 +21,43 @@ class Parfis:
             - 'Release' - load release version
             - 'Debug' - load debug version
             - 'Copy' - load debug version if python is in debug mode, otherwise load release version
+
+            stateType (str): Available state types:
+            - 'double' - load library with state type double
+            - 'float' - load library with state type float
         """
+        
+        Parfis.state_t = stateType
 
-        # If lib is loaded do nothing
-        if Parfis.lib is not None:
-            return
-
-        linuxReleaseLib = os.path.join(Parfis.currPath, "libparfis.so")
-        linuxDebugLib = os.path.join(Parfis.currPath, "libparfisd.so")
-        winReleaseLib = os.path.join(Parfis.currPath, "parfis.dll")
-        winDebugLib = os.path.join(Parfis.currPath, "parfisd.dll")
+        linuxRelease32Lib = os.path.join(Parfis.currPath, "libparfis32.so")
+        linuxDebug32Lib = os.path.join(Parfis.currPath, "libparfis32d.so")
+        winRelease32Lib = os.path.join(Parfis.currPath, "parfis32.dll")
+        winDebug32Lib = os.path.join(Parfis.currPath, "parfis32d.dll")
+        linuxRelease64Lib = os.path.join(Parfis.currPath, "libparfis64.so")
+        linuxDebug64Lib = os.path.join(Parfis.currPath, "libparfis64d.so")
+        winRelease64Lib = os.path.join(Parfis.currPath, "parfis64.dll")
+        winDebug64Lib = os.path.join(Parfis.currPath, "parfis64d.dll")
 
         pathBackup = os.environ['PATH'].split(os.pathsep)
 
         releaseLib = ""
         debugLib = ""
-        # Checking platform.system() gets it wrong under docker, so just look for files
-        if os.path.isfile(linuxReleaseLib) or os.path.isfile(linuxDebugLib):
-            print("Detected Linux library file")
-            releaseLib = linuxReleaseLib
-            debugLib = linuxDebugLib
-        elif os.path.isfile(winReleaseLib) or os.path.isfile(winDebugLib):
-            print("Detected Windows library file")
-            releaseLib = winReleaseLib
-            debugLib = winDebugLib
-        else:
+        if sys.platform == "linux":
+            if stateType == "double":
+                releaseLib = linuxRelease64Lib
+                debugLib = linuxDebug64Lib
+            elif stateType == "float":
+                releaseLib = linuxRelease32Lib
+                debugLib = linuxDebug32Lib
+        elif sys.platform == "win32":
+            if stateType == "double":
+                releaseLib = winRelease64Lib
+                debugLib = winDebug64Lib
+            elif stateType == "float":
+                releaseLib = winRelease32Lib
+                debugLib = winDebug32Lib
+
+        if not os.path.isfile(releaseLib) and not os.path.isfile(debugLib):
             print("Library file not found!")
             exit(1)
 
@@ -68,14 +81,21 @@ class Parfis:
         else:
             libPath = debugLib
 
-        # needed when the lib is linked with non-system-available
-        # dependencies
+        # needed when the lib is linked with non-system-available dependencies
         os.environ['PATH'] = os.pathsep.join(
             pathBackup + [os.path.dirname(libPath)])
+
+        # If you want to load different lib version
+        if Parfis.lib != None and Parfis.libPath != libPath:
+            Parfis.unload_lib()
+        elif Parfis.lib != None:
+            # If it is the same lib - do nothing
+            return
 
         print(f"Lib file to load: {libPath}")
 
         Parfis.lib = cdll.LoadLibrary(libPath)
+        Parfis.libPath = libPath
 
         print(f"Successfully loaded lib file")
 
@@ -114,6 +134,22 @@ class Parfis:
 
         Parfis.lib.runCommandChain.argtypes = [c_uint32, c_char_p]
         Parfis.lib.runCommandChain.restype = c_int
+
+    @staticmethod
+    def unload_lib():
+        print(f"Unload lib: {Parfis.libPath}")
+        if sys.platform == "linux":
+            dlclose_func = cdll.LoadLibrary('').dlclose
+            dlclose_func.argtypes = [c_void_p]
+            handle = Parfis.lib._handle
+            del Parfis.lib
+            dlclose_func(handle)
+        elif sys.platform == "win32":
+            handle = Parfis.lib._handle
+            del Parfis.lib
+            ctypes.windll.kernel32.FreeLibrary(handle)
+        else:
+            raise NotImplementedError("Unknown platform.")
 
     @staticmethod
     def info() -> str:
