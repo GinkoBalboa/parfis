@@ -27,11 +27,3 @@ Logger object.
 .. doxygendefine:: LOG
 
 .. doxygendefine:: LOG_LEVEL
-
-parfisApp
-=========
-
-The executable ``parfisApp`` functions as an interface for the parfis library. The 
-app is a terminal application that has couple of commands. If building from source
-the ``parfisApp`` is compiled in ``/build/bin/parfisApp/``. By executing the application
-a list of all available commands can be obtained with the ``help()`` command. 

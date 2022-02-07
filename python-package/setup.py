@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="parfis",
-        version="v0.0.5-dev",
+        version="N/A",
         author="Ginko Balboa",
         author_email="ginkobalboa3@gmail.com",
         description="Particles and field simulator",

@@ -16,4 +16,7 @@ def suite(stateType):
 if __name__ == '__main__':
 
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite(sys.argv[1]))
+    if len(sys.argv) > 1:
+        runner.run(suite(sys.argv[1]))
+    else:
+        runner.run(suite('double'))

@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Parfis documentation!
-=====================
+Parfis documentation
+====================
 
 Parfis is a particles and field simulator. Written in C++ with Python interface, Parfis is based on 
 the altered particle-in-cell (PIC) method. In the PIC method, individual particles (or fluid 
@@ -12,8 +12,25 @@ elements) in a Lagrangian frame are tracked in continuous phase space, whereas m
 of the distribution such as densities and currents are computed simultaneously on Eulerian 
 (stationary) mesh points.
 
-- `Link to GitHub repo <https://github.com/GinkoBalboa/parfis>`_
-- Version: |version|
+Quick start
+===========
+
+You can quickly install and try parfis by doing the following in your terminal:
+
+.. code-block:: bash
+
+    pip install parfis
+
+After installing you can try if the library loads and check the info of 
+the istalled build with the following three commands in your terminal:
+
+.. code-block:: bash
+
+   python -c "from parfis import Parfis; Parfis.load_lib(); print(Parfis.info());"
+
+Explore the possibilities by checking some of the examples given in the 
+:ref:`demo <demo>` section of this site. The above three commands are given in 
+the :ref:`simple demo hotebook </demo/simple_demo.ipynb>`.
 
 .. toctree::
    :maxdepth: 2
@@ -21,6 +38,7 @@ of the distribution such as densities and currents are computed simultaneously o
 
    installation
    build
+   demo
    cpp
 
 .. toctree::

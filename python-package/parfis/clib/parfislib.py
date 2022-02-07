@@ -92,12 +92,10 @@ class Parfis:
             # If it is the same lib - do nothing
             return
 
-        print(f"Lib file to load: {libPath}")
-
         Parfis.lib = cdll.LoadLibrary(libPath)
         Parfis.libPath = libPath
 
-        print(f"Successfully loaded lib file")
+        print(f"Successfully loaded lib file: {libPath.split('/')[-1]}")
 
         Parfis.lib.info.argtypes = None
         Parfis.lib.info.restype = c_char_p

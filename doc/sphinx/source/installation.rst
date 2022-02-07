@@ -7,14 +7,12 @@ For building from source visit :doc:`this page </build>`
 
 .. contents::
 
-Stable Release
-==============
+PyPI package
+============
 
-Python
-------
-
-Pre-built binary are uploaded to PyPI (Python Package Index) for each release.  Supported 
-platforms are Linux and Windows.
+Stable releases are uploaded to PyPI (Python Package Index) for each release. Supported 
+platforms are Linux and Windows. You can install the latest stable release with the following
+command from your terminal:
 
 .. code-block:: bash
 

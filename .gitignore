@@ -67,3 +67,8 @@ python-package/dist
 python-package/build
 python-package/parfis.egg-info
 __pycache__
+
+# Jupyter notebooks
+.ipynb_checkpoints
+*.pdf
+*.html

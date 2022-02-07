@@ -9,6 +9,7 @@ fi
 rm -rf ./bin/* ./lib/parfis/* ./CMake* ./Makefile ./cmake* ./.cmake*
 rm ./*.log
 rm ../*.log
+rm ../test/pytest/*.log
 rm ../python-package/parfis/clib/libparfis64d.so
 cmake .. -DCOPY_LIB_PYTHON=ON -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=ON
 cmake --build . --config Debug

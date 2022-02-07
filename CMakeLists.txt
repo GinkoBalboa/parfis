@@ -5,10 +5,11 @@ project(parfis LANGUAGES CXX C)
 
 set_version()
 
+option(BUILD_LIB "Build parfis library" ON)
 option(BUILD_DEBUG "Build debug version" OFF)
 option(BUILD_STATIC_LIB "Build static library" OFF)
-option(BUILD_PARFISAPP "Build executable application" ON)
-option(PARFIS_STATE_TYPE_DOUBLE "Use double for state data type" OFF)
+option(BUILD_PARFISAPP "Build executable application" OFF)
+option(PARFIS_STATE_TYPE_DOUBLE "Use double for state data type" ON)
 option(BUILD_DOXYGEN "Build documentation C++ code using Doxygen." OFF)
 option(BUILD_SPHINX "Build documentation using Sphinx." OFF)
 option(BUILD_GOOGLE_TEST "Build google test" OFF)
@@ -30,10 +31,7 @@ endif()
 
 # Core parfis
 file(GLOB_RECURSE PARFIS_CORE_SOURCES ${parfis_SOURCE_DIR}/src/parfis/*.cpp ${parfis_SOURCE_DIR}/src/parfis/*.h)
-if (BUILD_STATIC_LIB)
-    message("Build static lib")
-    add_library(parfis STATIC)
-else ()
+if (BUILD_LIB)
     message("Build shared lib")
     add_library(parfis SHARED)
     add_compile_definitions(PARFIS_SHARED_LIB)
@@ -45,15 +43,19 @@ else ()
         message("Using float for type parfis::state_t")
         set_properties(parfis SHARED "32")
     endif()
+    target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
+    set_target_properties(parfis PROPERTIES PUBLIC_HEADER "parfis.h")
+    set_target_properties(parfis PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/parfis)
+    target_include_directories(parfis PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
+        $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
+    )
+    set_output_directory(parfis ${parfis_SOURCE_DIR}/build/lib/parfis)
+    get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
+    get_target_property(PARFIS_FILE_NAME parfis FILE_NAME)
+    message("PARFIS_FILE_DIR = ${PARFIS_FILE_DIR}")
+    message("PARFIS_FILE_NAME = ${PARFIS_FILE_NAME}")
 endif()
-target_sources(parfis PRIVATE ${PARFIS_CORE_SOURCES})
-set_target_properties(parfis PROPERTIES PUBLIC_HEADER "parfis.h")
-set_target_properties(parfis PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/parfis)
-target_include_directories(parfis PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
-  $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
-)
-set_output_directory(parfis ${parfis_SOURCE_DIR}/build/lib/parfis)
 
 # parfisApp
 if(BUILD_PARFISAPP)
@@ -136,6 +138,12 @@ if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)
         set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/gtest.lib)
         set_target_properties(gtest PROPERTIES FILE_NAME gtest.dll)
     endif()
+    get_target_property(GTEST_IMPORTED_LOCATION gtest IMPORTED_LOCATION)
+    get_target_property(GTEST_FILE_DIR gtest FILE_DIR)
+    get_target_property(GTEST_FILE_NAME gtest FILE_NAME)
+    message("GTEST_IMPORTED_LOCATION = ${GTEST_IMPORTED_LOCATION}")
+    message("GTEST_FILE_DIR = ${GTEST_FILE_DIR}")
+    message("GTEST_FILE_NAME = ${GTEST_FILE_NAME}")
 endif()
 
 # gtestAll
@@ -144,17 +152,5 @@ if(BUILD_GTESTALL)
     include(${parfis_SOURCE_DIR}/test/CMakeLists.txt)
 endif()
 
-
 message("VERSION = ${VERSION}")
 message("PARFIS_LOG_LEVEL = ${PARFIS_LOG_LEVEL}")
-
-get_target_property(GTEST_IMPORTED_LOCATION gtest IMPORTED_LOCATION)
-get_target_property(GTEST_FILE_DIR gtest FILE_DIR)
-get_target_property(GTEST_FILE_NAME gtest FILE_NAME)
-get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
-get_target_property(PARFIS_FILE_NAME parfis FILE_NAME)
-message("GTEST_IMPORTED_LOCATION = ${GTEST_IMPORTED_LOCATION}")
-message("GTEST_FILE_DIR = ${GTEST_FILE_DIR}")
-message("GTEST_FILE_NAME = ${GTEST_FILE_NAME}")
-message("PARFIS_FILE_DIR = ${PARFIS_FILE_DIR}")
-message("PARFIS_FILE_NAME = ${PARFIS_FILE_NAME}")
