@@ -31,7 +31,7 @@ jobs:
       name: Build Release float
       run: |
         cd build
-        cmake .. -DBUILD_GOOGLE_TEST=ON
+        cmake .. -DBUILD_GOOGLE_TEST=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF
         cmake --build . --config Release
 
     - if: ${{ matrix.config=='Release' && matrix.state_t=='double' }}
@@ -45,7 +45,7 @@ jobs:
       name: Build Debug
       run: |
         cd build
-        cmake .. -DBUILD_DEBUG=ON -DBUILD_GOOGLE_TEST=ON
+        cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF -DBUILD_GOOGLE_TEST=ON
         cmake --build . --config Debug
 
     - if: ${{ matrix.config=='Debug' && matrix.state_t=='double' }}
@@ -168,7 +168,16 @@ jobs:
       run: |
         pip install -v wheel
         cd python-package
-        python setup.py bdist_wheel --plat-name linux_x86_64
+        python setup.py bdist_wheel --plat-name manylinux2014_x86_64
+
+    - if: ${{ matrix.os=='ubuntu-latest'}}
+      name: Upload linux pypi package
+      uses: actions/upload-artifact@v2
+      with:
+        name: pypi-linux
+        path: python-package/
+        if-no-files-found: error
+        retention-days: 1
 
     - if: ${{ matrix.os=='windows-latest'}}
       name: Create pypi wheel win
@@ -177,6 +186,15 @@ jobs:
         pip install -v wheel
         cd python-package
         python setup.py bdist_wheel --plat-name win_amd64
+
+    - if: ${{ matrix.os=='windows-latest'}}
+      name: Upload windows pypi package
+      uses: actions/upload-artifact@v2
+      with:
+        name: pypi-windows
+        path: python-package/
+        if-no-files-found: error
+        retention-days: 1
 
     - name: Install wheel and run tests
       # Use the following command if you install locally for testing

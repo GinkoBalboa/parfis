@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="parfis",
-        version="N/A",
+        version="v0.0.6-dev",
         author="Ginko Balboa",
         author_email="ginkobalboa3@gmail.com",
         description="Particles and field simulator",
@@ -33,7 +33,8 @@ if __name__ == '__main__':
         #                 'testing':['unittest']},
         long_description=long_description,
         long_description_content_type="text/markdown",
-        url="https://github.com/GinkoBalboa/parfis",
+        project_urls={"github": "https://github.com/GinkoBalboa/parfis",
+                      "documentation": "https://www.parfis.com"},
         classifiers=[
             "Development Status :: 1 - Planning",
             "Intended Audience :: Science/Research",

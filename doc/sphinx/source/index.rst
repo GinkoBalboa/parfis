@@ -22,7 +22,7 @@ You can quickly install and try parfis by doing the following in your terminal:
     pip install parfis
 
 After installing you can try if the library loads and check the info of 
-the istalled build with the following three commands in your terminal:
+the istalled build with the following three commands from your terminal:
 
 .. code-block:: bash
 
