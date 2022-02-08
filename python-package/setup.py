@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 import setuptools
 import subprocess
 from platform import system
@@ -19,8 +20,11 @@ if __name__ == '__main__':
 
     with open("README.md", "r") as fh:
         long_description = fh.read()
-        
+
     subprocess.Popen("git describe --tags --abbrev=0 > tag.txt", shell=True)
+
+    while os.path.isfile("tag.txt") == False:
+        time.sleep(1)
 
     tagName = "0.0.0"
     with open('tag.txt', 'r') as file:
