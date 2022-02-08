@@ -145,7 +145,7 @@ class Parfis:
         elif sys.platform == "win32":
             handle = Parfis.lib._handle
             del Parfis.lib
-            ctypes.windll.kernel32.FreeLibrary(handle)
+            windll.kernel32.FreeLibrary(handle)
         else:
             raise NotImplementedError("Unknown platform.")
 
