@@ -1,3 +1,4 @@
+from ctypes import WinDLL
 import sys
 import os
 from ctypes import *
@@ -95,7 +96,7 @@ class Parfis:
         Parfis.lib = cdll.LoadLibrary(libPath)
         Parfis.libPath = libPath
 
-        print(f"Successfully loaded lib file: {libPath.split('/')[-1]}")
+        print(f"Successfully loaded lib file: {libPath[len(Parfis.currPath)+1:]}")
 
         Parfis.lib.info.argtypes = None
         Parfis.lib.info.restype = c_char_p
@@ -135,7 +136,7 @@ class Parfis:
 
     @staticmethod
     def unload_lib():
-        print(f"Unload lib: {Parfis.libPath}")
+        print(f"Unload lib: {Parfis.libPath[len(Parfis.currPath)+1:]}")
         if sys.platform == "linux":
             dlclose_func = cdll.LoadLibrary('').dlclose
             dlclose_func.argtypes = [c_void_p]
@@ -145,7 +146,9 @@ class Parfis:
         elif sys.platform == "win32":
             handle = Parfis.lib._handle
             del Parfis.lib
-            windll.kernel32.FreeLibrary(handle)
+            kernel32 = WinDLL('kernel32', use_last_error=True)
+            kernel32.FreeLibrary.argtypes = [wintypes.HMODULE]
+            kernel32.FreeLibrary(handle)
         else:
             raise NotImplementedError("Unknown platform.")
 
