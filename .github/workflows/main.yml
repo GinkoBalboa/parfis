@@ -4,6 +4,12 @@ on:
   pull_request:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      uploadWheel:
+        description: "Upload wheel artifacts"
+        required: true
+        default: false
+        type: boolean
   
 jobs:
 
@@ -170,12 +176,12 @@ jobs:
         cd python-package
         python setup.py bdist_wheel --plat-name manylinux2014_x86_64
 
-    - if: ${{ matrix.os=='ubuntu-latest'}}
-      name: Upload linux pypi package
+    - if: ${{ matrix.os=='ubuntu-latest' && github.events.inputs.uploadWheel }}
+      name: Upload linux wheel
       uses: actions/upload-artifact@v2
       with:
-        name: pypi-linux
-        path: python-package/
+        name: linux-wheel
+        path: python-package/dist/
         if-no-files-found: error
         retention-days: 1
 
@@ -187,12 +193,12 @@ jobs:
         cd python-package
         python setup.py bdist_wheel --plat-name win_amd64
 
-    - if: ${{ matrix.os=='windows-latest'}}
-      name: Upload windows pypi package
+    - if: ${{ matrix.os=='windows-latest' && github.events.inputs.uploadWheel }}
+      name: Upload windows wheel
       uses: actions/upload-artifact@v2
       with:
-        name: pypi-windows
-        path: python-package/
+        name: windows-wheel
+        path: python-package/dist/
         if-no-files-found: error
         retention-days: 1
 
