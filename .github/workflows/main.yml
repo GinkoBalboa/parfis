@@ -37,28 +37,28 @@ jobs:
       name: Build Release float
       run: |
         cd build
-        cmake .. -DBUILD_GOOGLE_TEST=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF
+        cmake .. -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF
         cmake --build . --config Release
 
     - if: ${{ matrix.config=='Release' && matrix.state_t=='double' }}
       name: Build Release double
       run: |
         cd build
-        cmake .. -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GOOGLE_TEST=ON
+        cmake .. -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON -DPARFIS_STATE_TYPE_DOUBLE=ON
         cmake --build . --config Release
 
     - if: ${{ matrix.config=='Debug' && matrix.state_t=='float' }}
       name: Build Debug
       run: |
         cd build
-        cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF -DBUILD_GOOGLE_TEST=ON
+        cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON
         cmake --build . --config Debug
 
     - if: ${{ matrix.config=='Debug' && matrix.state_t=='double' }}
       name: Build Debug
       run: |
         cd build
-        cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GOOGLE_TEST=ON
+        cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON
         cmake --build . --config Debug
 
     # Run gtestAll

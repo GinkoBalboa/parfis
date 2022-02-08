@@ -1,6 +1,7 @@
 import sys
 import os
 import setuptools
+import subprocess
 from platform import system
 
 # You can't use `pip install .` as pip copies setup.py to a temporary
@@ -18,10 +19,16 @@ if __name__ == '__main__':
 
     with open("README.md", "r") as fh:
         long_description = fh.read()
+        
+    subprocess.Popen("git describe --tags --abbrev=0 > tag.txt", shell=True)
+
+    tagName = "0.0.0"
+    with open('tag.txt', 'r') as file:
+        tagName = file.read().rstrip()
 
     setuptools.setup(
         name="parfis",
-        version="N/A",
+        version=tagName,
         author="Ginko Balboa",
         author_email="ginkobalboa3@gmail.com",
         description="Particles and field simulator",

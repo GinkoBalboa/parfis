@@ -28,15 +28,15 @@ You can add build options through command-line arguments with the call to cmake.
 
 - ``BUILD_LIB`` (default ``ON``). Should library be build at all (usefull when you want to generate
   documentation.
-- ``BUILD_DEBUG`` (default ``OFF``). Build all binaries in debug mode. Debug version get the ``d``
-  suffix.
-- ``BUILD_PARFISAPP`` (default ``ON``). Builds executable file ``parfisApp`` that functions as
-  a terminal interface towards the Parfis program. The executable is build in the location
-  ``/build/bin/parfisApp``.
-- ``PARFIS_STATE_TYPE_DOUBLE`` (default ``OFF``). The parameter defines the type for the state 
+- ``PARFIS_STATE_TYPE_DOUBLE`` (default ``ON``). The parameter defines the type for the state 
   vector used in parfis. The state vector defines the position and velocity of particles. The 
   default type is float. If state type is **double**, the memory needed for particle states is 
   twice the size of the **float** state.
+- ``BUILD_DEBUG`` (default ``OFF``). Build all binaries in debug mode. Debug version get the ``d``
+  suffix.
+- ``BUILD_PARFISAPP`` (default ``OFF``). Builds executable file ``parfisApp`` that functions as
+  a terminal interface towards the Parfis program. The executable is build in the location
+  ``/build/bin/parfisApp``.
 - ``BUILD_DOXYGEN`` (default ``OFF``). Builds doxygen documentation in the folder 
   ``build/doc/doxygen``.
 - ``BUILD_SPHINX`` (default ``OFF``). Builds sphinx documentation in the folder  
