@@ -1,4 +1,3 @@
-from ctypes import WinDLL
 import sys
 import os
 from ctypes import *
