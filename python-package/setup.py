@@ -19,6 +19,8 @@ if __name__ == '__main__':
     #   pip install -e . --force-reinstall -v
     # Upload to test.pypi
     #   twine upload --repository testpypi dist/*
+    # Istall from test.pypi
+    #   pip install --force-reinstall -i https://test.pypi.org/simple/ parfis
 
     with open("README.md", "r") as fh:
         long_description = fh.read()
