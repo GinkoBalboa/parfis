@@ -143,6 +143,7 @@ class Parfis:
             del Parfis.lib
             dlclose_func(handle)
         elif sys.platform == "win32":
+            from ctypes import wintypes
             handle = Parfis.lib._handle
             del Parfis.lib
             kernel32 = WinDLL('kernel32', use_last_error=True)

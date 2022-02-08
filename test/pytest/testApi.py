@@ -39,17 +39,17 @@ class TestApi(unittest.TestCase):
         parInfo = Parfis.info()
         self.assertTrue(f"parfis::state_t = {TestApi.stateType}" in parInfo)
         Parfis.deleteAll()
-        if sys.platform != "win32":
-            for i in range(2):
-                if TestApi.stateType == 'float':
-                    TestApi.stateType = 'double'
-                else: 
-                    TestApi.stateType = 'float'
-                Parfis.load_lib(stateType=TestApi.stateType)
-                Parfis.newParfis()
-                parInfo = Parfis.info()
-                self.assertTrue(f"parfis::state_t = {TestApi.stateType}" in parInfo)
-                Parfis.deleteAll()
+        # if sys.platform != "win32":
+        for i in range(2):
+            if TestApi.stateType == 'float':
+                TestApi.stateType = 'double'
+            else: 
+                TestApi.stateType = 'float'
+            Parfis.load_lib(stateType=TestApi.stateType)
+            Parfis.newParfis()
+            parInfo = Parfis.info()
+            self.assertTrue(f"parfis::state_t = {TestApi.stateType}" in parInfo)
+            Parfis.deleteAll()
 
     def test_delete_parfis(self) -> None:
         '''Create four new parfis objects and delete one of them

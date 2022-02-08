@@ -11,6 +11,6 @@ rm ./*.log
 rm ../*.log
 rm ../test/pytest/*.log
 rm ../python-package/parfis/clib/libparfis32.so
-cmake .. -DCOPY_LIB_PYTHON=ON
+cmake .. -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF
 cmake --build . --config Release
 ./bin/gtestAll/gtestAll
