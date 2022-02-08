@@ -17,11 +17,15 @@ if __name__ == '__main__':
     #   pip install parfis
     # Locally for testing (from parfis/python-packate dir)
     #   pip install -e . --force-reinstall -v
+    # Upload to test.pypi
+    #   twine upload --repository testpypi dist/*
 
     with open("README.md", "r") as fh:
         long_description = fh.read()
 
-    subprocess.Popen("git describe --tags --abbrev=0 > tag.txt", shell=True)
+    # If tag.txt is supplied use that - for testing purposes only
+    if os.path.isfile("tag.txt") == False:
+        subprocess.Popen("git describe --tags --abbrev=0 > tag.txt", shell=True)
 
     while os.path.isfile("tag.txt") == False:
         time.sleep(1)
@@ -30,6 +34,7 @@ if __name__ == '__main__':
     with open('tag.txt', 'r') as file:
         tagName = file.read().rstrip()
 
+    print(f"Tag name is: {tagName}")
     setuptools.setup(
         name="parfis",
         version=tagName,

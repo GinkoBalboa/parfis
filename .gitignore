@@ -65,8 +65,8 @@ _build
 # Python distribution
 python-package/dist
 python-package/build
-python-package/parfis.egg-info
 __pycache__
+parfis.egg-info
 
 # Jupyter notebooks
 .ipynb_checkpoints
