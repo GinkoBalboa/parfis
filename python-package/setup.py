@@ -25,7 +25,7 @@ if __name__ == '__main__':
     with open("README.md", "r") as fh:
         long_description = fh.read()
 
-    # If tag.txt is supplied use that - for testing purposes only
+    # If tag.txt is supplied use that (for testing purposes only)
     if os.path.isfile("tag.txt") == False:
         subprocess.Popen("git describe --tags --abbrev=0 > tag.txt", shell=True)
 

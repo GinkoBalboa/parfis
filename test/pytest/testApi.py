@@ -1,7 +1,7 @@
-from ctypes import c_double, c_float
+import ctypes
 import unittest
 import math
-import sys
+import parfis as pfs
 from parfis import Parfis
 
 # from parfis import PyCfgData
@@ -33,22 +33,34 @@ class TestApi(unittest.TestCase):
         self.assertTrue(f"Parfis object id = [{parId}]" in parInfo)
 
     def test_load_different_lib(self) -> None:
-        '''Change lib and back again
+        '''Change lib and back again, check parfis.Type.state_t
         '''
         Parfis.newParfis()
         parInfo = Parfis.info()
         self.assertTrue(f"parfis::state_t = {TestApi.stateType}" in parInfo)
         Parfis.deleteAll()
-        # if sys.platform != "win32":
         for i in range(2):
             if TestApi.stateType == 'float':
                 TestApi.stateType = 'double'
             else: 
                 TestApi.stateType = 'float'
-            Parfis.load_lib(stateType=TestApi.stateType)
+            Parfis.load_lib(stateType=TestApi.stateType)            
             Parfis.newParfis()
             parInfo = Parfis.info()
             self.assertTrue(f"parfis::state_t = {TestApi.stateType}" in parInfo)
+            id = Parfis.newParfis()
+            Parfis.loadCfgData(id)
+            Parfis.loadSimData(id)
+            Parfis.runCommandChain(id, "create")
+            Parfis.setPySimData(id)
+            ptrSimData = Parfis.getPySimData(id)
+            # Now check if state_t is set as it should
+            if TestApi.stateType == 'float':
+                self.assertTrue(pfs.Type.state_t, ctypes.c_float)
+                self.assertEqual(pfs.Vec3D_float, type(ptrSimData[0].stateVec.ptr[0].pos))
+            else:
+                self.assertTrue(pfs.Type.state_t, ctypes.c_double)
+                self.assertEqual(pfs.Vec3D_float, type(ptrSimData[0].stateVec.ptr[0].pos))
             Parfis.deleteAll()
 
     def test_delete_parfis(self) -> None:

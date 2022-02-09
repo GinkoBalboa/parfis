@@ -2,13 +2,13 @@ import sys
 import os
 from ctypes import *
 
-from .datastruct import PyCfgData, PySimData
+from .datastruct import PyCfgData, PySimData, Vec3DBase, Type
+# import datastruct as ds
 
 class Parfis:
 
     lib = None
     libPath = None
-    state_t = None
 
     currPath = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
     
@@ -26,8 +26,6 @@ class Parfis:
             - 'double' - load library with state type double
             - 'float' - load library with state type float
         """
-        
-        Parfis.state_t = stateType
 
         linuxRelease32Lib = os.path.join(Parfis.currPath, "libparfis32.so")
         linuxDebug32Lib = os.path.join(Parfis.currPath, "libparfis32d.so")
@@ -94,6 +92,11 @@ class Parfis:
 
         Parfis.lib = cdll.LoadLibrary(libPath)
         Parfis.libPath = libPath
+
+        if stateType == 'float':
+            Type.state_t = c_float
+        elif stateType == 'double':
+            Type.state_t = c_double
 
         print(f"Successfully loaded lib file: {libPath[len(Parfis.currPath)+1:]}")
 
@@ -199,6 +202,11 @@ class Parfis:
     @staticmethod
     def runCommandChain(id: int, cmdStr: str) -> int:
         return Parfis.lib.runCommandChain(id, cmdStr.encode())
+
+    
+def getCellId(cellCount: Vec3DBase, node: Vec3DBase) -> int:
+        return cellCount.x * (node.z * cellCount.y + node.y) + node.x
+
 
 if __name__ == "__main__":
 

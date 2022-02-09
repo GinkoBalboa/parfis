@@ -1,2 +1,2 @@
-from .datastruct import PyCfgData
-from .parfislib import Parfis
+from .datastruct import *
+from .parfislib import *
