@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Parfis documentation
-====================
+Parfis
+======
 
 Parfis is an acronym for Particles and Field Simulator. Parfis is written in 
 C++ with Python bindings. The algorithm is based on the particle-in-cell 
@@ -34,16 +34,26 @@ the istalled build with the following three commands from your python terminal:
    print(Parfis.info())
 
 Explore the possibilities by checking some of the examples given in the 
-:ref:`demo <demo>` section of this site. The above three commands are given in 
-the :ref:`simple demo hotebook </demo/simple_demo.ipynb>`.
+:doc:`demo` section of this site. The above three commands are given in 
+the :doc:`demo_files/simple_demo`.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Installation:
 
    installation
    build
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Tutorials:
+
    demo
+
+.. toctree::
+   :maxdepth: 2
+   :caption: CPP API:
+
    cpp
 
 .. toctree::

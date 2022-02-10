@@ -7,10 +7,13 @@ Documentation presented here is from the generated doxygen documentation.
 
 .. contents:: Contents
 
-parfis
-======
+parfis library
+==============
 
-Parfis is the main library of the parfis project. It can be compiled as shared or static library.
+Parfis is the main library of the parfis project. It is compiled as shared library in two
+modes. One mode has ``float`` for the ``state_t`` type (with suffix 32), and the other mode 
+has ``double`` (with suffix 64). Both libraries are packed with the python module so the user
+can use one or the other.
 
 Logging
 -------

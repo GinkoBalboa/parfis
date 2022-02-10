@@ -52,6 +52,7 @@ lib/
 # Build generated files
 include/parfis/version.h
 doc/sphinx/source/conf.py
+python-package/tag.txt
 
 # Sphinx build directories
 _build

@@ -7,6 +7,9 @@ class Type():
     cellPos_t = c_uint16
     nodeFlag_t = c_uint8
 
+class Const():
+    noCellId = 0xFFFFFFFF
+
 class Vec3DBase():
 
     def __init__(self, x=0, y=0, z=0):
