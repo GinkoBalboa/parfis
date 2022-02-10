@@ -342,7 +342,7 @@ namespace parfis {
         PyCfgData pyCfgData;
         /// Get absolute cell id from i,j,k
         inline cellId_t getAbsoluteCellId(Vec3D<cellPos_t>& cellPos) {
-            return cellCount.x * (cellCount.y * cellPos.z + cellPos.y ) + cellPos.x;
+            return cellCount.z * (cellCount.y * cellPos.x + cellPos.y ) + cellPos.z;
         };
         /// Set PyCfgData
         int setPyCfgData();

@@ -207,8 +207,8 @@ class Parfis:
         return Parfis.lib.runCommandChain(id, cmdStr.encode())
 
     
-def getCellId(cellCount: Vec3DBase, node: Vec3DBase) -> int:
-        return cellCount.x * (node.z * cellCount.y + node.y) + node.x
+def getAbsoluteCellId(cellCount: Vec3DBase, node: Vec3DBase) -> int:
+    return cellCount.z * (cellCount.y * node.x + node.y) + node.z
 
 
 if __name__ == "__main__":
