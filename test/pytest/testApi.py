@@ -60,7 +60,7 @@ class TestApi(unittest.TestCase):
                 self.assertEqual(pfs.Vec3D_float, type(ptrSimData[0].stateVec.ptr[0].pos))
             else:
                 self.assertTrue(pfs.Type.state_t, ctypes.c_double)
-                self.assertEqual(pfs.Vec3D_float, type(ptrSimData[0].stateVec.ptr[0].pos))
+                self.assertEqual(pfs.Vec3D_double, type(ptrSimData[0].stateVec.ptr[0].pos))
             Parfis.deleteAll()
 
     def test_delete_parfis(self) -> None:

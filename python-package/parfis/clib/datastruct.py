@@ -69,13 +69,37 @@ def Vec3DClass(cType = c_int):
     else:
         return None
 
-class State(Structure):
+# class State(Structure):
+#     _fields_ = [
+#         ('next', Type.stateId_t),
+#         ('prev', Type.stateId_t),
+#         ('pos', Vec3DClass(Type.state_t)),
+#         ('vel', Vec3DClass(Type.state_t))
+#     ]
+
+class State_float(Structure):
     _fields_ = [
         ('next', Type.stateId_t),
         ('prev', Type.stateId_t),
-        ('pos', Vec3DClass(Type.state_t)),
-        ('vel', Vec3DClass(Type.state_t))
+        ('pos', Vec3DClass(c_float)),
+        ('vel', Vec3DClass(c_float))
     ]
+
+class State_double(Structure):
+    _fields_ = [
+        ('next', Type.stateId_t),
+        ('prev', Type.stateId_t),
+        ('pos', Vec3DClass(c_double)),
+        ('vel', Vec3DClass(c_double))
+    ]
+
+def StateClass():
+    if Type.state_t == c_float:
+        return State_float
+    elif Type.state_t == c_double:
+        return State_double
+    else:
+        return None
 
 class Cell(Structure):
     _fields_ = [
@@ -100,9 +124,15 @@ class PyVec_char_p(Structure, PyVecBase):
         ('size', c_size_t)
     ]
 
-class PyVec_State(Structure, PyVecBase):
+class PyVec_State_float(Structure, PyVecBase):
     _fields_ = [
-        ('ptr', POINTER(State)),
+        ('ptr', POINTER(State_float)),
+        ('size', c_size_t)
+    ]
+
+class PyVec_State_double(Structure, PyVecBase):
+    _fields_ = [
+        ('ptr', POINTER(State_double)),
         ('size', c_size_t)
     ]
 
@@ -143,10 +173,14 @@ def PyVecClass(cType = c_char_p):
             return PyVec_uint32
     elif cType == c_uint8:
             return PyVec_uint8
-    elif cType == State:
-        return PyVec_State
+    elif cType == State_float:
+        return PyVec_State_float
+    elif cType == State_double:
+        return PyVec_State_double
     elif cType == Specie:
         return PyVec_Specie
+    elif cType == Cell:
+        return PyVec_Cell
     else:
         return None
 
@@ -169,14 +203,31 @@ class PyCfgData(Structure):
         ('specieNameVec', PyVecClass(c_char_p))
     ]
 
-class PySimData(Structure):
+class PySimData_float(Structure):
     _fields_ = [
-        ('stateVec', PyVecClass(State)),
+        ('stateVec', PyVecClass(State_float)),
         ('cellIdVec', PyVecClass(c_uint32)),
         ('specieVec', PyVecClass(Specie)),
-        ('cellVec', PyVecClass(Specie)),
+        ('cellVec', PyVecClass(Cell)),
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t))
     ]
+
+class PySimData_double(Structure):
+    _fields_ = [
+        ('stateVec', PyVecClass(State_double)),
+        ('cellIdVec', PyVecClass(c_uint32)),
+        ('specieVec', PyVecClass(Specie)),
+        ('cellVec', PyVecClass(Cell)),
+        ('nodeFlagVec', PyVecClass(Type.nodeFlag_t))
+    ]
+
+def PySimDataClass():
+    if Type.state_t == c_float:
+        return PySimData_float
+    elif Type.state_t == c_double:
+        return PySimData_double
+    else:
+        return None
 
 if __name__ == '__main__':
     pass

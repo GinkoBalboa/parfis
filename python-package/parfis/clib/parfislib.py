@@ -1,8 +1,10 @@
 import sys
 import os
 from ctypes import *
+from importlib import reload
 
-from .datastruct import PyCfgData, PySimData, Vec3DBase, Type
+# import .datastruct as ds
+from .datastruct import PyCfgData, PySimDataClass, Vec3DBase, Type
 # import datastruct as ds
 
 class Parfis:
@@ -86,6 +88,7 @@ class Parfis:
         # If you want to load different lib version
         if Parfis.lib != None and Parfis.libPath != libPath:
             Parfis.unload_lib()
+            # PySimData = reload(PySimData)
         elif Parfis.lib != None:
             # If it is the same lib - do nothing
             return
@@ -122,7 +125,7 @@ class Parfis:
         Parfis.lib.setPySimData.restype = c_int
 
         Parfis.lib.getPySimData.argtypes = [c_uint32]
-        Parfis.lib.getPySimData.restype = POINTER(PySimData)
+        Parfis.lib.getPySimData.restype = POINTER(PySimDataClass())
 
         Parfis.lib.setConfig.argtypes = [c_uint32, c_char_p]
         Parfis.lib.setConfig.restype = c_int
@@ -180,7 +183,7 @@ class Parfis:
         return Parfis.lib.setPyCfgData(id)
 
     @staticmethod
-    def getPySimData(id: int) -> POINTER(PySimData):
+    def getPySimData(id: int) -> POINTER(PySimDataClass()):
         return Parfis.lib.getPySimData(id)
 
     @staticmethod
