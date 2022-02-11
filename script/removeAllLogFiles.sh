@@ -10,6 +10,6 @@ echo "Removing *.log files from the location where they are usually located"
 rm ./*.log
 rm ../*.log
 rm ../test/pytest/*.log
-rm ../doc/sphinx/source/demo/*.log
+rm ../doc/sphinx/source/demo_files/*.log
 rm ../script/*.log
 rm ../python-package/parfis/clib/*.so

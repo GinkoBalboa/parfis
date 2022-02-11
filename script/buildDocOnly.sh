@@ -7,5 +7,5 @@ if [[ $? != 0 ]]; then
   exit 1
 fi
 rm -rf ./CMake* ./Makefile ./cmake* ./.cmake* ./doc
-cmake .. -DBUILD_SPHINX=ON -DBUILD_LIB=OFF -DBUILD_GTESTALL=OFF -DSETUP_PYTHON_MODULE=OFF
+cmake .. -DBUILD_SPHINX=ON -DBUILD_LIB=OFF -DBUILD_GTESTALL=OFF
 cmake --build . --config Release

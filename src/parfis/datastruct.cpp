@@ -266,6 +266,7 @@ int parfis::SimData::setPySimData()
     pySimData.specieVec = specieVec;
     pySimData.cellVec = cellVec;
     pySimData.nodeFlagVec = nodeFlagVec;
+    pySimData.headIdVec = headIdVec;
     return 0;
 }
 

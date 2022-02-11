@@ -9,4 +9,5 @@ from the demos in ``parfis/doc/sphinx/source/demo_files`` folder of the source p
 
   /demo_files/simple_demo.ipynb
   /demo_files/cells_cylindrical_demo.ipynb
+  /demo_files/move_cylindrical_demo.ipynb
 

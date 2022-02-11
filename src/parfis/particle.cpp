@@ -116,12 +116,11 @@ int parfis::Particle::createStates()
     std::string msg = "reserved " + std::to_string(stateSum * m_pSimData->cellVec.size()) + 
         " states for all species" + "\n";
     LOG(*m_pLogger, LogMask::Memory, msg);
-    m_pSimData->headIdVec.resize(m_pSimData->specieVec.size());
+    m_pSimData->headIdVec.resize(
+        m_pSimData->specieVec.size()*m_pSimData->cellVec.size(), Const::noStateId);
+    msg = "created " + std::to_string(m_pSimData->headIdVec.size()) + " head pointers\n";
+    LOG(*m_pLogger, LogMask::Memory, msg);    
     for (auto& spec : m_pSimData->specieVec) {
-        m_pSimData->headIdVec[spec.id].resize(m_pSimData->cellVec.size(), Const::noStateId);
-        msg = "created " + std::to_string(m_pSimData->cellVec.size()) + 
-            " head pointers for specie " + spec.name + "\n";
-        LOG(*m_pLogger, LogMask::Memory, msg);    
         createStatesOfSpecie(spec);
     }
     return 0;
@@ -152,6 +151,7 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
     double radiusSquared = geoCenter.x*geoCenter.x; 
     double rx, ry;
     std::string msg;
+    size_t headIdPos;
     for (cellId_t ci = 0; ci < m_pSimData->cellVec.size(); ci++) {
         for (stateId_t si = 0; si < spec.statesPerCell; si++) {
             state.pos.x = dist(engine);
@@ -168,7 +168,7 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             }
 
             pCell = &m_pSimData->cellVec[ci];
-            // If the cell is not whole in the geometry check state position, 
+            // If the cell is not whole in the spec.id*m_pSimData->cellVec.size() + cigeometry check state position, 
             // and if the state is not in the geometry, don't add it
             if (m_pSimData->nodeFlagVec[ci] != NodeFlag::InsideGeo && 
                 m_pCfgData->geometry == "cylindrical") {                
@@ -183,14 +183,15 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             pState = &m_pSimData->stateVec.back();
             pState->next = Const::noStateId;
             pState->prev = Const::noStateId;
-            headId = m_pSimData->headIdVec[spec.id][ci];
+            headIdPos = spec.id*m_pSimData->cellVec.size() + ci;
+            headId = m_pSimData->headIdVec[headIdPos];
             // If it is not first state in the cell
             if (headId != Const::noStateId) {
-                m_pSimData->stateVec[headId].prev = stateId_t(m_pSimData->stateVec.size() - 1);
+                m_pSimData->stateVec[headId].prev = size_t(m_pSimData->stateVec.size() - 1);
                 m_pSimData->stateVec.back().next = headId;
             }
             // Set head pointer
-            m_pSimData->headIdVec[spec.id][ci] = stateId_t(m_pSimData->stateVec.size() - 1);
+            m_pSimData->headIdVec[headIdPos] = size_t(m_pSimData->stateVec.size() - 1);
             spec.stateCount++;
         }
     }
@@ -241,7 +242,7 @@ int parfis::Particle::pushStatesCylindrical()
             pCell = &m_pSimData->cellVec[cellId];
             newCell = *pCell;
             // Get the head state
-            stateId = m_pSimData->headIdVec[specId][cellId];
+            stateId = m_pSimData->headIdVec[specId*m_pSimData->cellVec.size() + cellId];
             // Go through all states of the specie in one cell
             while (stateId != Const::noStateId) {
                 // If it was pushed previously - just continue
@@ -303,7 +304,9 @@ int parfis::Particle::pushStatesCylindrical()
                         }
                     }
                     // Set states linked list for the old cell and the new cell
-                    setNewCell(*pState, stateId, *pCell, newCell, cellId, newCellId, specId);
+                    setNewCell(*pState, stateId,
+                        specId*m_pSimData->cellVec.size() + cellId, 
+                        specId*m_pSimData->cellVec.size() + newCellId);
                 }
                 stateId = m_pSimData->stateVec[stateId].next;
             }
@@ -314,7 +317,7 @@ int parfis::Particle::pushStatesCylindrical()
             pCell = &m_pSimData->cellVec[cellId];
             newCell = *pCell;
             // Get the head state
-            stateId = m_pSimData->headIdVec[specId][cellId];
+            stateId = m_pSimData->headIdVec[specId*m_pSimData->cellVec.size() + cellId];
             // Go through all states of the specie in one cell
             while (stateId != Const::noStateId) {
                 // If it was pushed previously - just continue
@@ -389,7 +392,9 @@ int parfis::Particle::pushStatesCylindrical()
                     newCellId = m_pSimData->cellIdVec[
                         m_pCfgData->getAbsoluteCellId(newCell.pos)];
                     // Set states linked list for the old cell and the new cell
-                    setNewCell(*pState, stateId, *pCell, newCell, cellId, newCellId, specId);
+                    setNewCell(*pState, stateId,
+                        specId*m_pSimData->cellVec.size() + cellId, 
+                        specId*m_pSimData->cellVec.size() + newCellId);
                 }
                 stateId = m_pSimData->stateVec[stateId].next;
             }
@@ -500,8 +505,8 @@ int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>
     return retval;
 }
 
-void parfis::Particle::setNewCell(State& state, stateId_t stateId, Cell& cell, Cell& newCell, 
-    cellId_t cellId, cellId_t newCellId, specieId_t specId)
+void parfis::Particle::setNewCell(State& state, stateId_t stateId, 
+    size_t headIdPos, size_t newHeadIdPos)
 {
     // If the state is not the head state (has prev)
     if (state.prev != Const::noStateId) {
@@ -511,9 +516,9 @@ void parfis::Particle::setNewCell(State& state, stateId_t stateId, Cell& cell, C
     }
     // If the state is a head state (doesn't have prev)
     else {
-        stateId = m_pSimData->headIdVec[specId][cellId];
+        stateId = m_pSimData->headIdVec[headIdPos];
         // Connect head pointer to prev from the old cell
-        m_pSimData->headIdVec[specId][cellId] = state.next;
+        m_pSimData->headIdVec[headIdPos] = state.next;
     }
 
     // If the state is not the last state (has next)
@@ -524,8 +529,8 @@ void parfis::Particle::setNewCell(State& state, stateId_t stateId, Cell& cell, C
 
     // Set new cell values for the state (state becomes head in the new cell)
     state.prev = Const::noStateId;
-    state.next = m_pSimData->headIdVec[specId][newCellId];
-    m_pSimData->headIdVec[specId][newCellId] = stateId;
+    state.next = m_pSimData->headIdVec[newHeadIdPos];
+    m_pSimData->headIdVec[newHeadIdPos] = stateId;
 
     // If there was a head before (in the new cell) then set its prev pointer to the new head
     if (state.next != Const::noStateId)

@@ -271,7 +271,7 @@ namespace parfis {
     };
 
     /**
-     * @brief Structure used instead of std::vector for python bindings
+     * @brief Structure used instead of std::vector<T> for python bindings
      * @tparam T type of vector
      */
     template <class T>
@@ -283,24 +283,6 @@ namespace parfis {
         PyVec<T>& operator=(const std::vector<T>& tVec) {
             ptr = &tVec[0];
             size = tVec.size();
-            return *this;
-        }
-    };
-
-    template<>
-    struct PyVec<std::string>
-    {   
-        const char ** ptr;
-        size_t size;
-
-        std::vector<const char *> vec;
-
-        PyVec<std::string>& operator=(const std::vector<std::string>& strVec) {
-            vec.clear();
-            for (auto & str: strVec)
-                vec.push_back(str.c_str());
-            ptr = &vec[0];
-            size = vec.size();
             return *this;
         }
     };
@@ -359,6 +341,7 @@ namespace parfis {
         PyVec<Specie> specieVec;
         PyVec<Cell> cellVec;
         PyVec<nodeFlag_t> nodeFlagVec;
+        PyVec<stateId_t> headIdVec;
     };
 
     /**
@@ -392,9 +375,10 @@ namespace parfis {
          * @brief Vector of pointers to head states
          * @details Head state is the first state in the doubly linked list of states that 
          * belong to a certain cell. For every cell there are as many heads as there are 
-         * species in the simulation.
+         * species in the simulation. This structure is a matrix written in one dimension since
+         * the number of elements is cellVec.size()*specieVec.size()
          */
-        std::vector<std::vector<stateId_t>> headIdVec;
+        std::vector<stateId_t> headIdVec;
         /// Vector of species
         std::vector<Specie> specieVec;
         /// PySimData points to data of this object

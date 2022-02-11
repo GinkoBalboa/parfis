@@ -144,7 +144,5 @@ int parfis::System::createCellsCylindrical()
         " cells for cylindrical geometry\n";
     LOG(*m_pLogger, LogMask::Memory, msg);
 
-    //pData->headIdVec.resize(pData->cellVec.size()*pData->specieCnt, NULLCID);
-
     return 0;
 }
