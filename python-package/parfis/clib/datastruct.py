@@ -9,6 +9,7 @@ class Type():
 
 class Const():
     noCellId = 0xFFFFFFFF
+    noStateId = 0xFFFFFFFF
 
 class Vec3DBase():
 
@@ -71,14 +72,6 @@ def Vec3DClass(cType = c_int):
         return Vec3D_uint16
     else:
         return None
-
-# class State(Structure):
-#     _fields_ = [
-#         ('next', Type.stateId_t),
-#         ('prev', Type.stateId_t),
-#         ('pos', Vec3DClass(Type.state_t)),
-#         ('vel', Vec3DClass(Type.state_t))
-#     ]
 
 class State_float(Structure):
     _fields_ = [
@@ -212,7 +205,8 @@ class PySimData_float(Structure):
         ('cellIdVec', PyVecClass(Type.cellId_t)),
         ('specieVec', PyVecClass(Specie)),
         ('cellVec', PyVecClass(Cell)),
-        ('nodeFlagVec', PyVecClass(Type.nodeFlag_t))
+        ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
+        ('headIdVec', PyVecClass(Type.stateId_t))
     ]
 
 class PySimData_double(Structure):
@@ -221,7 +215,8 @@ class PySimData_double(Structure):
         ('cellIdVec', PyVecClass(Type.cellId_t)),
         ('specieVec', PyVecClass(Specie)),
         ('cellVec', PyVecClass(Cell)),
-        ('nodeFlagVec', PyVecClass(Type.nodeFlag_t))
+        ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
+        ('headIdVec', PyVecClass(Type.stateId_t))
     ]
 
 def PySimDataClass():

@@ -117,7 +117,9 @@ class TestApi(unittest.TestCase):
         Parfis.setPyCfgData(id)
         ptrCfgData = Parfis.getPyCfgData(id)
         self.assertEqual(2, ptrCfgData[0].specieNameVec.size)
-        self.assertEqual(["electron", "atom"], ptrCfgData[0].specieNameVec.asList())
+        self.assertEqual("electron", ptrCfgData[0].specieNameVec.ptr[0].decode())
+        self.assertEqual("atom", ptrCfgData[0].specieNameVec.ptr[1].decode())
+        # self.assertEqual(["electron", "atom"], ptrCfgData[0].specieNameVec.asList())
 
     def test_createCommandChain(self) -> None:
         '''Check creation of cells and states

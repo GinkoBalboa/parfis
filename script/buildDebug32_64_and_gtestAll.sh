@@ -10,10 +10,12 @@ fi
 cd ../build
 echo "Remove library files from /build/lib/parfis and /python-package/parfis/clib"
 rm -rf ./lib/parfis/* ../python-package/parfis/clib/*.so ../python-package/parfis/clib/*.dll
-echo "Build float release"
-cmake .. -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF
-cmake --build . --config Release
+echo "Build float debug"
+cmake .. -DBUILD_DEBUG=ON -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF -DBUILD_GTESTALL=ON
+cmake --build . --config Debug
+./bin/gtestAll/gtestAlld
 ./removeCMakeBuildFiles.sh
-echo "Build double release"
-cmake .. -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=ON
-cmake --build . --config Release
+echo "Build double debug"
+cmake .. -DBUILD_DEBUG=ON -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GTESTALL=ON
+cmake --build . --config Debug
+./bin/gtestAll/gtestAlld

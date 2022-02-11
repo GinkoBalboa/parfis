@@ -268,6 +268,8 @@ namespace parfis {
         double charge;
         /// Number of states;
         uint32_t stateCount;
+        /// Offset for headIdVec
+        size_t headIdOffset;
     };
 
     /**
@@ -283,6 +285,30 @@ namespace parfis {
         PyVec<T>& operator=(const std::vector<T>& tVec) {
             ptr = &tVec[0];
             size = tVec.size();
+            return *this;
+        }
+    };
+
+    /**
+     * @brief Overload of PyVec for type std::string
+     * @details Dealing with std::string requires different treatment since the
+     * const char pointers are not aligned in memory
+     * @tparam T std::string
+     */
+    template<>
+    struct PyVec<std::string>
+    {   
+        const char ** ptr;
+        size_t size;
+
+        std::vector<const char *> vec;
+
+        PyVec<std::string>& operator=(const std::vector<std::string>& strVec) {
+            vec.clear();
+            for (auto & str: strVec)
+                vec.push_back(str.c_str());
+            ptr = &vec[0];
+            size = vec.size();
             return *this;
         }
     };
