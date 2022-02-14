@@ -179,6 +179,8 @@ int parfis::Parfis::loadSimData()
         if (retval != 0)
             break;
     }
+    // Set evolution counter
+    m_simData.evolveCnt = 0;
     return retval;
 }
 
@@ -212,6 +214,8 @@ int parfis::Parfis::runCommandChain(const std::string& chainChainName)
         retval = pcom->m_func();
         pcom = pcom->getNext();
     }
+    if (chainChainName == "evolve")
+        m_simData.evolveCnt++;
     return retval;
 }
 

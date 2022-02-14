@@ -175,16 +175,16 @@ class Parfis:
         return Parfis.lib.deleteAll()
 
     @staticmethod
-    def getPyCfgData(id: int) -> POINTER(PyCfgData):
-        return Parfis.lib.getPyCfgData(id)
+    def getPyCfgData(id: int) -> PyCfgData:
+        return Parfis.lib.getPyCfgData(id)[0]
 
     @staticmethod
     def setPyCfgData(id: int) -> int:
         return Parfis.lib.setPyCfgData(id)
 
     @staticmethod
-    def getPySimData(id: int) -> POINTER(PySimDataClass()):
-        return Parfis.lib.getPySimData(id)
+    def getPySimData(id: int) -> PySimDataClass():
+        return Parfis.lib.getPySimData(id)[0]
 
     @staticmethod
     def setPySimData(id: int) -> int:

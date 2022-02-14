@@ -409,6 +409,8 @@ namespace parfis {
         std::vector<Specie> specieVec;
         /// PySimData points to data of this object
         PySimData pySimData;
+        /// Evolution counter
+        uint64_t evolveCnt;
         /// Set PyCfgData
         int setPySimData();
     };

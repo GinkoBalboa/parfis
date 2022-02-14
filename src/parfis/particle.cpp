@@ -223,24 +223,25 @@ int parfis::Particle::pushStatesCylindrical()
     double rx, ry;
     double radiusSquared = geoCenter.x*geoCenter.x; 
     double invRadius = 1.0 / geoCenter.x;
+    // Reset pushed state vector
+    std::fill(m_pSimData->stateFlagVec.begin(), m_pSimData->stateFlagVec.end(), 0);
     for (specieId_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
         // Define timestep and 1/timestep for specie
         pSpec = &m_pSimData->specieVec[specId];
         dtvmax = {
-            state_t(pSpec->dt*pSpec->maxVel.x),
-            state_t(pSpec->dt*pSpec->maxVel.y),
-            state_t(pSpec->dt*pSpec->maxVel.z)
+            state_t(pSpec->dt/**pSpec->maxVel.x*/),
+            state_t(pSpec->dt/**pSpec->maxVel.y*/),
+            state_t(pSpec->dt/**pSpec->maxVel.z*/)
         };
         invDtvmax = {
-            state_t(1.0/(pSpec->dt*pSpec->maxVel.x)),
-            state_t(1.0/(pSpec->dt*pSpec->maxVel.y)),
-            state_t(1.0/(pSpec->dt*pSpec->maxVel.z))
+            state_t(1.0/(pSpec->dt/**pSpec->maxVel.x*/)),
+            state_t(1.0/(pSpec->dt/**pSpec->maxVel.y*/)),
+            state_t(1.0/(pSpec->dt/**pSpec->maxVel.z*/))
         };
         // Go through cells that lie inside the geo
         for (cellId_t cellId : m_pSimData->cellIdAVec) {
             // New position for traversing cells
             pCell = &m_pSimData->cellVec[cellId];
-            newCell = *pCell;
             // Get the head state
             stateId = m_pSimData->headIdVec[pSpec->headIdOffset + cellId];
             // Go through all states of the specie in one cell
@@ -254,6 +255,7 @@ int parfis::Particle::pushStatesCylindrical()
                 pState->pos.x += pState->vel.x * dtvmax.x;
                 pState->pos.y += pState->vel.y * dtvmax.y;
                 pState->pos.z += pState->vel.z * dtvmax.z;
+                newCell.pos = pCell->pos;
                 traverseCell(*pState, newCell);
                 // If cell is traversed
                 if (newCell.pos != pCell->pos) {
@@ -308,6 +310,7 @@ int parfis::Particle::pushStatesCylindrical()
                         pSpec->headIdOffset + cellId, 
                         pSpec->headIdOffset + newCellId);
                 }
+                m_pSimData->stateFlagVec[stateId] = StateFlag::PushedState;
                 stateId = m_pSimData->stateVec[stateId].next;
             }
         }
@@ -315,7 +318,6 @@ int parfis::Particle::pushStatesCylindrical()
         for (cellId_t cellId : m_pSimData->cellIdBVec) {
             // New position for traversing cells
             pCell = &m_pSimData->cellVec[cellId];
-            newCell = *pCell;
             // Get the head state
             stateId = m_pSimData->headIdVec[pSpec->headIdOffset + cellId];
             // Go through all states of the specie in one cell
@@ -329,6 +331,7 @@ int parfis::Particle::pushStatesCylindrical()
                 pState->pos.x += pState->vel.x * dtvmax.x;
                 pState->pos.y += pState->vel.y * dtvmax.y;
                 pState->pos.z += pState->vel.z * dtvmax.z;
+                newCell = *pCell;
                 traverseCell(*pState, newCell);
                 // if state got out of the geometry then reflect/re-emit it, state can't
                 // traverse more than one cell so we check if it is in the cell that is the
@@ -396,6 +399,7 @@ int parfis::Particle::pushStatesCylindrical()
                         pSpec->headIdOffset + cellId, 
                         pSpec->headIdOffset + newCellId);
                 }
+                m_pSimData->stateFlagVec[stateId] = StateFlag::PushedState;
                 stateId = m_pSimData->stateVec[stateId].next;
             }
         }
@@ -405,7 +409,7 @@ int parfis::Particle::pushStatesCylindrical()
 
 void parfis::Particle::traverseCell(State& state, Cell& newCell)
 {
-    // Mark crossing cell boundaries
+    // Mark crossing of cell boundaries
     if (state.pos.x < 0.0) {
         state.pos.x += 1.0;
         newCell.pos.x -= 1;
@@ -462,12 +466,12 @@ int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>
         // First we find point of reflection
         double rx = m_pCfgData->cellSize.x*(state.pos.x + cell.pos.x) - geoCenter.x;
         double ry = m_pCfgData->cellSize.y*(state.pos.y + cell.pos.y) - geoCenter.y;
-        state_t vx = state.vel.x*dtvmax.x;
-        state_t vy = state.vel.y*dtvmax.y;
+        double vx = state.vel.x*dtvmax.x;
+        double vy = state.vel.y*dtvmax.y;
         double a = 2.0*(vx * vx + vy * vy);
         double b = 2.0*(rx * vx + ry * vy);
         double c = rx * rx + ry * ry - geoCenter.x*geoCenter.x;
-        state_t delt = state_t((sqrt(b*b - 2.0*a*c) - b) / a);
+        double delt = (sqrt(b*b - 2.0*a*c) - b) / a;
         // Push particle to point of reflection (rx, ry)
         state.pos.x += vx * delt;
         state.pos.y += vy * delt;
@@ -480,16 +484,15 @@ int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>
         double ux = -vx * cr - vy * sr;
         double uy = vy * cr - vx * sr;
         // Set velocity and position vector of the rotated coord. sys.
-        vx = state_t(ux * cr - uy * sr);
-        vy = state_t(uy * cr + ux * sr);
+        vx = ux * cr - uy * sr;
+        vy = uy * cr + ux * sr;
         // Push particle to final position
         delt = 1.0 - delt;
         state.pos.x += vx * delt;
         state.pos.y += vy * delt;
         state.vel.x = vx * invDtvmax.x;
         state.vel.y = vy * invDtvmax.y;
-        // If traectory is close to tangent reflection can happen 
-        // multiple times in a single timestep
+        // If traectory is close to tangent - multiple reflection can happen in a single timestep
         rx = m_pCfgData->cellSize.x*(state.pos.x + cell.pos.x) - geoCenter.x;
         ry = m_pCfgData->cellSize.y*(state.pos.y + cell.pos.y) - geoCenter.y;
         if (rx * rx + ry * ry > geoCenter.x*geoCenter.x) {
@@ -509,23 +512,18 @@ void parfis::Particle::setNewCell(State& state, stateId_t stateId,
     size_t headIdPos, size_t newHeadIdPos)
 {
     // If the state is not the head state (has prev)
-    if (state.prev != Const::noStateId) {
-        stateId = m_pSimData->stateVec[state.prev].next;
-        // Connect prev and next from the old cell (from prev to next)
+    if (state.prev != Const::noStateId)
+        // Connect prev and next from the old cell (prev->next)
         m_pSimData->stateVec[state.prev].next = state.next;
-    }
     // If the state is a head state (doesn't have prev)
-    else {
-        stateId = m_pSimData->headIdVec[headIdPos];
-        // Connect head pointer to prev from the old cell
+    else
+        // Connect head pointer to next from the old cell (head->next)
         m_pSimData->headIdVec[headIdPos] = state.next;
-    }
 
     // If the state is not the last state (has next)
-    if (state.next != Const::noStateId) {
-        // Connect prev and next from the old cell (from next to prev)
+    if (state.next != Const::noStateId)
+        // Connect prev and next from the old cell (prev<-next)
         m_pSimData->stateVec[state.next].prev = state.prev;
-    }
 
     // Set new cell values for the state (state becomes head in the new cell)
     state.prev = Const::noStateId;
@@ -535,6 +533,4 @@ void parfis::Particle::setNewCell(State& state, stateId_t stateId,
     // If there was a head before (in the new cell) then set its prev pointer to the new head
     if (state.next != Const::noStateId)
         m_pSimData->stateVec[state.next].prev = stateId;
-
-    m_pSimData->stateFlagVec[stateId] = StateFlag::PushedState;
 }

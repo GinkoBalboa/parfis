@@ -14,7 +14,10 @@ echo "Build float debug"
 cmake .. -DBUILD_DEBUG=ON -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF -DBUILD_GTESTALL=ON
 cmake --build . --config Debug
 ./bin/gtestAll/gtestAlld
+
+cd ../script
 ./removeCMakeBuildFiles.sh
+cd ../build
 echo "Build double debug"
 cmake .. -DBUILD_DEBUG=ON -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GTESTALL=ON
 cmake --build . --config Debug
