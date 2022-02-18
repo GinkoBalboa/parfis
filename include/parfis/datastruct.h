@@ -364,6 +364,8 @@ namespace parfis {
     {
         PyVec<State> stateVec;
         PyVec<cellId_t> cellIdVec;
+        PyVec<cellId_t> cellIdAVec;
+        PyVec<cellId_t> cellIdBVec;
         PyVec<Specie> specieVec;
         PyVec<Cell> cellVec;
         PyVec<nodeFlag_t> nodeFlagVec;

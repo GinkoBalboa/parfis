@@ -203,6 +203,8 @@ class PySimData_float(Structure):
     _fields_ = [
         ('stateVec', PyVecClass(State_float)),
         ('cellIdVec', PyVecClass(Type.cellId_t)),
+        ('cellIdAVec', PyVecClass(Type.cellId_t)),
+        ('cellIdBVec', PyVecClass(Type.cellId_t)),
         ('specieVec', PyVecClass(Specie)),
         ('cellVec', PyVecClass(Cell)),
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
@@ -213,6 +215,8 @@ class PySimData_double(Structure):
     _fields_ = [
         ('stateVec', PyVecClass(State_double)),
         ('cellIdVec', PyVecClass(Type.cellId_t)),
+        ('cellIdAVec', PyVecClass(Type.cellId_t)),
+        ('cellIdBVec', PyVecClass(Type.cellId_t)),
         ('specieVec', PyVecClass(Specie)),
         ('cellVec', PyVecClass(Cell)),
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),

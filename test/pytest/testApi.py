@@ -86,12 +86,12 @@ class TestApi(unittest.TestCase):
         Parfis.loadCfgData(parId)
         Parfis.setPyCfgData(parId)
         ptrCfgData = Parfis.getPyCfgData(parId)
-        self.assertEqual(1.0, ptrCfgData[0].timestep)
-        self.assertEqual((0.02, 0.02, 0.4), ptrCfgData[0].geometrySize[0].asTuple())
-        self.assertEqual((0.001, 0.001, 0.001), ptrCfgData[0].cellSize[0].asTuple())
-        self.assertEqual((20, 20, 400), ptrCfgData[0].cellCount[0].asTuple())
-        self.assertEqual(1, ptrCfgData[0].specieNameVec.size)
-        self.assertEqual(["a"], ptrCfgData[0].specieNameVec.asList())
+        self.assertEqual(1.0,ptrCfgData.timestep)
+        self.assertEqual((0.02, 0.02, 0.4),ptrCfgData.geometrySize[0].asTuple())
+        self.assertEqual((0.001, 0.001, 0.001),ptrCfgData.cellSize[0].asTuple())
+        self.assertEqual((20, 20, 400),ptrCfgData.cellCount[0].asTuple())
+        self.assertEqual(1,ptrCfgData.specieNameVec.size)
+        self.assertEqual(["a"],ptrCfgData.specieNameVec.asList())
 
     def test_reconfiguration(self) -> None:
         '''Check reconfiguration of specie data
@@ -100,8 +100,8 @@ class TestApi(unittest.TestCase):
         Parfis.loadCfgData(id)
         Parfis.setPyCfgData(id)
         ptrCfgData = Parfis.getPyCfgData(id)
-        self.assertEqual(1, ptrCfgData[0].specieNameVec.size)
-        self.assertEqual(["a"], ptrCfgData[0].specieNameVec.asList())
+        self.assertEqual(1,ptrCfgData.specieNameVec.size)
+        self.assertEqual(["a"],ptrCfgData.specieNameVec.asList())
         Parfis.setConfig(id, "particle.specie = [electron, atom] <parfis::Param>")
         Parfis.setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>")
         Parfis.setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>")
@@ -116,10 +116,10 @@ class TestApi(unittest.TestCase):
         Parfis.loadCfgData(id)
         Parfis.setPyCfgData(id)
         ptrCfgData = Parfis.getPyCfgData(id)
-        self.assertEqual(2, ptrCfgData[0].specieNameVec.size)
-        self.assertEqual("electron", ptrCfgData[0].specieNameVec.ptr[0].decode())
-        self.assertEqual("atom", ptrCfgData[0].specieNameVec.ptr[1].decode())
-        # self.assertEqual(["electron", "atom"], ptrCfgData[0].specieNameVec.asList())
+        self.assertEqual(2,ptrCfgData.specieNameVec.size)
+        self.assertEqual("electron",ptrCfgData.specieNameVec.ptr[0].decode())
+        self.assertEqual("atom",ptrCfgData.specieNameVec.ptr[1].decode())
+        # self.assertEqual(["electron", "atom"],ptrCfgData.specieNameVec.asList())
 
     def test_createCommandChain(self) -> None:
         '''Check creation of cells and states
@@ -141,20 +141,20 @@ class TestApi(unittest.TestCase):
         Parfis.setPyCfgData(id)
         ptrCfgData = Parfis.getPyCfgData(id)
         rSqPi = math.pi * (0.5*ptrCfgData[0].geometrySize[0].x)**2
-        volCyl = rSqPi * ptrCfgData[0].geometrySize[0].z
+        volCyl = rSqPi *ptrCfgData.geometrySize[0].z
         volCylAbs = (
-            ptrCfgData[0].geometrySize[0].x*
-            ptrCfgData[0].geometrySize[0].y*
-            ptrCfgData[0].geometrySize[0].z
+           ptrCfgData.geometrySize[0].x*
+           ptrCfgData.geometrySize[0].y*
+           ptrCfgData.geometrySize[0].z
         )
         volRatio = volCyl/volCylAbs
 
         Parfis.setPySimData(id)
         ptrSimData = Parfis.getPySimData(id)
-        self.assertEqual("electron", ptrSimData[0].specieVec.ptr[0].name.decode())
-        numStatesCyl = ptrSimData[0].stateVec.size
-        numCells = ptrSimData[0].cellIdVec.size
-        numStatesCub = numCells * ptrSimData[0].specieVec.ptr[0].statesPerCell
+        self.assertEqual("electron",ptrSimData.specieVec.ptr[0].name.decode())
+        numStatesCyl =ptrSimData.stateVec.size
+        numCells =ptrSimData.cellIdVec.size
+        numStatesCub = numCells *ptrSimData.specieVec.ptr[0].statesPerCell
         stateRatio = numStatesCyl/numStatesCub
         relativeDifference = abs(volRatio - stateRatio)/(0.5*(volRatio + stateRatio))
         precission = 5.0e-3

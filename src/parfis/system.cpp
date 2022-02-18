@@ -126,18 +126,46 @@ int parfis::System::createCellsCylindrical()
                     cellId = m_pSimData->cellVec.size();
                     m_pSimData->cellVec.push_back({ i, j, k });
                     m_pSimData->nodeFlagVec.push_back(nodeFlag);
-                    // For cylindrical we split to cells that have states that can go 
-                    // off the boundary (reflection checking) and those that can't go outside
-                    // the boundary
-                    if (nodeFlag == 0b11111111)
-                        m_pSimData->cellIdAVec.push_back(cellId);
-                    else
-                        m_pSimData->cellIdBVec.push_back(cellId);
                     m_pSimData->cellIdVec[
                         m_pCfgData->getAbsoluteCellId(m_pSimData->cellVec.back().pos)] = cellId;
                 }
             }
          }
+    }
+
+    // For cylindrical we split to cells that have states that can go 
+    // off the boundary (reflection checking) and those that can't go outside
+    // the boundary
+    cellId_t nCellId;
+    Vec3D<cellPos_t> nPos;
+    bool add;
+    for (cellId = 0; cellId < m_pSimData->cellVec.size(); cellId++) {
+        nodeFlag = m_pSimData->nodeFlagVec[cellId];
+        if (nodeFlag == 0b11111111) {
+            add = false;
+            for (int i = -1; i < 2; i++) {
+                for (int j = -1; j < 2; j++) {
+                    nPos = m_pSimData->cellVec[cellId].pos;
+                    nPos.x += i;
+                    nPos.y += j;
+                    nCellId = m_pSimData->cellIdVec[m_pCfgData->getAbsoluteCellId(nPos)];
+                    if (nCellId != Const::noCellId && 
+                        m_pSimData->nodeFlagVec[nCellId] != 0b11111111) {
+                            m_pSimData->cellIdBVec.push_back(cellId);
+                            add = true;
+                    }
+                    if (add) {
+                        j = 2; 
+                        i = 2;
+                    }
+                }
+            }
+            if (!add)
+                m_pSimData->cellIdAVec.push_back(cellId);
+        }
+        else {
+            m_pSimData->cellIdBVec.push_back(cellId);
+        }
     }
 
     std::string msg = "created " + std::to_string(m_pSimData->cellVec.size()) + 

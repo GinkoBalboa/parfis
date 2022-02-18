@@ -212,14 +212,12 @@ int parfis::Particle::pushStatesCylindrical()
     Cell newCell;
     cellId_t cellId, newCellId;
     stateId_t stateId;
-    Vec3D<state_t> dtvmax;
-    Vec3D<state_t> invDtvmax;
     uint16_t mark;
     // Center of the geometry
     Vec3D<double> geoCenter = {
-        0.5 * m_pCfgData->geometrySize.x, 
-        0.5 * m_pCfgData->geometrySize.y,
-        0.5 * m_pCfgData->geometrySize.z};
+        0.5 * m_pCfgData->cellCount.x, 
+        0.5 * m_pCfgData->cellCount.y,
+        0.5 * m_pCfgData->cellCount.z};
     double rx, ry;
     double radiusSquared = geoCenter.x*geoCenter.x; 
     double invRadius = 1.0 / geoCenter.x;
@@ -228,16 +226,6 @@ int parfis::Particle::pushStatesCylindrical()
     for (specieId_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
         // Define timestep and 1/timestep for specie
         pSpec = &m_pSimData->specieVec[specId];
-        dtvmax = {
-            state_t(pSpec->dt/**pSpec->maxVel.x*/),
-            state_t(pSpec->dt/**pSpec->maxVel.y*/),
-            state_t(pSpec->dt/**pSpec->maxVel.z*/)
-        };
-        invDtvmax = {
-            state_t(1.0/(pSpec->dt/**pSpec->maxVel.x*/)),
-            state_t(1.0/(pSpec->dt/**pSpec->maxVel.y*/)),
-            state_t(1.0/(pSpec->dt/**pSpec->maxVel.z*/))
-        };
         // Go through cells that lie inside the geo
         for (cellId_t cellId : m_pSimData->cellIdAVec) {
             // New position for traversing cells
@@ -252,9 +240,9 @@ int parfis::Particle::pushStatesCylindrical()
                     continue;
                 }
                 pState = &m_pSimData->stateVec[stateId];
-                pState->pos.x += pState->vel.x * dtvmax.x;
-                pState->pos.y += pState->vel.y * dtvmax.y;
-                pState->pos.z += pState->vel.z * dtvmax.z;
+                pState->pos.x += pState->vel.x;
+                pState->pos.y += pState->vel.y;
+                pState->pos.z += pState->vel.z;
                 newCell.pos = pCell->pos;
                 traverseCell(*pState, newCell);
                 // If cell is traversed
@@ -262,24 +250,23 @@ int parfis::Particle::pushStatesCylindrical()
                     // newCellId must exist (no Global::noCellId, no id that doesn't exist) 
                     // so if the following line segfaults something has been faulty coded
                     newCellId = m_pSimData->cellIdVec[m_pCfgData->getAbsoluteCellId(newCell.pos)];
-                    if (m_pSimData->nodeFlagVec[newCellId] != NodeFlag::InsideGeo &&
-                        (m_pSimData->nodeFlagVec[newCellId] != NodeFlag::NegZBound ||
-                         m_pSimData->nodeFlagVec[newCellId] != NodeFlag::PosZBound)) {
-                        rx = m_pCfgData->cellSize.x*(pState->pos.x + newCell.pos.x) - geoCenter.x;
-                        ry = m_pCfgData->cellSize.y*(pState->pos.y + newCell.pos.y) - geoCenter.y;
-                        if (rx * rx + ry * ry > radiusSquared) {
-                            // Return particle to position before the reflection
-                            pState->pos.x -= pState->vel.x * dtvmax.x;
-                            pState->pos.y -= pState->vel.y * dtvmax.y;
-                            // Do the reflection from walls
-                            reflectCylindrical(
-                                *pState, *pCell, geoCenter, dtvmax, invDtvmax, invRadius);
-                            newCell.pos.x = pCell->pos.x;
-                            newCell.pos.y = pCell->pos.y;
-                            // Mark new cell traverse (it can happen after reflection)
-                            traverseXYCell(*pState, newCell);
-                        }
-                    }
+                    // if (m_pSimData->nodeFlagVec[newCellId] != NodeFlag::InsideGeo &&
+                    //     (m_pSimData->nodeFlagVec[newCellId] != NodeFlag::NegZBound ||
+                    //      m_pSimData->nodeFlagVec[newCellId] != NodeFlag::PosZBound)) {
+                    //     rx = pState->pos.x + newCell.pos.x - geoCenter.x;
+                    //     ry = pState->pos.y + newCell.pos.y - geoCenter.y;
+                    //     if (rx * rx + ry * ry > radiusSquared) {
+                    //         // Return particle to position before the reflection
+                    //         pState->pos.x -= pState->vel.x;
+                    //         pState->pos.y -= pState->vel.y;
+                    //         // Do the reflection from walls
+                    //         reflectCylindrical(*pState, *pCell, geoCenter, invRadius);
+                    //         newCell.pos.x = pCell->pos.x;
+                    //         newCell.pos.y = pCell->pos.y;
+                    //         // Mark new cell traverse (it can happen after reflection)
+                    //         traverseXYCell(*pState, newCell);
+                    //     }
+                    // }
                     // Now check the z-boundary
                     if (newCell.pos.z == m_pCfgData->cellCount.z) {
                         // Periodic boundary - torus like geometry
@@ -328,42 +315,20 @@ int parfis::Particle::pushStatesCylindrical()
                     continue;
                 }
                 pState = &m_pSimData->stateVec[stateId];
-                pState->pos.x += pState->vel.x * dtvmax.x;
-                pState->pos.y += pState->vel.y * dtvmax.y;
-                pState->pos.z += pState->vel.z * dtvmax.z;
+                pState->pos.x += pState->vel.x;
+                pState->pos.y += pState->vel.y;
+                pState->pos.z += pState->vel.z;
                 newCell = *pCell;
-                traverseCell(*pState, newCell);
-                // if state got out of the geometry then reflect/re-emit it, state can't
-                // traverse more than one cell so we check if it is in the cell that is the
-                // first one outside the geo                    
-                if (newCell.pos.x == m_pCfgData->cellCount.x || newCell.pos.x == 0xFFFF ||
-                    newCell.pos.y == m_pCfgData->cellCount.y || newCell.pos.y == 0xFFFF) {
-                    // Return particles back to position before the reflection
-                    pState->pos.x -= pState->vel.x * dtvmax.x;
-                    pState->pos.y -= pState->vel.y * dtvmax.y;
+                rx = pState->pos.x + pCell->pos.x - geoCenter.x;
+                ry = pState->pos.y + pCell->pos.y - geoCenter.y;
+                if (rx * rx + ry * ry > radiusSquared) {
+                    // Return particle to position before the reflection
+                    pState->pos.x -= pState->vel.x;
+                    pState->pos.y -= pState->vel.y;
                     // Do the reflection from walls
-                    reflectCylindrical(
-                        *pState, *pCell, geoCenter, dtvmax, invDtvmax, invRadius);
-                    newCell.pos.x = pCell->pos.x;
-                    newCell.pos.y = pCell->pos.y;
-                    traverseXYCell(*pState, newCell);
+                    reflectCylindrical(*pState, *pCell, geoCenter, invRadius);
                 }
-                else {
-                    rx = m_pCfgData->cellSize.x*(pState->pos.x + newCell.pos.x) - geoCenter.x;
-                    ry = m_pCfgData->cellSize.y*(pState->pos.y + newCell.pos.y) - geoCenter.y;
-                    if (rx * rx + ry * ry > radiusSquared) {
-                        // Return particle to position before the reflection
-                        pState->pos.x -= pState->vel.x * dtvmax.x;
-                        pState->pos.y -= pState->vel.y * dtvmax.y;
-                        // Do the reflection from walls
-                        reflectCylindrical(
-                            *pState, *pCell, geoCenter, dtvmax, invDtvmax, invRadius);
-                        newCell.pos.x = pCell->pos.x;
-                        newCell.pos.y = pCell->pos.y;
-                        // Mark new cell traverse (it can happen after reflection)
-                        traverseXYCell(*pState, newCell);
-                    }
-                }
+                traverseCell(*pState, newCell);
                 // Now check the z-boundary
                 if (newCell.pos.z == m_pCfgData->cellCount.z) {
                     // Periodic boundary - torus like geometry
@@ -436,69 +401,51 @@ void parfis::Particle::traverseCell(State& state, Cell& newCell)
     }
 }
 
-void parfis::Particle::traverseXYCell(State& state, Cell& newCell)
-{
-    // Mark crossing cell boundaries
-    if (state.pos.x < 0.0) {
-        state.pos.x += 1.0;
-        newCell.pos.x -= 1;
-    }
-    else if (state.pos.x > 1.0) {
-        state.pos.x -= 1.0;
-        newCell.pos.x += 1;
-    }
-    if (state.pos.y < 0.0) {
-        state.pos.y += 1.0;
-        newCell.pos.y -= 1;
-    }
-    else if (state.pos.y > 1.0) {
-        state.pos.y -= 1.0;
-        newCell.pos.y += 1;
-    }
-}
-
-int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>& geoCenter, 
-    Vec3D<state_t>& dtvmax, Vec3D<state_t>& invDtvmax, double invRadius) 
+int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>& geoCenter,
+    double invRadius) 
 {
     bool reflect = true;
     int retval = 0;
+    double timeStep = 1.0, tau;
+    double rx, ry, vx, vy, a, b, c;
+    double ux, uy, cr, sr;
     while (reflect) {
         // First we find point of reflection
-        double rx = m_pCfgData->cellSize.x*(state.pos.x + cell.pos.x) - geoCenter.x;
-        double ry = m_pCfgData->cellSize.y*(state.pos.y + cell.pos.y) - geoCenter.y;
-        double vx = state.vel.x*dtvmax.x;
-        double vy = state.vel.y*dtvmax.y;
-        double a = 2.0*(vx * vx + vy * vy);
-        double b = 2.0*(rx * vx + ry * vy);
-        double c = rx * rx + ry * ry - geoCenter.x*geoCenter.x;
-        double delt = (sqrt(b*b - 2.0*a*c) - b) / a;
+        rx = state.pos.x + cell.pos.x - geoCenter.x;
+        ry = state.pos.y + cell.pos.y - geoCenter.y;
+        vx = state.vel.x;
+        vy = state.vel.y;
+        a = (vx * vx + vy * vy);
+        b = 2.0*(rx * vx + ry * vy);
+        c = rx * rx + ry * ry - geoCenter.x*geoCenter.x;
+        tau = 0.5*(sqrt(b*b - 4.0*a*c) - b) / a;
         // Push particle to point of reflection (rx, ry)
-        state.pos.x += vx * delt;
-        state.pos.y += vy * delt;
-        rx = m_pCfgData->cellSize.x*(state.pos.x + cell.pos.x) - geoCenter.x;
-        ry = m_pCfgData->cellSize.y*(state.pos.y + cell.pos.y) - geoCenter.y;
+        state.pos.x += vx * tau;
+        state.pos.y += vy * tau;
+        rx = state.pos.x + cell.pos.x - geoCenter.x;
+        ry = state.pos.y + cell.pos.y - geoCenter.y;
         // Cosine and sine of rotation
-        double cr = rx * invRadius;
-        double sr = ry * invRadius;
-        // Reflected velocity vector in the rotated coord. sys.
-        double ux = -vx * cr - vy * sr;
-        double uy = vy * cr - vx * sr;
-        // Set velocity and position vector of the rotated coord. sys.
-        vx = ux * cr - uy * sr;
-        vy = uy * cr + ux * sr;
+        cr = rx * invRadius;
+        sr = ry * invRadius;
+        // Velocity vector before reflection in the rotated coord. sys.
+        ux =  vx * cr + vy * sr;
+        uy =  vy * cr - vx * sr;
+        // Set velocity and position vector of the original coord. sys.
+        vx = -ux * cr - uy * sr;
+        vy =  uy * cr - ux * sr;
         // Push particle to final position
-        delt = 1.0 - delt;
-        state.pos.x += vx * delt;
-        state.pos.y += vy * delt;
-        state.vel.x = vx * invDtvmax.x;
-        state.vel.y = vy * invDtvmax.y;
+        timeStep -= tau;
+        state.pos.x += vx * timeStep;
+        state.pos.y += vy * timeStep;
+        state.vel.x = vx;
+        state.vel.y = vy;
         // If traectory is close to tangent - multiple reflection can happen in a single timestep
-        rx = m_pCfgData->cellSize.x*(state.pos.x + cell.pos.x) - geoCenter.x;
-        ry = m_pCfgData->cellSize.y*(state.pos.y + cell.pos.y) - geoCenter.y;
+        rx = state.pos.x + cell.pos.x - geoCenter.x;
+        ry = state.pos.y + cell.pos.y - geoCenter.y;
         if (rx * rx + ry * ry > geoCenter.x*geoCenter.x) {
             // Reflect back to the boundary and repeat reflection process
-            state.pos.x -= vx * delt;
-            state.pos.y -= vy * delt;
+            state.pos.x -= vx * timeStep;
+            state.pos.y -= vy * timeStep;
             retval++;
         }
         else {

@@ -52,6 +52,12 @@ the :doc:`demo_files/simple_demo`.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Algorithms:
+
+   physics
+
+.. toctree::
+   :maxdepth: 2
    :caption: CPP API:
 
    cpp

@@ -59,7 +59,7 @@ class Parfis:
 
         if not os.path.isfile(releaseLib) and not os.path.isfile(debugLib):
             print("Library file not found!")
-            exit(1)
+            sys.exit(1)
 
         loadRelease = True
         if mode == 'Copy':
