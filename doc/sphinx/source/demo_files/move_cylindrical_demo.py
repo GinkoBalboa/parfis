@@ -93,7 +93,7 @@ plt.show()
 
 # %%
 # Number of frames to run the simulation
-numFrames = 100
+numFrames = 1
 # Size of a particle in the animation
 particleSize = 0.02*cellSize.x
 # Save animation as mp4
@@ -157,7 +157,7 @@ def update(i):
     return ax.patches + ax.texts
 
 
-anim = animation.FuncAnimation(fig, update, frames=numFrames, blit=True, interval=10)
+anim = animation.FuncAnimation(fig, update, frames=numFrames, blit=True, interval=1000)
 
 # fig.axes.append(axGrid)
 

@@ -30,7 +30,7 @@ namespace parfis
         void traverseCell(State& state, Cell& cell);
         int reflectCylindrical(State& state, Cell& cell, Vec3D<double>& geoCenter, 
             double invRadius);
-        void setNewCell(State& state, stateId_t stateId, size_t headIdPos, size_t newHeadIdPos);
+        void setNewCell(State& state, size_t headIdPos, size_t newHeadIdPos);
     };
 }
 

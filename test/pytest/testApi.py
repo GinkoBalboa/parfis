@@ -57,10 +57,10 @@ class TestApi(unittest.TestCase):
             # Now check if state_t is set as it should
             if TestApi.stateType == 'float':
                 self.assertTrue(pfs.Type.state_t, ctypes.c_float)
-                self.assertEqual(pfs.Vec3D_float, type(ptrSimData[0].stateVec.ptr[0].pos))
+                self.assertEqual(pfs.Vec3D_float, type(ptrSimData.stateVec.ptr[0].pos))
             else:
                 self.assertTrue(pfs.Type.state_t, ctypes.c_double)
-                self.assertEqual(pfs.Vec3D_double, type(ptrSimData[0].stateVec.ptr[0].pos))
+                self.assertEqual(pfs.Vec3D_double, type(ptrSimData.stateVec.ptr[0].pos))
             Parfis.deleteAll()
 
     def test_delete_parfis(self) -> None:
@@ -140,7 +140,7 @@ class TestApi(unittest.TestCase):
         
         Parfis.setPyCfgData(id)
         ptrCfgData = Parfis.getPyCfgData(id)
-        rSqPi = math.pi * (0.5*ptrCfgData[0].geometrySize[0].x)**2
+        rSqPi = math.pi * (0.5*ptrCfgData.geometrySize[0].x)**2
         volCyl = rSqPi *ptrCfgData.geometrySize[0].z
         volCylAbs = (
            ptrCfgData.geometrySize[0].x*

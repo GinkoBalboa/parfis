@@ -137,31 +137,40 @@ int parfis::System::createCellsCylindrical()
     // off the boundary (reflection checking) and those that can't go outside
     // the boundary
     cellId_t nCellId;
-    Vec3D<cellPos_t> nPos;
+    Vec3D<cellPos_t> neigbourPos;
     bool add;
     for (cellId = 0; cellId < m_pSimData->cellVec.size(); cellId++) {
         nodeFlag = m_pSimData->nodeFlagVec[cellId];
+        // Check neigbours of inside cells
         if (nodeFlag == 0b11111111) {
             add = false;
             for (int i = -1; i < 2; i++) {
                 for (int j = -1; j < 2; j++) {
-                    nPos = m_pSimData->cellVec[cellId].pos;
-                    nPos.x += i;
-                    nPos.y += j;
-                    nCellId = m_pSimData->cellIdVec[m_pCfgData->getAbsoluteCellId(nPos)];
-                    if (nCellId != Const::noCellId && 
-                        m_pSimData->nodeFlagVec[nCellId] != 0b11111111) {
-                            m_pSimData->cellIdBVec.push_back(cellId);
-                            add = true;
-                    }
-                    if (add) {
-                        j = 2; 
-                        i = 2;
+                    for (int k = -1; k < 2; k++) {
+                        neigbourPos = m_pSimData->cellVec[cellId].pos;
+                        // neighbourPos cant have any of the components equal to zero 
+                        // (since the condition nodeFlag == 0b11111111) so the following 
+                        // lines are ok to compute
+                        neigbourPos.x += i;
+                        neigbourPos.y += j;
+                        neigbourPos.z += k;
+                        nCellId = m_pSimData->cellIdVec[m_pCfgData->getAbsoluteCellId(neigbourPos)];
+                        // If neigbour is not fully inside than the cell is stored to BVec
+                        if (nCellId != Const::noCellId) {
+                            if (m_pSimData->nodeFlagVec[nCellId] != 0b11111111) {
+                                m_pSimData->cellIdBVec.push_back(cellId);
+                                add = true;
+                            }
+                        }
+                        if (add) {
+                            j = 2; 
+                            i = 2;
+                            k = 2;
+                        }
                     }
                 }
             }
-            if (!add)
-                m_pSimData->cellIdAVec.push_back(cellId);
+            if (!add) m_pSimData->cellIdAVec.push_back(cellId);
         }
         else {
             m_pSimData->cellIdBVec.push_back(cellId);
