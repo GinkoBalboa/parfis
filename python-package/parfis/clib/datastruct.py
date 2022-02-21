@@ -21,6 +21,17 @@ class Vec3DBase():
     def asTuple(self):
         return (self.x, self.y, self.z)
 
+    def asList(self):
+        return [self.x, self.y, self.z]
+
+    def __mul__(self, val):
+        # Check if it is another Vec3DBase
+        if Vec3DBase in [baseClass for baseClass in val.__class__.__bases__]:
+            return Vec3DClass(self.type)(self.x*val.x, self.y*val.y, self.z*val.z) 
+        # Val is a single value (float or int)
+        else:
+            return Vec3DClass(self.type)(self.x*val, self.y*val, self.z*val) 
+
     def __str__(self):
         return f"{{x: {self.x}, y: {self.y}, z: {self.z}}}"
 
@@ -30,6 +41,7 @@ class Vec3D_double(Structure, Vec3DBase):
         ('y', c_double),
         ('z', c_double)
     ]
+    type = c_double
 
 class Vec3D_float(Structure, Vec3DBase):
     _fields_ = [
@@ -37,6 +49,7 @@ class Vec3D_float(Structure, Vec3DBase):
         ('y', c_float),
         ('z', c_float)
     ]
+    type = c_float
 
 class Vec3D_int(Structure, Vec3DBase):
     _fields_ = [
@@ -44,6 +57,7 @@ class Vec3D_int(Structure, Vec3DBase):
         ('y', c_int),
         ('z', c_int)
     ]
+    type = c_int
 
 class Vec3D_uint32(Structure, Vec3DBase):
     _fields_ = [
@@ -51,6 +65,7 @@ class Vec3D_uint32(Structure, Vec3DBase):
         ('y', c_uint32),
         ('z', c_uint32)
     ]
+    type = c_uint32
 
 class Vec3D_uint16(Structure, Vec3DBase):
     _fields_ = [
@@ -58,6 +73,7 @@ class Vec3D_uint16(Structure, Vec3DBase):
         ('y', c_uint16),
         ('z', c_uint16)
     ]
+    type = c_uint16
 
 def Vec3DClass(cType = c_int):
     if cType == c_float:
@@ -106,7 +122,14 @@ class Specie(Structure):
     _fields_ = [
         ('id', c_uint32),
         ('name', c_char_p),
-        ('statesPerCell', c_int)        
+        ('velInitRandom', c_char_p),
+        ('statesPerCell', c_int),
+        ('timestepRatio', c_int),
+        ('dt', c_double),
+        ('idt', c_double),
+        ('maxVel', Vec3DClass(c_double)),
+        ('velInitDistMin', Vec3DClass(c_double)),
+        ('velInitDistMax', Vec3DClass(c_double))
     ]
 
 class PyVecBase:

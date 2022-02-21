@@ -251,11 +251,14 @@ TEST(api, pySimData) {
     std::string cfgStr = "\n\n\
         \n\n\
         particle.specie = [electron] <parfis::Param>\n\
-        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>\n\
+        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge, velInitRandom, velInitDistMin, velInitDistMax] <parfis::Param>\n\
         particle.specie.electron.statesPerCell = 10 <int>\n\
         particle.specie.electron.timestepRatio = 1 <int>\n\
         particle.specie.electron.amuMass = 0.00054858 <double>\n\
         particle.specie.electron.eCharge = -1 <int>\n\
+        particle.specie.electron.velInitRandom = uniform <std::string> \n\
+        particle.specie.electron.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double> \n\
+        particle.specie.electron.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double> \n\
     ";
     parfis::api::setConfig(id, cfgStr.c_str());
     parfis::api::loadCfgData(id);
@@ -268,29 +271,14 @@ TEST(api, pySimData) {
     parfis::api::setPySimData(id);
     ASSERT_EQ(std::string("electron"), 
         std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].name));
+    ASSERT_EQ(std::string("uniform"), 
+        std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].velInitRandom));
     ASSERT_EQ(parfis::api::getSimData(id)->stateVec.size(), 
         parfis::api::getPySimData(id)->stateVec.size);
     ASSERT_EQ(parfis::api::getSimData(id)->cellIdVec.size(), 
         parfis::api::getPySimData(id)->cellIdVec.size);
     ASSERT_EQ(parfis::api::getSimData(id)->specieVec[0].statesPerCell, 
         parfis::api::getPySimData(id)->specieVec.ptr[0].statesPerCell);
-    parfis::api::deleteParfis(id);
-}
-
-/**
- * @brief Push states
- */
-TEST(api, pushStates) {
-    uint32_t id = parfis::api::newParfis();
-    parfis::api::loadCfgData(id);
-    parfis::api::loadSimData(id);
-    parfis::api::runCommandChain(id, "create");
-    std::cout << GTEST_BOX << "progress: "<< std::flush;
-    for (uint32_t i = 0; i<100; i++) {
-        if (i%5 == 0) std::cout << "|" << std::flush;
-        parfis::api::runCommandChain(id, "evolve");
-    }
-    std::cout << " 100%" << std::endl;
     parfis::api::deleteParfis(id);
 }
 /** @} gtestAll*/

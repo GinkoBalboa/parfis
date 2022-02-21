@@ -246,6 +246,8 @@ namespace parfis {
         uint32_t id;
         /// Specie name
         const char * name;
+        /// Initial velocty random generator
+        const char * velInitRandom;
         /// States per cell for creating initial particles
         int statesPerCell;
         /// Number of CfgData.timestep for one specie timestep
@@ -256,6 +258,10 @@ namespace parfis {
         double idt;
         /// Maximal velocity allowed for the specie in m/s
         Vec3D<double> maxVel;
+        /// Minimal velocity value for initial distribution
+        Vec3D<double> velInitDistMin;
+        /// Maximal velocity value for initial distribution
+        Vec3D<double> velInitDistMax;
         /// Charge/mass ratio in C/kg
         double qm;
         /// Mass in amu
@@ -326,6 +332,7 @@ namespace parfis {
         Vec3D<int>* periodicBoundary;
         Vec3D<int>* cellCount;
         PyVec<std::string> specieNameVec;
+        PyVec<std::string> velInitRandomVec;
     };
 
     /**
@@ -346,6 +353,8 @@ namespace parfis {
         Vec3D<int> cellCount;
         /// Specie names
         std::vector<std::string> specieNameVec;
+        /// Initial distribuition
+        std::vector<std::string> velInitRandomVec;
         /// PyCfgData points to data of this object
         PyCfgData pyCfgData;
         /// Get absolute cell id from i,j,k

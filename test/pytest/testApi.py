@@ -132,6 +132,9 @@ class TestApi(unittest.TestCase):
             particle.specie.electron.timestepRatio = 1 <int>
             particle.specie.electron.amuMass = 0.00054858 <double>
             particle.specie.electron.eCharge = -1 <int>
+            particle.specie.electron.velInitRandom = uniform <std::string>
+            particle.specie.electron.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double>
+            particle.specie.electron.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double>
         """
         Parfis.setConfig(id, cfgStr)
         Parfis.loadCfgData(id)

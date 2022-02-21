@@ -256,6 +256,7 @@ int parfis::CfgData::setPyCfgData()
     pyCfgData.periodicBoundary = &periodicBoundary;
     pyCfgData.cellCount = &cellCount;
     pyCfgData.specieNameVec = specieNameVec;
+    pyCfgData.velInitRandomVec = velInitRandomVec;
     return 0;
 }
 

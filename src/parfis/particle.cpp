@@ -13,12 +13,12 @@ int parfis::Particle::loadCfgData()
 {
     std::string str;
     getParamToVector("specie", m_pCfgData->specieNameVec);
-
     return 0;
 }
 
 int parfis::Particle::loadSimData()
 {
+    std::string strTmp;
     m_pSimData->specieVec.resize(m_pCfgData->specieNameVec.size());
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
         m_pSimData->specieVec[i].id = i;
@@ -31,6 +31,14 @@ int parfis::Particle::loadSimData()
             m_pSimData->specieVec[i].amuMass);
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".eCharge", 
             m_pSimData->specieVec[i].eCharge);
+        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitRandom", 
+            strTmp);
+        m_pCfgData->velInitRandomVec.push_back(strTmp);
+        m_pSimData->specieVec[i].velInitRandom = m_pCfgData->velInitRandomVec[i].c_str();
+        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMin", 
+            m_pSimData->specieVec[i].velInitDistMin);
+        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMax", 
+            m_pSimData->specieVec[i].velInitDistMax);
     }
 
     for (auto& spec: m_pSimData->specieVec) {
@@ -39,9 +47,9 @@ int parfis::Particle::loadSimData()
         spec.dt = double(spec.timestepRatio)*m_pCfgData->timestep;
         spec.idt = 1.0 / spec.dt;
         spec.maxVel = {
-            m_pCfgData->cellSize.x * spec.idt,
-            m_pCfgData->cellSize.y * spec.idt,
-            m_pCfgData->cellSize.z * spec.idt
+            std::sqrt(1.0/3.0),
+            std::sqrt(1.0/3.0),
+            std::sqrt(1.0/3.0)
         };
         spec.qm = spec.charge*Const::eCharge / spec.mass;
         double maxEnergy = 0.5*spec.maxVel.lenSq()*spec.mass*Const::eVJ;
@@ -52,9 +60,9 @@ int parfis::Particle::loadSimData()
             "mass [kg]: " + Global::to_string(spec.mass) + "\n" +
             "dt [s]: " + Global::to_string(spec.dt) + "\n" +
             "max velocity [m/s]: [" + 
-                Global::to_string(spec.maxVel.x) + ", " + 
-                Global::to_string(spec.maxVel.y) + ", " + 
-                Global::to_string(spec.maxVel.z) + "]" + "\n" +
+                Global::to_string(spec.maxVel.x*spec.idt) + ", " + 
+                Global::to_string(spec.maxVel.y*spec.idt) + ", " + 
+                Global::to_string(spec.maxVel.z*spec.idt) + "]" + "\n" +
             "max energy [eV]: " + Global::to_string(maxEnergy) + "\n" +
             "charge/mass ratio [C/kg]: " + Global::to_string(spec.qm) + "\n" +
             Const::multilineSeparator;
@@ -158,9 +166,14 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             state.pos.x = dist(engine);
             state.pos.y = dist(engine);
             state.pos.z = dist(engine);
-            state.vel.x = 2.0*dist(engine) - 1.0;
-            state.vel.y = 2.0*dist(engine) - 1.0;
-            state.vel.z = 2.0*dist(engine) - 1.0;
+            if (std::string(spec.velInitRandom) == "uniform") {
+                state.vel.x = (spec.velInitDistMax.x - spec.velInitDistMin.x)*dist(engine) + 
+                    spec.velInitDistMin.x;
+                state.vel.y = (spec.velInitDistMax.y - spec.velInitDistMin.y)*dist(engine) + 
+                    spec.velInitDistMin.y;
+                state.vel.z = (spec.velInitDistMax.z - spec.velInitDistMin.z)*dist(engine) + 
+                    spec.velInitDistMin.z;
+            }
             if (ci==0 && si==0) {
                 msg = "the first three position vector components: " + 
                 std::to_string(state.pos.x) + ", " + std::to_string(state.pos.y) + ", " + 
@@ -364,7 +377,8 @@ int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>
     bool reflect = true;
     int retval = 0;
     double timeStep = 1.0, tau;
-    double rx, ry, vx, vy, a, b, c;
+    state_t rx, ry, vx, vy;
+    double a, b, c;
     double ux, uy, cr, sr;
     while (reflect) {
         // First we find point of reflection
@@ -372,7 +386,7 @@ int parfis::Particle::reflectCylindrical(State& state, Cell& cell, Vec3D<double>
         ry = state.pos.y + cell.pos.y - geoCenter.y;
         vx = state.vel.x;
         vy = state.vel.y;
-        a = (vx * vx + vy * vy);
+        a = (vx * vx + vy * vy) * timeStep;
         b = 2.0*(rx * vx + ry * vy);
         c = rx * rx + ry * ry - geoCenter.x*geoCenter.x;
         tau = 0.5*(sqrt(b*b - 4.0*a*c) - b) / a;
