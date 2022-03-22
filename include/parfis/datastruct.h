@@ -548,7 +548,7 @@ namespace parfis {
             std::map<std::string, std::unique_ptr<CommandChain>>& cmdChainMap);
 
         template<class T>
-        void getParamToValue(const std::string& key, T& valRef);
+        int getParamToValue(const std::string& key, T& valRef);
 
         template<class T>
         void getParamToVector(const std::string& key, std::vector<T>& vecRef);

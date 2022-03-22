@@ -11,8 +11,16 @@
  */
 int parfis::Particle::loadCfgData()
 {
-    std::string str;
+    int retVal;
+    std::string strTmp;
     getParamToVector("specie", m_pCfgData->specieNameVec);
+    m_pCfgData->velInitRandomVec.clear();
+    for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitRandom", strTmp);
+        // If there is no parameter given, set the default
+        if (retVal) strTmp = Const::velInitRandom;
+        m_pCfgData->velInitRandomVec.push_back(strTmp);
+    }
     return 0;
 }
 
@@ -31,9 +39,6 @@ int parfis::Particle::loadSimData()
             m_pSimData->specieVec[i].amuMass);
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".eCharge", 
             m_pSimData->specieVec[i].eCharge);
-        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitRandom", 
-            strTmp);
-        m_pCfgData->velInitRandomVec.push_back(strTmp);
         m_pSimData->specieVec[i].velInitRandom = m_pCfgData->velInitRandomVec[i].c_str();
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMin", 
             m_pSimData->specieVec[i].velInitDistMin);

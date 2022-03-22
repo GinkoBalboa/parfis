@@ -379,7 +379,7 @@ PARFIS_EXPORT int parfis::api::setConfig(uint32_t id, const char* str)
         retval = Parfis::getParfis(id)->configure(str);
     }
     else {
-        // Mulit line cfgStr
+        // Multi line cfgStr
         std::string line;
         line = cfgStr.substr(start, end - start + 1);
         while(line.size() > 0) {
