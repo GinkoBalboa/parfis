@@ -56,7 +56,7 @@ if (BUILD_LIB)
 endif()
 
 # Copy shared libs for the python-package
-if(COPY_LIB_PYTHON)
+if(BUILD_LIB AND COPY_LIB_PYTHON)
     add_custom_command(TARGET parfis POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy 
         ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
