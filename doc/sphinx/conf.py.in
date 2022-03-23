@@ -104,3 +104,6 @@ html_copy_source = False
 
 # Enable numref
 numfig = True
+
+# Allow errors
+nbsphinx_allow_errors = True
