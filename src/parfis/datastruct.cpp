@@ -166,9 +166,10 @@ std::string parfis::ParamBase::getValueString(bool printType)
  * @tparam T type of parameter (double, float, int or string)
  * @param key name of the parameter without the first, domain, name level.
  * @param valRef reference to set value to
+ * @return int zero on success
  */
 template<class T>
-void parfis::Domain::getParamToValue(const std::string& key, T& valRef) 
+int parfis::Domain::getParamToValue(const std::string& key, T& valRef) 
 {
     auto inhvec = Global::getInheritanceVector(key);
     ParamBase* pp = this;
@@ -176,16 +177,27 @@ void parfis::Domain::getParamToValue(const std::string& key, T& valRef)
     for(i=0; i<inhvec.size() - 1; i++) {
         pp = pp->m_childMap[inhvec[i]].get();
     }
-    valRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
+    if (pp->m_childMap.count(inhvec[i])) {
+        valRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
+        return 0;
+    }
+    return 1;
 }
 
-template void parfis::Domain::getParamToValue<int>(const std::string& key, int& valRef);
-template void parfis::Domain::getParamToValue<double>(const std::string& key, double& valRef);
-template void parfis::Domain::getParamToValue<std::string>(
+template int parfis::Domain::getParamToValue<int>(const std::string& key, int& valRef);
+template int parfis::Domain::getParamToValue<double>(const std::string& key, double& valRef);
+template int parfis::Domain::getParamToValue<std::string>(
     const std::string& key, std::string& valRef);
 
+/**
+ * @brief Specialization for Vec3D<double>
+ * 
+ * @param key name of the parameter without the first, domain, name level.
+ * @param valRef reference to set value to
+ * @return int zero on success
+ */
 template<>
-void parfis::Domain::getParamToValue(const std::string& key, Vec3D<double>& valRef) 
+int parfis::Domain::getParamToValue(const std::string& key, Vec3D<double>& valRef) 
 {
     auto inhvec = Global::getInheritanceVector(key);
     ParamBase* pp = this;
@@ -193,13 +205,24 @@ void parfis::Domain::getParamToValue(const std::string& key, Vec3D<double>& valR
     for(i=0; i<inhvec.size() - 1; i++) {
         pp = pp->m_childMap[inhvec[i]].get();
     }
-    valRef.x = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
-    valRef.y = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[1];
-    valRef.z = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[2];
+    if (pp->m_childMap.count(inhvec[i])) {
+        valRef.x = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
+        valRef.y = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[1];
+        valRef.z = static_cast<Param<double>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[2];
+        return 0;
+    }
+    return 1;
 }
 
+/**
+ * @brief Specialization for Vec3D<int>
+ * 
+ * @param key name of the parameter without the first, domain, name level.
+ * @param valRef reference to set value to
+ * @return int zero on success
+ */
 template<>
-void parfis::Domain::getParamToValue(const std::string& key, Vec3D<int>& valRef) 
+int parfis::Domain::getParamToValue(const std::string& key, Vec3D<int>& valRef) 
 {
     auto inhvec = Global::getInheritanceVector(key);
     ParamBase* pp = this;
@@ -207,9 +230,13 @@ void parfis::Domain::getParamToValue(const std::string& key, Vec3D<int>& valRef)
     for(i=0; i<inhvec.size() - 1; i++) {
         pp = pp->m_childMap[inhvec[i]].get();
     }
-    valRef.x = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
-    valRef.y = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[1];
-    valRef.z = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[2];
+    if (pp->m_childMap.count(inhvec[i])) {
+        valRef.x = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[0];
+        valRef.y = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[1];
+        valRef.z = static_cast<Param<int>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec[2];
+        return 0;
+    }
+    return 1;
 }
 
 /**
@@ -227,6 +254,7 @@ void parfis::Domain::getParamToVector(const std::string& key, std::vector<T>& ve
     for(i=0; i<inhvec.size() - 1; i++) {
         pp = pp->m_childMap[inhvec[i]].get();
     }
+    vecRef.clear();
     vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
 }
 
@@ -244,6 +272,32 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
         pp = static_cast<Param<std::string>*>(pp->m_childMap[inheritvec[i]].get());
     }
     return pp;
+}
+
+int parfis::CfgData::setPyCfgData()
+{
+    pyCfgData.geometry = geometry.c_str();
+    pyCfgData.timestep = timestep;
+    pyCfgData.geometrySize = &geometrySize;
+    pyCfgData.cellSize = &cellSize;
+    pyCfgData.periodicBoundary = &periodicBoundary;
+    pyCfgData.cellCount = &cellCount;
+    pyCfgData.specieNameVec = specieNameVec;
+    pyCfgData.velInitRandomVec = velInitRandomVec;
+    return 0;
+}
+
+int parfis::SimData::setPySimData()
+{
+    pySimData.stateVec = stateVec;
+    pySimData.cellIdVec = cellIdVec;
+    pySimData.cellIdAVec = cellIdAVec;
+    pySimData.cellIdBVec = cellIdBVec;
+    pySimData.specieVec = specieVec;
+    pySimData.cellVec = cellVec;
+    pySimData.nodeFlagVec = nodeFlagVec;
+    pySimData.headIdVec = headIdVec;
+    return 0;
 }
 
 /**
@@ -264,8 +318,11 @@ int parfis::Domain::initialize(const std::string& cstr)
         cp = pp;
     }
     else {
-        if (cstr.find("<parfis::Param>") != std::string::npos)
+        if (cstr.find("<parfis::Param>") != std::string::npos) {
+            if (pp->m_childMap.find(childName) != pp->m_childMap.end())
+                pp->m_childMap.erase(childName);
             pp->addChild<std::string>(childName);
+        }
         else if (cstr.find("<std::string>") != std::string::npos)
             pp->addChild<std::string>(childName);
         else if (cstr.find("<double>") != std::string::npos)
@@ -289,6 +346,9 @@ int parfis::Domain::configure(const std::string& cstr)
     std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(cstr);
     std::string childName = Global::childName(std::get<0>(keyValue));
     Param<std::string>* pp = getParent(std::get<0>(keyValue));
+    // If reconfiguration is ongoing then childMap must be reassembled
+    if (pp->m_childMap.find(childName) == pp->m_childMap.end())
+        initialize(cstr);
     ParamBase::setValueVec(pp->m_childMap[childName].get(), std::get<1>(keyValue));
     return 0;
 }

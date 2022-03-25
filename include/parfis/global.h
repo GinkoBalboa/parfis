@@ -60,6 +60,8 @@ namespace parfis
         static const uint32_t logLevel;
         /// Version string
         static const char* version;
+        /// Build configuration
+        static const char* buildConfig;
         /// Git tag string
         static const char* gitTag;
         /// Multiline string starts and ends with this separator
@@ -70,6 +72,8 @@ namespace parfis
         static constexpr cellId_t noCellId = UINT32_MAX;
         /// Id that represents that no state exists
         static constexpr stateId_t noStateId = UINT32_MAX;
+        /// Defaul velInitRandom value
+        static const char* velInitRandom;
     };
 }
 

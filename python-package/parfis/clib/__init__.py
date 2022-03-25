@@ -1,1 +1,2 @@
-from .parfislib import Parfis
+from .datastruct import *
+from .parfislib import *

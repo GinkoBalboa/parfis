@@ -22,7 +22,7 @@ get_target_property(GTEST_FILE_NAME gtest FILE_NAME)
 get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
 get_target_property(PARFIS_FILE_NAME parfis FILE_NAME)
 
-set_properties(gtestAll EXECUTABLE)
+set_properties(gtestAll EXECUTABLE "")
 set_output_directory(gtestAll ${parfis_SOURCE_DIR}/build/bin/gtestAll)
 target_link_libraries(gtestAll PUBLIC parfis ${GTEST_IMPORTED_LOCATION})
 add_dependencies(gtestAll parfis gtest)

@@ -1,6 +1,8 @@
 import sys
 import os
+import time
 import setuptools
+import subprocess
 from platform import system
 
 # You can't use `pip install .` as pip copies setup.py to a temporary
@@ -8,26 +10,36 @@ from platform import system
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, CURRENT_DIR)
 
-def lib_name() -> str:
-    '''Return platform dependent shared object name.'''
-    if system() == 'Linux' or system().upper().endswith('BSD'):
-        name = 'libpafis.so'
-    elif system() == 'Windows':
-        name = 'pafis.dll'
-    return name
-
 if __name__ == '__main__':
     
     # Supported commands:
     # From internet:
     #   pip install parfis
+    # Locally for testing (from parfis/python-packate dir)
+    #   pip install -e . --force-reinstall -v
+    # Upload to test.pypi
+    #   twine upload --repository testpypi dist/*
+    # Istall from test.pypi
+    #   pip install --force-reinstall -i https://test.pypi.org/simple/ parfis
 
     with open("README.md", "r") as fh:
         long_description = fh.read()
 
+    # If tag.txt is supplied use that (for testing purposes only)
+    if os.path.isfile("tag.txt") == False:
+        subprocess.Popen("git describe --tags --abbrev=0 > tag.txt", shell=True)
+
+    while os.path.isfile("tag.txt") == False:
+        time.sleep(1)
+
+    tagName = "0.0.0"
+    with open('tag.txt', 'r') as file:
+        tagName = file.read().rstrip()
+
+    print(f"Tag name is: {tagName}")
     setuptools.setup(
         name="parfis",
-        version="0.0.5-dev",
+        version=tagName,
         author="Ginko Balboa",
         author_email="ginkobalboa3@gmail.com",
         description="Particles and field simulator",
@@ -39,7 +51,8 @@ if __name__ == '__main__':
         #                 'testing':['unittest']},
         long_description=long_description,
         long_description_content_type="text/markdown",
-        url="https://github.com/GinkoBalboa/parfis",
+        project_urls={"github": "https://github.com/GinkoBalboa/parfis",
+                      "documentation": "https://www.parfis.com"},
         classifiers=[
             "Development Status :: 1 - Planning",
             "Intended Audience :: Science/Research",

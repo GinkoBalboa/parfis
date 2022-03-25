@@ -51,7 +51,7 @@ TEST(api, checkTimestep) {
 }
 
 /**
- * @brief Creates three new parfis objects and deletes one from the middle
+ * @brief Creates three new parfis objects and deletes one from the middle, then delete all
  */
 TEST(api, deleteParfis)
 {
@@ -62,6 +62,8 @@ TEST(api, deleteParfis)
     idVec.push_back(parfis::api::newParfis());
     parfis::api::deleteParfis(1);
     ASSERT_EQ(sizeBefore + 2, parfis::api::getParfisIdVec().size());
+    parfis::api::deleteAll();
+    ASSERT_EQ(0, parfis::api::getParfisIdVec().size());
 }
 
 /**
@@ -70,6 +72,7 @@ TEST(api, deleteParfis)
  */
 TEST(api, calculateCellCount) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     int retval = 0;
     // Get number of cells in the x direction
     int cellCount_x = parfis::api::getCfgData(id)->cellCount.x;
@@ -81,8 +84,11 @@ TEST(api, calculateCellCount) {
     ASSERT_EQ(cellCount_x, cellCount_x_calc);
     // Set normal number of cells
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-3, 1.0e-3, 1.0e-3]");
+    retval = parfis::api::loadCfgData(id);
+    ASSERT_EQ(retval, 0);
     // Set over the limit number of cells
     retval = parfis::api::setConfig(id, "system.cellSize=[1.0e-6, 1.0e-6, 1.0e-6]");
+    retval = parfis::api::loadCfgData(id);
     ASSERT_NE(retval, 0);
     parfis::api::deleteParfis(id);
 }
@@ -92,6 +98,7 @@ TEST(api, calculateCellCount) {
  */
 TEST(api, createCells) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     std::cout << GTEST_BOX << "log file name: " << parfis::api::getLogFileName(id) << std::endl;
     int retval = parfis::api::setConfig(id, "commandChain.create = [createCells]");
     ASSERT_EQ(retval, 0);
@@ -118,6 +125,7 @@ TEST(api, userDefinedCfgString) {
         "commandChain.create = [createCells] <parfis::Command>");
     // Proceed as usual with creating the Parfis object
     uint32_t id = parfis::api::newParfis(defaultStr.c_str());
+    parfis::api::loadCfgData(id);
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     ASSERT_EQ(139200, parfis::api::getSimData(id)->cellVec.size());
@@ -135,8 +143,67 @@ TEST(api, userDefinedCfgString) {
  */
 TEST(api, configSpecie) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     ASSERT_EQ(1, parfis::api::getCfgData(id)->specieNameVec.size());
     ASSERT_EQ("a", parfis::api::getCfgData(id)->specieNameVec[0]);
+    parfis::api::deleteParfis(id);
+}
+
+/**
+ * @brief Reconfigure and add specie
+ */
+TEST(api, reconfigSpecie) {
+    uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
+    parfis::api::setPyCfgData(id);
+    ASSERT_EQ(1, parfis::api::getCfgData(id)->specieNameVec.size());
+    ASSERT_EQ("a", parfis::api::getCfgData(id)->specieNameVec[0]);
+    // Set two species
+    parfis::api::setConfig(id, "particle.specie = [electron, atom] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.timestepRatio = 1 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.amuMass = 0.00054858 <double>");
+    parfis::api::setConfig(id, "particle.specie.electron.eCharge = -1 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.atom.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
+    parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
+    parfis::api::loadCfgData(id);
+    parfis::api::setPyCfgData(id);
+    ASSERT_EQ(2, parfis::api::getCfgData(id)->specieNameVec.size());
+    ASSERT_EQ("electron", parfis::api::getCfgData(id)->specieNameVec[0]);
+    ASSERT_EQ("atom", parfis::api::getCfgData(id)->specieNameVec[1]);
+    // Check as double
+    ASSERT_EQ(double(4), std::stod(parfis::api::getConfigParam(id, "particle.specie.atom.amuMass"), nullptr));
+    parfis::api::deleteParfis(id);
+}
+
+/**
+ * @brief Test PyCfgData
+ */
+TEST(api, pyCfgData) {
+    uint32_t id = parfis::api::newParfis();
+    // Set two species
+    parfis::api::setConfig(id, "particle.specie = [electron, atom] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.timestepRatio = 1 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.amuMass = 0.00054858 <double>");
+    parfis::api::setConfig(id, "particle.specie.electron.eCharge = -1 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
+    parfis::api::setConfig(id, "particle.specie.atom.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
+    parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
+    int retval;
+    retval = parfis::api::loadCfgData(id);
+    ASSERT_EQ(0, retval);
+    parfis::api::setPyCfgData(id);
+    ASSERT_EQ(2, parfis::api::getPyCfgData(id)->specieNameVec.size);
+    ASSERT_EQ(std::string("electron"), std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]));
+    ASSERT_EQ(std::string("atom"), std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[1]));
     parfis::api::deleteParfis(id);
 }
 
@@ -145,25 +212,26 @@ TEST(api, configSpecie) {
  */
 TEST(api, createCellsAndStates) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     double rSqPi = M_PI * std::pow(parfis::api::getCfgData(id)->geometrySize.x * 0.5, 2);
-    double areaCyl = rSqPi * parfis::api::getCfgData(id)->geometrySize.z;
-    double areaCub = parfis::api::getCfgData(id)->geometrySize.x * 
+    double volCyl = rSqPi * parfis::api::getCfgData(id)->geometrySize.z;
+    double volCub = parfis::api::getCfgData(id)->geometrySize.x * 
         parfis::api::getCfgData(id)->geometrySize.y * parfis::api::getCfgData(id)->geometrySize.z;
 
     uint32_t numStatesCyl = parfis::api::getSimData(id)->stateVec.size();
     uint32_t numCells = parfis::api::getSimData(id)->cellIdVec.size();
     uint32_t numStatesCub = numCells*parfis::api::getSimData(id)->specieVec[0].statesPerCell;
-    double areaRatio = areaCyl/areaCub;
+    double volRatio = volCyl/volCub;
     double stateRatio = double(numStatesCyl)/double(numStatesCub);
-    double relativeDifference = abs(areaRatio - stateRatio)/(0.5*(areaRatio + stateRatio));
+    double relativeDifference = abs(volRatio - stateRatio)/(0.5*(volRatio + stateRatio));
     double precission = 5.0e-3;
     
     // The ratio between the number of created states in cylindrical and cubical geometry 
     // should resemble the ratio of the volume between the two
     std::cout << GTEST_BOX << "created: " << numStatesCyl << " states" << std::endl;
-    std::cout << GTEST_BOX << "volume ratio: " << areaRatio << std::endl;
+    std::cout << GTEST_BOX << "volume ratio: " << volRatio << std::endl;
     std::cout << GTEST_BOX << "states ratio: " << stateRatio << std::endl;
     std::cout << GTEST_BOX << "relative difference: " << 
         relativeDifference*100.0 << "%" << std::endl;
@@ -175,18 +243,42 @@ TEST(api, createCellsAndStates) {
 }
 
 /**
- * @brief Push states
+ * @brief Test PySimData
  */
-TEST(api, pushStates) {
+TEST(api, pySimData) {
     uint32_t id = parfis::api::newParfis();
+    // Set two species
+    std::string cfgStr = "\n\n\
+        \n\n\
+        particle.specie = [electron] <parfis::Param>\n\
+        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge, velInitRandom, velInitDistMin, velInitDistMax] <parfis::Param>\n\
+        particle.specie.electron.statesPerCell = 10 <int>\n\
+        particle.specie.electron.timestepRatio = 1 <int>\n\
+        particle.specie.electron.amuMass = 0.00054858 <double>\n\
+        particle.specie.electron.eCharge = -1 <int>\n\
+        particle.specie.electron.velInitRandom = uniform <std::string> \n\
+        particle.specie.electron.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double> \n\
+        particle.specie.electron.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double> \n\
+    ";
+    parfis::api::setConfig(id, cfgStr.c_str());
+    parfis::api::loadCfgData(id);
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
-    std::cout << GTEST_BOX << "progress: "<< std::flush;
-    for (uint32_t i = 0; i<100; i++) {
-        if (i%5 == 0) std::cout << "|" << std::flush;
-        parfis::api::runCommandChain(id, "evolve");
-    }
-    std::cout << " 100%" << std::endl;
+    parfis::api::setPyCfgData(id);
+    ASSERT_EQ(1, parfis::api::getPyCfgData(id)->specieNameVec.size);
+    ASSERT_EQ(std::string("electron"), 
+        std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]));
+    parfis::api::setPySimData(id);
+    ASSERT_EQ(std::string("electron"), 
+        std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].name));
+    ASSERT_EQ(std::string("uniform"), 
+        std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].velInitRandom));
+    ASSERT_EQ(parfis::api::getSimData(id)->stateVec.size(), 
+        parfis::api::getPySimData(id)->stateVec.size);
+    ASSERT_EQ(parfis::api::getSimData(id)->cellIdVec.size(), 
+        parfis::api::getPySimData(id)->cellIdVec.size);
+    ASSERT_EQ(parfis::api::getSimData(id)->specieVec[0].statesPerCell, 
+        parfis::api::getPySimData(id)->specieVec.ptr[0].statesPerCell);
     parfis::api::deleteParfis(id);
 }
 /** @} gtestAll*/

@@ -19,39 +19,39 @@ function(set_output_directory target dir)
 endfunction(set_output_directory)
 
 # Set binary files extension
-function(set_properties target type)
+function(set_properties target type suffix)
     if(${type} MATCHES "SHARED")
         if(UNIX)
             if(BUILD_DEBUG)
                 set_target_properties(
                     ${target} 
                     PROPERTIES 
-                        SUFFIX "d.so"
-                        FILE_NAME "lib${target}d.so"
+                        SUFFIX "${suffix}d.so"
+                        FILE_NAME "lib${target}${suffix}d.so"
                         CMAKE_C_FLAGS_DEBUG "-g -DDEBUG"
                         CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
             else()
                 set_target_properties(
                     ${target} 
                     PROPERTIES 
-                        SUFFIX ".so"
-                        FILE_NAME "lib${target}.so")
+                        SUFFIX "${suffix}.so"
+                        FILE_NAME "lib${target}${suffix}.so")
             endif()
         elseif(WIN32)
             if(BUILD_DEBUG)
                 set_target_properties(
                     ${target} 
                     PROPERTIES 
-                        SUFFIX "d.dll"
-                        FILE_NAME "${target}d.dll"
+                        SUFFIX "${suffix}d.dll"
+                        FILE_NAME "${target}${suffix}d.dll"
                         CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MDd"
                         CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
             else()
                 set_target_properties(
                     ${target} 
                     PROPERTIES 
-                        SUFFIX ".dll"
-                        FILE_NAME "${target}.dll"
+                        SUFFIX "${suffix}.dll"
+                        FILE_NAME "${target}${suffix}.dll"
                         CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MD"
                         CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
             endif()
@@ -90,6 +90,7 @@ function(set_properties target type)
 endfunction(set_properties)
 
 function(set_version)
+    set(GIT_REV "no-rev")
     execute_process(
         COMMAND git log --pretty=format:'%h' -n 1
         OUTPUT_VARIABLE GIT_REV ERROR_QUIET)
@@ -127,12 +128,19 @@ function(set_version)
 
     string(STRIP "${GIT_REV}" GIT_REV)
     # GIT_REV string has quotes
-    string(REPLACE "\'" "" GIT_REV ${GIT_REV})
-    string(REPLACE "\"" "" GIT_REV ${GIT_REV})
+    if(NOT "${GIT_REV}" STREQUAL "")
+        string(REPLACE "\'" "" GIT_REV ${GIT_REV})
+        string(REPLACE "\"" "" GIT_REV ${GIT_REV})
+    endif()
     string(STRIP "${GIT_DIFF}" GIT_DIFF)
     string(STRIP "${GIT_TAG}" GIT_TAG)
     string(STRIP "${VERSION}" VERSION)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
+
+    set(BUILD_CONFIG_STR "Release")
+    if(BUILD_DEBUG)
+        set(BUILD_CONFIG_STR "Debug")
+    endif()
 
     set(VERSION_H "\
 #ifndef PARFIS_VERSION_H
@@ -141,6 +149,7 @@ function(set_version)
 #define GIT_TAG \"${GIT_TAG}\"
 #define GIT_BRANCH \"${GIT_BRANCH}\"
 #define VERSION \"${VERSION}\"
+#define BUILD_CONFIG \"${BUILD_CONFIG_STR}\"
 #endif // PARFIS_VERSION_H
 ")
 

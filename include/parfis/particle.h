@@ -28,11 +28,9 @@ namespace parfis
         int createStatesOfSpecie(Specie& spec);
         int pushStatesCylindrical();
         void traverseCell(State& state, Cell& cell);
-        void traverseXYCell(State& state, Cell& cell);
         int reflectCylindrical(State& state, Cell& cell, Vec3D<double>& geoCenter, 
-            Vec3D<state_t>& dtvmax, Vec3D<state_t>& invDtvmax, double invRadius);
-        void setNewCell(State& state, stateId_t stateId, Cell& cell, Cell& newCell, 
-            cellId_t cellId, cellId_t newCellId, specieId_t specId);
+            double invRadius);
+        void setNewCell(State& state, size_t headIdPos, size_t newHeadIdPos);
     };
 }
 

@@ -168,11 +168,6 @@ int parfis::Parfis::initialize()
 {
     initializeDomains();
     int retval = 0;
-    for (auto& domain : m_domainVec) {
-        retval = m_domainMap[domain]->loadCfgData();
-        if (retval != 0)
-            break;
-    }
     return retval;
 }
 
@@ -181,6 +176,19 @@ int parfis::Parfis::loadSimData()
     int retval = 0;
     for (auto& domain : m_domainVec) {
         retval = m_domainMap[domain]->loadSimData();
+        if (retval != 0)
+            break;
+    }
+    // Set evolution counter
+    m_simData.evolveCnt = 0;
+    return retval;
+}
+
+int parfis::Parfis::loadCfgData()
+{
+    int retval = 0;
+    for (auto& domain : m_domainVec) {
+        retval = m_domainMap[domain]->loadCfgData();
         if (retval != 0)
             break;
     }
@@ -206,6 +214,8 @@ int parfis::Parfis::runCommandChain(const std::string& chainChainName)
         retval = pcom->m_func();
         pcom = pcom->getNext();
     }
+    if (chainChainName == "evolve")
+        m_simData.evolveCnt++;
     return retval;
 }
 
@@ -259,8 +269,8 @@ int parfis::Parfis::configure(const char* str)
         }
     }
     else {
+        // This is reconfiguration of a variable or a parameter
         retval = dptr->configure(cstr);
-        retval = dptr->loadCfgData();
     }
     return retval;
 }
@@ -289,6 +299,7 @@ PARFIS_EXPORT const char* parfis::api::info()
         str = "parfis::state_t = unknown";
     str += "\nparfis::logLevel = " + std::to_string(Const::logLevel);
     str += "\nparfis::version = " + std::string(Const::version);
+    str += "\nparfis::buildConfig = " + std::string(Const::buildConfig);
     str += "\nparfis::gitTag = " + std::string(Const::gitTag);
     int pfSize = int(Parfis::s_parfisMap.size());
     str += "\nParfis object count = " + std::to_string(pfSize);
@@ -359,7 +370,28 @@ PARFIS_EXPORT int parfis::api::setConfig(uint32_t id, const char* str)
 {
     if (Parfis::getParfis(id) == nullptr) 
         return 1;
-    int retval = Parfis::getParfis(id)->configure(str);
+    int retval = 0;
+    std::string cfgStr = str;
+    size_t start = 0;
+    size_t end = cfgStr.find('\n', start);
+    if (end == std::string::npos) {
+        // One line cfgStr
+        retval = Parfis::getParfis(id)->configure(str);
+    }
+    else {
+        // Multi line cfgStr
+        std::string line;
+        line = cfgStr.substr(start, end - start + 1);
+        while(line.size() > 0) {
+            retval = Parfis::getParfis(id)->configure(line.c_str());
+            start = end + 1;
+            end = cfgStr.find('\n', start);
+            if (end == std::string::npos)
+                line.clear();
+            else
+                line = cfgStr.substr(start, end - start + 1); 
+        }
+    }
     // Domain name not recognized
     if (retval == -1)
         return 2;
@@ -373,6 +405,14 @@ PARFIS_EXPORT int parfis::api::loadSimData(uint32_t id)
     if (Parfis::getParfis(id) == nullptr) 
         return 1;
     int retval = Parfis::getParfis(id)->loadSimData();
+    return retval;
+}
+
+PARFIS_EXPORT int parfis::api::loadCfgData(uint32_t id)
+{
+    if (Parfis::getParfis(id) == nullptr) 
+        return 1;
+    int retval = Parfis::getParfis(id)->loadCfgData();
     return retval;
 }
 
@@ -473,6 +513,42 @@ PARFIS_EXPORT const parfis::CfgData* parfis::api::getCfgData(uint32_t id)
 }
 
 /**
+ * @brief Loads the PyCfgData
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT int parfis::api::setPyCfgData(uint32_t id)
+{
+    return Parfis::getParfis(id)->m_cfgData.setPyCfgData();
+}
+
+/**
+ * @brief Loads the PySimData
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT int parfis::api::setPySimData(uint32_t id)
+{
+    return Parfis::getParfis(id)->m_simData.setPySimData();
+}
+
+/**
+ * @brief Returns pointer to the PyCfgData of the Parfis object given by id
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT const parfis::PyCfgData* parfis::api::getPyCfgData(uint32_t id)
+{
+    return &Parfis::getParfis(id)->m_cfgData.pyCfgData;
+}
+
+/**
+ * @brief Returns pointer to the PySimData of the Parfis object given by id
+ * @param id of the Parfis object
+ */
+PARFIS_EXPORT const parfis::PySimData* parfis::api::getPySimData(uint32_t id)
+{
+    return &Parfis::getParfis(id)->m_simData.pySimData;
+}
+
+/**
  * @brief Returns pointer to the SimData of the Parfis object given by id
  * @param id of the Parfis object
  */
@@ -491,6 +567,20 @@ PARFIS_EXPORT int parfis::api::deleteParfis(uint32_t id)
     if (Parfis::getParfis(id) == nullptr) 
         return 1;
     Parfis::s_parfisMap.erase(id);
+    return 0;
+}
+
+/**
+ * @brief Deletes all Parfis objects
+ * @return Zero on success 
+ */
+PARFIS_EXPORT int parfis::api::deleteAll()
+{
+    std::vector<uint32_t> keysToErase;
+    for (auto& pfis: Parfis::s_parfisMap)
+        keysToErase.push_back(pfis.first);
+    for (auto idtoerase: keysToErase)
+        Parfis::s_parfisMap.erase(idtoerase);
     return 0;
 }
 

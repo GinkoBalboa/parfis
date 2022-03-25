@@ -32,11 +32,14 @@ system.periodicBoundary = [0, 0, 0] <int> (0, 1)  # Boundary condition \n\
 \n\
 particle = specie <parfis::Param> (specie) # Particle parameters\n\
 particle.specie = a <parfis::Param> (*) # You can define specie name anyway you like \n\
-particle.specie.a = [statesPerCell, timestepRatio, mass, charge] (statesPerCell, timestepRatio, amuMass, eCharge) <parfis::Param> # Parameters for each specie \n\
+particle.specie.a = [statesPerCell, timestepRatio, amuMass, eCharge, velInitRandom, velInitDistMin, velInitDistMax] (statesPerCell, timestepRatio, amuMass, eCharge) <parfis::Param> # Parameters for each specie \n\
 particle.specie.a.statesPerCell = 10 <int> # Number of states (particles) per cell\n\
 particle.specie.a.timestepRatio = 1 <int> # This many system.timesteps is one timestep for the specie\n\
 particle.specie.a.amuMass = 4 <double> # Mass is given in a.m.u. \n\
 particle.specie.a.eCharge = 1 <int> # Charge is given in units of elementary charge \n\
+particle.specie.a.velInitRandom = uniform <std::string> # Random generator for initial velocity vector \n\
+particle.specie.a.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double> # Array of v initial distribution minimums \n\
+particle.specie.a.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double> # Array of v initial distribution maximums \n\
 \n\
 commandChain = [create, evolve] <parfis::CommandChain> (create, evolve) # Command chains for the program \n\
 commandChain.create = [createCells, createStates] (createCells, createStates) <parfis::Command> # Command chain for creation of data \n\

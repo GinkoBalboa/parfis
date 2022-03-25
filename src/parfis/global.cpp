@@ -8,7 +8,9 @@
 
 const char* parfis::Const::version = VERSION;
 const char* parfis::Const::gitTag = GIT_TAG;
+const char* parfis::Const::buildConfig = BUILD_CONFIG;
 const uint32_t parfis::Const::logLevel = LOG_LEVEL;
+const char* parfis::Const::velInitRandom = "uniform";
 const std::string parfis::Const::multilineSeparator = "---------------------------------------\n";
 
 /**

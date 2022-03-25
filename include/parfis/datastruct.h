@@ -150,14 +150,14 @@ namespace parfis {
          * @brief Compares if vectors are equal
          */
         friend bool operator==(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
-            return (lhs.x == rhs.x && lhs.y == rhs.y && rhs.z == rhs.z);
+            return (lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z);
         }
 
         /**
          * @brief Compares if vectors are not equal
          */
         friend bool operator!=(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
-            return (lhs.x != rhs.x || lhs.y != rhs.y || rhs.z != rhs.z);
+            return (lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z);
         }
 
         /** 
@@ -245,7 +245,9 @@ namespace parfis {
         /// Id from the specie vector
         uint32_t id;
         /// Specie name
-        std::string name;
+        const char * name;
+        /// Initial velocty random generator
+        const char * velInitRandom;
         /// States per cell for creating initial particles
         int statesPerCell;
         /// Number of CfgData.timestep for one specie timestep
@@ -256,6 +258,10 @@ namespace parfis {
         double idt;
         /// Maximal velocity allowed for the specie in m/s
         Vec3D<double> maxVel;
+        /// Minimal velocity value for initial distribution
+        Vec3D<double> velInitDistMin;
+        /// Maximal velocity value for initial distribution
+        Vec3D<double> velInitDistMax;
         /// Charge/mass ratio in C/kg
         double qm;
         /// Mass in amu
@@ -268,6 +274,65 @@ namespace parfis {
         double charge;
         /// Number of states;
         uint32_t stateCount;
+        /// Offset for headIdVec
+        size_t headIdOffset;
+    };
+
+    /**
+     * @brief Structure used instead of std::vector<T> for python bindings
+     * @tparam T type of vector
+     */
+    template <class T>
+    struct PyVec 
+    {
+        const T* ptr;
+        size_t size;
+
+        PyVec<T>& operator=(const std::vector<T>& tVec) {
+            ptr = &tVec[0];
+            size = tVec.size();
+            return *this;
+        }
+    };
+
+    /**
+     * @brief Overload of PyVec for type std::string
+     * @details Dealing with std::string requires different treatment since the
+     * const char pointers are not aligned in memory
+     * @tparam T std::string
+     */
+    template<>
+    struct PyVec<std::string>
+    {   
+        const char ** ptr;
+        size_t size;
+
+        std::vector<const char *> vec;
+
+        PyVec<std::string>& operator=(const std::vector<std::string>& strVec) {
+            vec.clear();
+            for (auto & str: strVec)
+                vec.push_back(str.c_str());
+            ptr = &vec[0];
+            size = vec.size();
+            return *this;
+        }
+    };
+
+    /**
+     * @brief Configuration data in format suitable for Python ctypes
+     * 
+     */
+    struct PyCfgData
+    {
+        const char* geometry;
+        double timestep;
+        Vec3D<double>* geometrySize;
+        Vec3D<double>* cellSize;
+        Vec3D<int>* periodicBoundary;
+        Vec3D<int>* cellCount;
+        PyVec<std::string> specieNameVec;
+        PyVec<std::string> velInitRandomVec;
     };
 
     /**
@@ -288,10 +353,32 @@ namespace parfis {
         Vec3D<int> cellCount;
         /// Specie names
         std::vector<std::string> specieNameVec;
+        /// Initial distribuition
+        std::vector<std::string> velInitRandomVec;
+        /// PyCfgData points to data of this object
+        PyCfgData pyCfgData;
         /// Get absolute cell id from i,j,k
         inline cellId_t getAbsoluteCellId(Vec3D<cellPos_t>& cellPos) {
-            return cellCount.x * (cellCount.y * cellPos.z + cellPos.y ) + cellPos.x;
+            return cellCount.z * (cellCount.y * cellPos.x + cellPos.y ) + cellPos.z;
         };
+        /// Set PyCfgData
+        int setPyCfgData();
+    };
+
+    /**
+     * @brief Simulation data in format suitable for Python ctypes
+     * 
+     */
+    struct PySimData
+    {
+        PyVec<State> stateVec;
+        PyVec<cellId_t> cellIdVec;
+        PyVec<cellId_t> cellIdAVec;
+        PyVec<cellId_t> cellIdBVec;
+        PyVec<Specie> specieVec;
+        PyVec<Cell> cellVec;
+        PyVec<nodeFlag_t> nodeFlagVec;
+        PyVec<stateId_t> headIdVec;
     };
 
     /**
@@ -325,11 +412,18 @@ namespace parfis {
          * @brief Vector of pointers to head states
          * @details Head state is the first state in the doubly linked list of states that 
          * belong to a certain cell. For every cell there are as many heads as there are 
-         * species in the simulation.
+         * species in the simulation. This structure is a matrix written in one dimension since
+         * the number of elements is cellVec.size()*specieVec.size()
          */
-        std::vector<std::vector<stateId_t>> headIdVec;
+        std::vector<stateId_t> headIdVec;
         /// Vector of species
         std::vector<Specie> specieVec;
+        /// PySimData points to data of this object
+        PySimData pySimData;
+        /// Evolution counter
+        uint64_t evolveCnt;
+        /// Set PyCfgData
+        int setPySimData();
     };
     /** @} data */
 
@@ -454,7 +548,7 @@ namespace parfis {
             std::map<std::string, std::unique_ptr<CommandChain>>& cmdChainMap);
 
         template<class T>
-        void getParamToValue(const std::string& key, T& valRef);
+        int getParamToValue(const std::string& key, T& valRef);
 
         template<class T>
         void getParamToVector(const std::string& key, std::vector<T>& vecRef);

@@ -52,6 +52,7 @@ lib/
 # Build generated files
 include/parfis/version.h
 doc/sphinx/source/conf.py
+python-package/tag.txt
 
 # Sphinx build directories
 _build
@@ -65,5 +66,10 @@ _build
 # Python distribution
 python-package/dist
 python-package/build
-python-package/parfis.egg-info
 __pycache__
+parfis.egg-info
+
+# Jupyter notebooks
+.ipynb_checkpoints
+*.pdf
+*.html

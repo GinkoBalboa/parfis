@@ -49,13 +49,15 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_last_updated_by_git',
     'sphinx.ext.mathjax',
-    'breathe'
-    #'nbsphinx'
+    'breathe',
+    'nbsphinx'
 ]
 
 breathe_domain_by_extension = {"h": "cpp"}
 breathe_default_project = "Parfis"
 breathe_projects = { "Parfis": "../../../build/doc/doxygen/xml"}
+
+nbsphinx_execute = "always"
 
 # Display todos by setting to True
 todo_include_todos = True
@@ -96,9 +98,12 @@ templates_path = ['_templates']
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['static']
+html_static_path = ['_static']
 html_extra_path = ['./.htaccess']
 html_copy_source = False
 
 # Enable numref
 numfig = True
+
+# Allow errors
+nbsphinx_allow_errors = True
