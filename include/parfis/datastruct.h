@@ -150,14 +150,14 @@ namespace parfis {
          * @brief Compares if vectors are equal
          */
         friend bool operator==(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
-            return (lhs.x == rhs.x && lhs.y == rhs.y && rhs.z == rhs.z);
+            return (lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z);
         }
 
         /**
          * @brief Compares if vectors are not equal
          */
         friend bool operator!=(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
-            return (lhs.x != rhs.x || lhs.y != rhs.y || rhs.z != rhs.z);
+            return (lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z);
         }
 
         /** 
