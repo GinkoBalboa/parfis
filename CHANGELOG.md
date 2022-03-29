@@ -1,6 +1,10 @@
 # Change log
 
-## 0.0.5 (unreleased)
+## 0.0.6
+
+Features:
+
+## 0.0.5
 
 Features:
 

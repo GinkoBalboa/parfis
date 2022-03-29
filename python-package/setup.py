@@ -12,6 +12,13 @@ sys.path.insert(0, CURRENT_DIR)
 
 if __name__ == '__main__':
     
+    # Uploading new release:
+    # - Check upload artifacts when running action, run actions
+    # - Downlad artifact wheels on your local machine
+    # - Create empty folder and put all *.whl files in the same folder
+    # - From that folder call:
+    #     twine upload ./*
+    
     # Supported commands:
     # From internet:
     #   pip install parfis
