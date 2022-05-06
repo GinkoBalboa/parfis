@@ -44,11 +44,11 @@ GitHub repo, run the CMake commands shown here.
 ### Requirements
 
 For building the dynamic library you will need cmake and cxx compiler. For running
-tests you will need to pull and build google test. On linux the following commands
+tests you will need to pull and build google test. On Linux the following commands
 will install cmake and cxx compiler, and the script will build the parfis lib in 
 debug mode and pull, build and run google test and gtest.
 
-```
+``` bash
 sudo apt get install cmake
 sudo apt get install g++
 cd scripts
