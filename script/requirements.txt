@@ -1,0 +1,7 @@
+sphinx
+sphinx_last_updated_by_git
+breathe
+nbsphinx
+sphinx_rtd_theme
+jupyter
+pytest

@@ -118,10 +118,10 @@ parfis::Parfis* parfis::Parfis::getParfis(uint32_t id)
  * map Parfis::s_parfisMap.
  * @return Pointer to the created Parfis object
  */
-parfis::Parfis* parfis::Parfis::newParfis(const std::string& cfgStr)
+parfis::Parfis* parfis::Parfis::newParfis(const std::string& cfgStr, uint32_t writeLogFile)
 {
     uint32_t id = Parfis::s_parfisMapId;
-    Parfis::s_parfisMap[id] = std::unique_ptr<Parfis>(new Parfis(id, cfgStr));
+    Parfis::s_parfisMap[id] = std::unique_ptr<Parfis>(new Parfis(id, cfgStr, writeLogFile));
     Parfis::s_parfisMapId++;
     return Parfis::s_parfisMap[id].get();
 }
@@ -131,14 +131,17 @@ parfis::Parfis* parfis::Parfis::newParfis(const std::string& cfgStr)
  * @param id of the created object
  * @param cfgstr configuration string ("" by default)
  */
-parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr) :
+parfis::Parfis::Parfis(uint32_t id, const std::string& cfgstr, uint32_t writeLogFile) :
     m_id(id)
 {
     int fcnt = 0;
-    std::string fname = Logger::getLogFileName(m_id, 0);
-    while(Global::fileExists(fname)) {
-        fcnt++;
-        fname = Logger::getLogFileName(m_id, fcnt);
+    std::string fname = "";
+    if (writeLogFile != 0) {
+        Logger::getLogFileName(m_id, 0);
+        while(Global::fileExists(fname)) {
+            fcnt++;
+            fname = Logger::getLogFileName(m_id, fcnt);
+        }
     }
     m_logger.initialize(fname);
     
@@ -353,9 +356,11 @@ PARFIS_EXPORT const char* parfis::api::version()
 
 /**
  * @brief Creates new Parfis object and returns its id.
+ * @param cfgStr Configuration string (default is "")
+ * @param writeLogFile Turn on/off writing logs to file (default is 0 - off)
  * @return Id of the created object
  */
-PARFIS_EXPORT uint32_t parfis::api::newParfis(const char * cfgStr)
+PARFIS_EXPORT uint32_t parfis::api::newParfis(const char * cfgStr, uint32_t writeLogFile)
 {
     return Parfis::newParfis(cfgStr)->m_id;
 }

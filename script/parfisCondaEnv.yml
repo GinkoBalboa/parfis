@@ -1,0 +1,14 @@
+name: parfis
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - conda
+  - c-compiler
+  - cxx-compiler
+  - make
+  - cmake
+  - python=3.9
+  - pip
+  - pandoc
+prefix: /home/ginko/miniconda3/envs/parfis
