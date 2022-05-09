@@ -4,4 +4,6 @@ breathe
 nbsphinx
 sphinx_rtd_theme
 jupyter
+pandoc
+nbconvert
 pytest
