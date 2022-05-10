@@ -11,6 +11,5 @@ dependencies:
   - python=3.9
   - pip
   - pandoc
-  - ipython
   - nbconvert
 prefix: /home/ginko/miniconda3/envs/parfis

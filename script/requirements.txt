@@ -6,4 +6,5 @@ sphinx_rtd_theme
 jupyter
 pandoc
 nbconvert
+matplotlib
 pytest

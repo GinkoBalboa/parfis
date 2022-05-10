@@ -287,6 +287,14 @@ int parfis::CfgData::setPyCfgData()
     return 0;
 }
 
+/**
+ * @brief Sets the PySimData pointers to coresponding references from SimData
+ * @details PySimData is used to wrap the data structure in order to be
+ * usable by python through ctypes. The need for this structure is mainly
+ * because in ctypes there isn't a built-in representation of the std::vector
+ * structure.
+ * @return int Zero on success 
+ */
 int parfis::SimData::setPySimData()
 {
     pySimData.stateVec = stateVec;

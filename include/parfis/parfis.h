@@ -121,7 +121,7 @@ namespace parfis {
             PARFIS_EXPORT const char* parfisInfo(uint32_t id);
             PARFIS_EXPORT const char* getLogFileName(uint32_t id);
             PARFIS_EXPORT const char* version();
-            PARFIS_EXPORT uint32_t newParfis(const char* cfgStr = "", uint32_t writeLogFile=0);            
+            PARFIS_EXPORT uint32_t newParfis(const char* cfgStr = "", uint32_t writeLogFile=0);
             PARFIS_EXPORT int setConfig(uint32_t id, const char* str);
             PARFIS_EXPORT int loadCfgData(uint32_t id);
             PARFIS_EXPORT int loadSimData(uint32_t id);

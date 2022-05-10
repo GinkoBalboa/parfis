@@ -422,7 +422,6 @@ namespace parfis {
         PySimData pySimData;
         /// Evolution counter
         uint64_t evolveCnt;
-        /// Set PyCfgData
         int setPySimData();
     };
     /** @} data */
