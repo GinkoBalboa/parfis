@@ -110,6 +110,12 @@ int parfis::Particle::loadSimData()
                 std::string msg = "pushStates command defined with " + pcom->m_funcName + "\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
+            if (true) {
+                stepState = 
+                    [&](Specie* pSpec, State* pState) { return stepStateNoField(pSpec, pState); }; 
+                std::string msg = "stepStates function defined with Particle::stepStateNoField\n";
+                LOG(*m_pLogger, LogMask::Info, msg);
+            }
         }
     }
 
@@ -241,7 +247,7 @@ int parfis::Particle::pushStatesCylindrical()
     double invRadius = 1.0 / geoCenter.x;
     // Reset pushed state vector
     std::fill(m_pSimData->stateFlagVec.begin(), m_pSimData->stateFlagVec.end(), 0);
-    for (specieId_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
+    for (size_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
         // Define timestep and 1/timestep for specie
         pSpec = &m_pSimData->specieVec[specId];
         // Go through cells that lie inside the geo
@@ -258,9 +264,7 @@ int parfis::Particle::pushStatesCylindrical()
                     continue;
                 }
                 pState = &m_pSimData->stateVec[stateId];
-                pState->pos.x += pState->vel.x;
-                pState->pos.y += pState->vel.y;
-                pState->pos.z += pState->vel.z;
+                stepState(pSpec, pState);
                 newCell.pos = pCell->pos;
                 traverseCell(*pState, newCell);
                 m_pSimData->stateFlagVec[stateId] = StateFlag::PushedState;
@@ -291,9 +295,7 @@ int parfis::Particle::pushStatesCylindrical()
                     continue;
                 }
                 pState = &m_pSimData->stateVec[stateId];
-                pState->pos.x += pState->vel.x;
-                pState->pos.y += pState->vel.y;
-                pState->pos.z += pState->vel.z;
+                stepState(pSpec, pState);                
                 rx = pState->pos.x + pCell->pos.x - geoCenter.x;
                 ry = pState->pos.y + pCell->pos.y - geoCenter.y;
                 if (rx * rx + ry * ry > radiusSquared) {
@@ -345,6 +347,13 @@ int parfis::Particle::pushStatesCylindrical()
         }
     }
     return 0;
+}
+
+void parfis::Particle::stepStateNoField(Specie *pSpec, State *pState)
+{
+    pState->pos.x += pState->vel.x;
+    pState->pos.y += pState->vel.y;
+    pState->pos.z += pState->vel.z;
 }
 
 void parfis::Particle::traverseCell(State& state, Cell& newCell)

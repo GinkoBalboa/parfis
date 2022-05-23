@@ -15,6 +15,10 @@ int parfis::System::loadCfgData()
     getParamToValue("geometrySize", m_pCfgData->geometrySize);
     getParamToValue("cellSize", m_pCfgData->cellSize);
     getParamToValue("periodicBoundary", m_pCfgData->periodicBoundary);
+    getParamToValue("fieldTypeE", m_pCfgData->field.typeE);
+    getParamToValue("fieldTypeB", m_pCfgData->field.typeB);
+    getParamToValue("fieldStrengthE", m_pCfgData->field.strengthE);
+    getParamToValue("fieldStrengthB", m_pCfgData->field.strengthB);
 
     m_pCfgData->cellCount.x = cellId_t(ceil(
         m_pCfgData->geometrySize.x / m_pCfgData->cellSize.x));
@@ -29,7 +33,7 @@ int parfis::System::loadCfgData()
         std::string msg = 
         "System::" + std::string(__FUNCTION__) + 
         " cell number limit exceeded. Requested " + std::to_string(cellIdCount) + 
-        " cells, where the maximum number of cells is " + std::to_string(Const::cellIdMax) + "\n";
+        " cells, where the maximum number of cells is " + std::to_string(Const::cellIdMax) + "\n  ";
         LOG(*m_pLogger, LogMask::Error, msg);
         return 1;
     }
@@ -37,7 +41,11 @@ int parfis::System::loadCfgData()
     return 0;
 }
 
- 
+ /**
+  * @brief Loads the defined data from CfgData into SimData
+  * 
+  * @return int 
+  */
 int parfis::System::loadSimData()
 {
     // Create vector for cell id
@@ -64,7 +72,6 @@ int parfis::System::loadSimData()
                 std::string msg = "createCells command defined with " + pcom->m_funcName + "\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
-
         }
     }
     return 0;
@@ -162,6 +169,7 @@ int parfis::System::createCellsCylindrical()
                                 add = true;
                             }
                         }
+                        // Force break from nested for loops
                         if (add) {
                             j = 2; 
                             i = 2;

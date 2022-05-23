@@ -4,6 +4,9 @@
 
 Features:
 
+  - Added conda environment `.yml` for easier management of the parfis library.
+  - Turn off log printing to file by default.
+
 ## 0.0.5
 
 Features:

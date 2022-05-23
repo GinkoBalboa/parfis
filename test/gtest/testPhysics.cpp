@@ -81,5 +81,18 @@ TEST(physics, checkCylindricalReflection) {
     parfis::api::deleteParfis(id);
 }
 
+/**
+ * @brief Check the uniform field definition
+ */
+TEST(physics, checkUniformField) {
+    uint32_t id = parfis::api::newParfis();
+    parfis::api::loadCfgData(id);
+    parfis::api::loadSimData(id);
+    parfis::api::runCommandChain(id, "create");
+    const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
+    const parfis::SimData *pSimData = parfis::api::getSimData(id);
+    std::cout << "pCfgData->field.typeE =" << pCfgData->field.typeE << std::endl;
+    parfis::api::deleteParfis(id);
+}
 
 /** @} gtestAll*/

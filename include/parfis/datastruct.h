@@ -50,8 +50,6 @@ namespace parfis {
     typedef uint32_t cellId_t;
     /// Type for the state id
     typedef uint32_t stateId_t;
-    /// Type for the specie id
-    typedef size_t specieId_t;
     /// Type for cell position vector components
     typedef uint16_t cellPos_t;
     /// Type for node bitwise marking
@@ -158,6 +156,18 @@ namespace parfis {
          */
         friend bool operator!=(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
             return (lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z);
+        }
+
+        /**
+         * @brief Oveload of std::out operator
+         * 
+         * @param os Output stream
+         * @param vec 3DVec to output
+         * @return ostream& 
+         */
+        friend std::ostream& operator<<(std::ostream& os, const Vec3D<T>& vec) {
+            os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
+            return os;
         }
 
         /** 
@@ -279,6 +289,64 @@ namespace parfis {
     };
 
     /**
+     * @brief Holds information about each gas component
+     */
+    struct Gas
+    {
+        /// Id from the gas vector in CfgData
+        uint32_t id;
+        /// Gas name
+        const char* name;
+        /// Gas particle mass in amu
+        double mass;
+        /// Gas (volume) fraction 
+        double fraction;
+        /// Temperature in K
+        double temperature;
+        /// Pressure in Pa (partial pressure)
+        double pressure;
+        /// Number density 10^27/m^3
+        double numDensity;
+    };
+
+    /**
+     * @brief Holds information about collisions with gas particles
+     */
+    struct GasCollision
+    {
+        /// Id from the gas collision vector in CfgData
+        uint32_t id;
+        /// Collision name
+        const char* name;
+        /// Id from the specie vector
+        uint32_t specieId;
+        /// Threshold in eV
+        double threshold;
+        /// Cross section in angstroms, with x-axis is in eV
+        std::vector<double> crosxVec;
+        /// Type of collision (elastic, inelastic)
+        uint32_t type;
+        /// Scattering angle (random number sampled with scatterAngle gives deflection in radians)
+        std::vector<double> scatterAngle;
+    };
+
+    /**
+     * @brief Holds data about the electromagnetic field.
+     * 
+     */
+    struct Field
+    {
+        /// E field type in a given direction (0:none, 1:uniform)
+        Vec3D<int> typeE;
+        /// B field type in a given direction (0:none, 1:uniform)
+        Vec3D<int> typeB;
+        /// Strength of E field in V/m in a given direction (when uniform)
+        Vec3D<double> strengthE;
+        /// Strength of B field in T in a given direction (when uniform)
+        Vec3D<double> strengthB;
+    };
+
+    /**
      * @brief Structure used instead of std::vector<T> for python bindings
      * @tparam T type of vector
      */
@@ -321,7 +389,6 @@ namespace parfis {
 
     /**
      * @brief Configuration data in format suitable for Python ctypes
-     * 
      */
     struct PyCfgData
     {
@@ -353,8 +420,14 @@ namespace parfis {
         Vec3D<int> cellCount;
         /// Specie names
         std::vector<std::string> specieNameVec;
+        /// Gas data
+        std::vector<std::string> gasNameVec;
         /// Initial distribuition
         std::vector<std::string> velInitRandomVec;
+        /// GasCollision names
+        std::vector<std::string> gasCollisionNameVec;
+        /// Field data
+        Field field;
         /// PyCfgData points to data of this object
         PyCfgData pyCfgData;
         /// Get absolute cell id from i,j,k
@@ -418,6 +491,10 @@ namespace parfis {
         std::vector<stateId_t> headIdVec;
         /// Vector of species
         std::vector<Specie> specieVec;
+        /// Vector of gases
+        std::vector<Gas> gasVec;
+        /// Vector of gas collision data
+        std::vector<GasCollision> gasCollisionVec;
         /// PySimData points to data of this object
         PySimData pySimData;
         /// Evolution counter

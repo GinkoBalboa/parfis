@@ -85,9 +85,9 @@ conda activate parfis
 ./buildDebug32_64_buildGoogleTest_and_gtestAll.sh
 ```
 
-To run python tests first install the requred python modules from
-the requrements file in the script directory. After that run local installation
-of parfis with pytest run.
+To run python tests: 
+- Install the requred python modules from the requrements file in the script directory. 
+- Run local installation of parfis with pytest run
 
 ``` bash
 pip install -r requirements.txt
