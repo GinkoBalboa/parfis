@@ -36,6 +36,7 @@
 #endif // LOG_LEVEL
 /** @} logging */
 
+/// Data type used for state_t (float or double) defined before compiling
 #if defined(STATE_TYPE_DOUBLE)
 #define STATE_TYPE double
 #else
@@ -125,7 +126,7 @@ namespace parfis {
     /** @} logging */
 
     /**
-     * @defgroup data
+     * @defgroup data Data structures
      * @brief Data structures.
      * @{
      */
@@ -543,7 +544,7 @@ namespace parfis {
     };
 
     /**
-     * @defgroup configuration
+     * @defgroup configuration Configuring structures
      * @brief Tree data structure used for configuring parfis.
      * @{
      */

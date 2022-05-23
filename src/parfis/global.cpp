@@ -51,7 +51,14 @@ std::tuple<std::string, std::string> parfis::Global::splitKeyValue(const std::st
     return {str.substr(0,eqPos), str.substr(eqPos+1, endPos-eqPos-1)};
 }
 
-/// @todo Write doxy
+/**
+ * @brief Gets string after '=' and '#' or end of string. Captures all
+ * data as value, range and type of the data string. Used mainly for parsing
+ * data that is not the value (ex. range).
+ * 
+ * @param str The string that has data in the forman key=value <additional data> (range data)
+ * @return Key value pair as str 
+ */
 std::tuple<std::string, std::string> parfis::Global::splitKeyString(const std::string& str)
 {
     size_t eqPos = str.find('=');
@@ -124,6 +131,7 @@ std::vector<std::string> parfis::Global::getInheritanceVector(const std::string&
     vec.push_back(line.substr(posStart, posEnd - posStart));
     return vec;
 }
+
 
 std::string parfis::Global::to_string(double num)
 {

@@ -102,6 +102,12 @@ void parfis::ParamBase::setValueVec(ParamBase* ppb, const std::string& valstr)
         static_cast<Param<std::string>*>(ppb)->setValueVec(valstr);
 }
 
+/**
+ * @brief Gets range from string between '(' and ')' and parses it as value
+ * 
+ * @param ppb Pointer to ParamBase (should be defined in advance)
+ * @param ranstr String from which range is parsed
+ */
 void parfis::ParamBase::setRangeVec(ParamBase* ppb, const std::string& ranstr)
 {
     if (ppb->m_type == "double")

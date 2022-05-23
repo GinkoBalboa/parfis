@@ -107,7 +107,7 @@ namespace parfis {
     /// Exported C functions
     namespace api {
         
-        /** @defgroup api
+        /** @defgroup api API
          *  @brief Exported C Functions of the main class Parfis
          *  @details Functions are compiled with the **extern "C"** thus forbiding
          * C++ to mangle the function names. This is essential for using these 

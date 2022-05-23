@@ -8,7 +8,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 /**
- * @defgroup gtestAll
+ * @defgroup gtestAll Testing
  * @brief Tests for the c++ code using Googletest
  * @{
  */

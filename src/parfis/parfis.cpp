@@ -339,6 +339,12 @@ PARFIS_EXPORT const char* parfis::api::parfisInfo(uint32_t id)
     return APIStaticString.c_str();
 }
 
+/**
+ * @brief Gets the name of the log file as a const char*.
+ * 
+ * @param id Id of the Parfis object
+ * @return Pointer to the allocated string holding a name of the file.
+ */
 PARFIS_EXPORT const char* parfis::api::getLogFileName(uint32_t id)
 {
     static std::string APIStaticString = Parfis::s_parfisMap[id]->m_logger.m_fname;
@@ -413,6 +419,13 @@ PARFIS_EXPORT int parfis::api::loadSimData(uint32_t id)
     return retval;
 }
 
+/**
+ * @brief Wrapper for calling member function with the same name from 
+ * the Parfis object
+ * 
+ * @param id Id of the Parfis object 
+ * @return Zero on success.
+ */
 PARFIS_EXPORT int parfis::api::loadCfgData(uint32_t id)
 {
     if (Parfis::getParfis(id) == nullptr) 
