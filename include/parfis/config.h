@@ -25,7 +25,7 @@
 domain = [system, particle] <parfis::Domain> (system, particle) # Domains are defined as separate classes in the code  \n\
 \n\
 #------------ System ------------\n\
-system = [geometry, timestep, geometrySize, cellSize, periodicBoundary] <parfis::Param> (geometry, timestep, geometrySize, cellSize, periodicBoundary)  # The system configuration domain  \n\
+system = [geometry, timestep, geometrySize, cellSize, periodicBoundary, fieldTypeE, fieldTypeB, fieldStrengthE, fieldStrengthB] <parfis::Param> (geometry, timestep, geometrySize, cellSize, periodicBoundary, fieldTypeE, fieldTypeB, fieldStrengthE, fieldStrengthB)  # The system configuration domain  \n\
 system.geometry = cylindrical <std::string> (cylindrical) # Only cylindrical geometry is supported for now \n\
 system.timestep = 1.0 <double> (0.0, 1.0) # Timestep is given in seconds \n\
 system.geometrySize = [0.02, 0.02, 0.4] <double> (0.0, 1.0) # System geometry size in meters \n\
@@ -33,8 +33,8 @@ system.cellSize = [1e-3, 1e-3, 1e-3] <double> (0.0, 1.0) # Cell size in meters \
 system.periodicBoundary = [0, 0, 0] <int> (0, 1)  # Boundary condition \n\
 system.fieldTypeE = [0, 0, 1] <int> (0, 1) # Type of electric field 0: none, 1: uniform\n\
 system.fieldTypeB = [0, 0, 0] <int> (0, 1) # Type of magnetic field 0: none, 1: uniform\n\
-system.fieldStrengthE = [0, 0, 1] <int> (0, 1) # Strength of electric field V/m\n\
-system.fieldStrengthB = [0, 0, 0] <int> (0, 1) # Strength of magnetic field T\n\
+system.fieldStrengthE = [0, 0, 1] <double> (0, 1) # Strength of electric field V/m\n\
+system.fieldStrengthB = [0, 0, 0] <double> (0, 1) # Strength of magnetic field T\n\
 \n\
 particle = specie <parfis::Param> (specie) # Particle parameters\n\
 particle.specie = a <parfis::Param> (*) # You can define specie name anyway you like \n\
