@@ -85,12 +85,21 @@ TEST(physics, checkCylindricalReflection) {
  */
 TEST(physics, checkUniformField) {
     uint32_t id = parfis::api::newParfis();
+    parfis::api::setConfig(id, "system.fieldTypeE = [0, 0, 1]");
+    parfis::api::setConfig(id, "system.fieldStrengthE = [0, 0, 10000.0]");
     parfis::api::loadCfgData(id);
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
     const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
     const parfis::SimData *pSimData = parfis::api::getSimData(id);
-    std::cout << "pCfgData->field.typeE =" << pCfgData->field.typeE << std::endl;
+    ASSERT_EQ(pCfgData->field.typeE.x, 0);
+    ASSERT_EQ(pCfgData->field.typeE.y, 0);
+    ASSERT_EQ(pCfgData->field.typeE.z, 1);
+    for (uint32_t i = 0; i<10; i++) {
+        parfis::api::runCommandChain(id, "evolve");
+        std::cout << "vx=" << pSimData->stateVec[100].vel.x;
+        std::cout << " vz=" << pSimData->stateVec[100].vel.z << std::endl;
+    }
     parfis::api::deleteParfis(id);
 }
 

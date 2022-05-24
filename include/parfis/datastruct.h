@@ -287,6 +287,8 @@ namespace parfis {
         uint32_t stateCount;
         /// Offset for headIdVec
         size_t headIdOffset;
+        /// Increase in dv for uniform field e
+        Vec3D<double> dvUniformE;
     };
 
     /**

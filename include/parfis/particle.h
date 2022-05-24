@@ -34,6 +34,7 @@ namespace parfis
 
         std::function<void(Specie*, State*)> stepState;
         void stepStateNoField(Specie *pSpec, State *pState);
+        void stepStateUniformEz(Specie *pSpec, State *pState);
     };
 }
 

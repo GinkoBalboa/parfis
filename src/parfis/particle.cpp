@@ -110,9 +110,15 @@ int parfis::Particle::loadSimData()
                 std::string msg = "pushStates command defined with " + pcom->m_funcName + "\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
-            if (true) {
+            if (m_pCfgData->field.typeE == Vec3D<int>{0, 0, 0}) {
                 stepState = 
                     [&](Specie* pSpec, State* pState) { return stepStateNoField(pSpec, pState); }; 
+                std::string msg = "stepStates function defined with Particle::stepStateNoField\n";
+                LOG(*m_pLogger, LogMask::Info, msg);
+            }
+            if (m_pCfgData->field.typeE == Vec3D<int>{0, 0, 1}) {
+                stepState = 
+                    [&](Specie* pSpec, State* pState) { return stepStateUniformEz(pSpec, pState); }; 
                 std::string msg = "stepStates function defined with Particle::stepStateNoField\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
@@ -250,6 +256,19 @@ int parfis::Particle::pushStatesCylindrical()
     for (size_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
         // Define timestep and 1/timestep for specie
         pSpec = &m_pSimData->specieVec[specId];
+        // velocity change in computational units:
+        // DV = (q*E*dt^2)/(m*CellLength)
+        pSpec->dvUniformE.x = m_pCfgData->field.strengthE.x*(pSpec->charge*Const::eCharge * 
+            pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
+            (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.x);
+
+        pSpec->dvUniformE.y = m_pCfgData->field.strengthE.y*(pSpec->charge*Const::eCharge * 
+            pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
+            (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.y);
+
+        pSpec->dvUniformE.z = m_pCfgData->field.strengthE.z*(pSpec->charge*Const::eCharge * 
+            pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
+            (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.z);
         // Go through cells that lie inside the geo
         for (cellId_t cellId : m_pSimData->cellIdAVec) {
             // New position for traversing cells
@@ -351,6 +370,14 @@ int parfis::Particle::pushStatesCylindrical()
 
 void parfis::Particle::stepStateNoField(Specie *pSpec, State *pState)
 {
+    pState->pos.x += pState->vel.x;
+    pState->pos.y += pState->vel.y;
+    pState->pos.z += pState->vel.z;
+}
+
+void parfis::Particle::stepStateUniformEz(Specie *pSpec, State *pState)
+{
+    pState->vel.z += pSpec->dvUniformE.z;
     pState->pos.x += pState->vel.x;
     pState->pos.y += pState->vel.y;
     pState->pos.z += pState->vel.z;
