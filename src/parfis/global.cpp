@@ -35,7 +35,7 @@ std::string parfis::Global::currentDateTime()
 std::string parfis::Global::removeWhitespace(const std::string& str)
 {
     std::string cstr = str;
-    cstr.erase(std::remove_if(cstr.begin(), cstr.end(), isspace), cstr.end());
+    cstr.erase(std::remove_if(cstr.begin(), cstr.end(), ::isspace), cstr.end());
     return cstr;
 }
 

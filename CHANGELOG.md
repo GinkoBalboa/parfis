@@ -6,6 +6,7 @@ Features:
 
   - Added conda environment `.yml` for easier management of the parfis library.
   - Turn off log printing to file by default.
+  - Added flag for nbexecution `NBSPHINX_EXECUTE` when generating doc.
 
 ## 0.0.5
 

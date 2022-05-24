@@ -45,7 +45,7 @@ void parfis::Parfis::initializeDomains()
     std::vector<std::string> commandVec;
     while(end != std::string::npos) {
         line = m_cfgstr.substr(start, end - start);
-        line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
+        line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
         if (line.find('#') != std::string::npos)
             line.erase(line.find('#'), line.size() - line.find('#'));
         if (line.size() > 0) {
