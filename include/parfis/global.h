@@ -74,6 +74,8 @@ namespace parfis
         static constexpr stateId_t noStateId = UINT32_MAX;
         /// Defaul velInitRandom value
         static const char* velInitRandom;
+        /// Defaul randomSeed value
+        static const char* randomSeed;
     };
 }
 

@@ -15,6 +15,7 @@
 #include <math.h>
 #include <functional>
 #include <memory>
+#include <random>
 
 /// Logging level defined from cmake is or-ed with bitmask to log strings.
 #if defined(PARFIS_LOG_LEVEL)
@@ -57,6 +58,8 @@ namespace parfis {
     typedef uint8_t nodeFlag_t;
     /// Type for state flags
     typedef uint8_t stateFlag_t;
+    /// Type for random generator engine
+    typedef std::mt19937_64 randEngine_t;
 
     struct StateFlag {
         constexpr static stateFlag_t None = 0;
@@ -289,6 +292,8 @@ namespace parfis {
         size_t headIdOffset;
         /// Increase in dv for uniform field e
         Vec3D<double> dvUniformE;
+        /// Seed for random engine
+        const char * randomSeed;
     };
 
     /**
@@ -427,8 +432,12 @@ namespace parfis {
         std::vector<std::string> gasNameVec;
         /// Initial distribuition
         std::vector<std::string> velInitRandomVec;
+        /// Seeds for the random engine
+        std::vector<std::string> randomSeedVec;
         /// GasCollision names
         std::vector<std::string> gasCollisionNameVec;
+        /// Engines used to generate random numbers
+        std::vector<randEngine_t> randomEngineVec;
         /// Field data
         Field field;
         /// PyCfgData points to data of this object

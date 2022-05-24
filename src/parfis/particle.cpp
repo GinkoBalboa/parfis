@@ -15,11 +15,18 @@ int parfis::Particle::loadCfgData()
     std::string strTmp;
     getParamToVector("specie", m_pCfgData->specieNameVec);
     m_pCfgData->velInitRandomVec.clear();
+    m_pCfgData->randomSeedVec.clear();
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
         retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitRandom", strTmp);
         // If there is no parameter given, set the default
         if (retVal) strTmp = Const::velInitRandom;
         m_pCfgData->velInitRandomVec.push_back(strTmp);
+
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".randomSeed", strTmp);
+        // If there is no parameter given, set the default
+        if (retVal) strTmp = Const::randomSeed;
+        m_pCfgData->randomSeedVec.push_back(strTmp);
+        m_pCfgData->randomEngineVec.push_back(randEngine_t());
     }
     return 0;
 }
@@ -44,6 +51,8 @@ int parfis::Particle::loadSimData()
             m_pSimData->specieVec[i].velInitDistMin);
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMax", 
             m_pSimData->specieVec[i].velInitDistMax);
+        m_pSimData->specieVec[i].randomSeed = m_pCfgData->randomSeedVec[i].c_str();
+        
     }
 
     for (auto& spec: m_pSimData->specieVec) {
@@ -130,17 +139,32 @@ int parfis::Particle::loadSimData()
 
 int parfis::Particle::createStates()
 {
+    // Initialize random engine
+    // Use random_device to generate a seed for Mersenne twister engine.
+    // Use Mersenne twister engine to generate pseudo-random numbers.
+    for (auto& spec : m_pSimData->specieVec) {
+        if (std::string(spec.randomSeed) == "random_device") {
+            std::random_device rd;
+            m_pCfgData->randomEngineVec[spec.id].seed(rd());
+        }
+        else {
+            int seedVal = atoi(spec.randomSeed);
+            m_pCfgData->randomEngineVec[spec.id].seed(seedVal);
+        }
+    }
+    
     // Reserve space for states
     int stateSum = 0;
     for (auto& spec : m_pSimData->specieVec)
         stateSum += spec.statesPerCell;
 
-    // Reserve space as if all states 
+    // Reserve space as if all states are used
     m_pSimData->stateVec.reserve(stateSum * m_pSimData->cellVec.size());
     m_pSimData->stateFlagVec.reserve(stateSum * m_pSimData->cellVec.size());
     std::string msg = "reserved " + std::to_string(stateSum * m_pSimData->cellVec.size()) + 
         " states for all species" + "\n";
     LOG(*m_pLogger, LogMask::Memory, msg);
+
     // Resize headIdVec
     m_pSimData->headIdVec.resize(
         m_pSimData->specieVec.size()*m_pSimData->cellVec.size(), Const::noStateId);
@@ -155,11 +179,8 @@ int parfis::Particle::createStates()
 
 int parfis::Particle::createStatesOfSpecie(Specie& spec)
 {
-    // Use random_device to generate a seed for Mersenne twister engine.
-    std::random_device rd{};
-    // Use Mersenne twister engine to generate pseudo-random numbers.
-    // std::mt19937 engine{ rd() };
-    std::mt19937 engine;
+    // Get the random engine
+    randEngine_t &engine = m_pCfgData->randomEngineVec[spec.id];
     // The range is[inclusive, inclusive].
     std::uniform_real_distribution<state_t> dist{ 0.0, 1.0 };
     State state;
