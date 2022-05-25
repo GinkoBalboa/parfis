@@ -4,12 +4,14 @@
 
 Features:
 
-  - Added conda environment `.yml` for easier management of the parfis library.
-  - Turn off log printing to file by default.
-  - Added flag for nbexecution `NBSPHINX_EXECUTE` when generating doc.
-  - Added selection of random seed for the random engine in the configuration file.
-  - Added possibility to change the random engine by setting `randEngine_t` in `datastruct.h`.
+  - Conda environment `.yml` for easier management of the parfis library.
+  - Flag for nbexecution `NBSPHINX_EXECUTE` when generating doc.
+  - Selection of random seed for the random engine in the configuration file.
+  - Possibility to change the random engine by setting `randEngine_t` in `datastruct.h`.
   - Loading configuration from files.
+
+Changes:
+  - Turn off log printing to file by default.
 
 ## 0.0.5
 
