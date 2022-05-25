@@ -15,10 +15,10 @@ int parfis::System::loadCfgData()
     getParamToValue("geometrySize", m_pCfgData->geometrySize);
     getParamToValue("cellSize", m_pCfgData->cellSize);
     getParamToValue("periodicBoundary", m_pCfgData->periodicBoundary);
-    getParamToValue("fieldTypeE", m_pCfgData->field.typeE);
-    getParamToValue("fieldTypeB", m_pCfgData->field.typeB);
-    getParamToValue("fieldStrengthE", m_pCfgData->field.strengthE);
-    getParamToValue("fieldStrengthB", m_pCfgData->field.strengthB);
+    getParamToValue("field.typeE", m_pCfgData->field.typeE);
+    getParamToValue("field.typeB", m_pCfgData->field.typeB);
+    getParamToValue("field.strengthE", m_pCfgData->field.strengthE);
+    getParamToValue("field.strengthB", m_pCfgData->field.strengthB);
 
     m_pCfgData->cellCount.x = cellId_t(ceil(
         m_pCfgData->geometrySize.x / m_pCfgData->cellSize.x));

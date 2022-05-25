@@ -6,6 +6,7 @@ int main(int argc, char **argv) {
     // ::testing::GTEST_FLAG(filter) = "api.createCells";
     // ::testing::GTEST_FLAG(filter) = "api.pushStates";
     // ::testing::GTEST_FLAG(filter) = "api.pySimData";
-    // ::testing::GTEST_FLAG(filter) = "physics.checkUniformField";
+    // ::testing::GTEST_FLAG(filter) = "api.configureSpecieFromFile";
+    ::testing::GTEST_FLAG(filter) = "physics.checkUniformField";
     return RUN_ALL_TESTS();
 }

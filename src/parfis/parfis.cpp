@@ -1,6 +1,7 @@
 ﻿#include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <iostream>
 #include <map>
@@ -419,6 +420,21 @@ PARFIS_EXPORT int parfis::api::setConfig(uint32_t id, const char* str)
     else if (retval != 0)
         return 3;
     return 0;
+}
+
+/**
+ * @brief Configures the Parfis object with the given id from a file.
+ * @param id Id of the Parfis object to configure
+ * @param str Configuration file path
+ * @return Zero for success
+ */
+PARFIS_EXPORT int parfis::api::setConfigFromFile(uint32_t id, const char* str)
+{
+    std::ifstream inFile;
+    inFile.open(str);
+    std::stringstream strStream;
+    strStream << inFile.rdbuf();
+    return parfis::api::setConfig(id, strStream.str().c_str());
 }
 
 PARFIS_EXPORT int parfis::api::loadSimData(uint32_t id)

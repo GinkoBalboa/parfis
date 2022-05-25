@@ -91,12 +91,12 @@ TEST(physics, checkCylindricalReflection) {
 }
 
 /**
- * @brief Check the uniform field definition
+ * @brief Check the uniform field definition and velocity change in the force field
  */
 TEST(physics, checkUniformField) {
     uint32_t id = parfis::api::newParfis();
-    parfis::api::setConfig(id, "system.fieldTypeE = [0, 0, 1]");
-    parfis::api::setConfig(id, "system.fieldStrengthE = [0, 0, 10000.0]");
+    parfis::api::setConfig(id, "system.field.typeE = [0, 0, 1]");
+    parfis::api::setConfig(id, "system.field.strengthE = [0, 0, 10000.0]");
     parfis::api::loadCfgData(id);
     parfis::api::loadSimData(id);
     parfis::api::runCommandChain(id, "create");
@@ -105,11 +105,26 @@ TEST(physics, checkUniformField) {
     ASSERT_EQ(pCfgData->field.typeE.x, 0);
     ASSERT_EQ(pCfgData->field.typeE.y, 0);
     ASSERT_EQ(pCfgData->field.typeE.z, 1);
+    double prevVz = pSimData->stateVec[100].vel.z;
     for (uint32_t i = 0; i<10; i++) {
         parfis::api::runCommandChain(id, "evolve");
-        std::cout << "vx=" << pSimData->stateVec[100].vel.x;
-        std::cout << " vz=" << pSimData->stateVec[100].vel.z << std::endl;
+        ASSERT_NE(prevVz, pSimData->stateVec[100].vel.z);
+        prevVz = pSimData->stateVec[100].vel.z;
     }
+    parfis::api::deleteParfis(id);
+}
+
+/**
+ * @brief Check gas definitions and particle-gas collision definitions
+ */
+TEST(physics, gasCollisionDefinition) {
+    uint32_t id = parfis::api::newParfis();
+    parfis::api::setConfigFromFile(id, "./data/config_files/test_physics_gasCollisionDefinition.ini");
+    parfis::api::loadCfgData(id);
+    parfis::api::loadSimData(id);
+    parfis::api::runCommandChain(id, "create");
+    const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
+    const parfis::SimData *pSimData = parfis::api::getSimData(id);
     parfis::api::deleteParfis(id);
 }
 

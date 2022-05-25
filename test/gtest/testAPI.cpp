@@ -181,6 +181,23 @@ TEST(api, reconfigSpecie) {
 }
 
 /**
+ * @brief Reconfigure from file (root dir is parfis)
+ */
+TEST(api, configureSpecieFromFile) {
+    uint32_t id = parfis::api::newParfis();
+    int retval = parfis::api::setConfigFromFile(id, "./data/config_files/test_api_configureSpecieFromFile.ini");
+    ASSERT_EQ(0, retval);
+    parfis::api::loadCfgData(id);
+    parfis::api::setPyCfgData(id);
+    ASSERT_EQ(2, parfis::api::getCfgData(id)->specieNameVec.size());
+    ASSERT_EQ("electron", parfis::api::getCfgData(id)->specieNameVec[0]);
+    ASSERT_EQ("atom", parfis::api::getCfgData(id)->specieNameVec[1]);
+    // Check as double
+    ASSERT_EQ(double(4), std::stod(parfis::api::getConfigParam(id, "particle.specie.atom.amuMass"), nullptr));
+    parfis::api::deleteParfis(id);
+}
+
+/**
  * @brief Test PyCfgData
  */
 TEST(api, pyCfgData) {

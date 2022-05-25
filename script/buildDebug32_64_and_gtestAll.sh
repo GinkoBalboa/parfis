@@ -13,12 +13,14 @@ rm -rf ./lib/parfis/* ../python-package/parfis/clib/*.so ../python-package/parfi
 echo "Build float debug"
 cmake .. -DBUILD_DEBUG=ON -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF -DBUILD_GTESTALL=ON -DPARFIS_LOG_LEVEL=15
 cmake --build . --config Debug
-./bin/gtestAll/gtestAlld
+cd ..
+./build/bin/gtestAll/gtestAlld
 
-cd ../script
+cd ./script
 ./removeCMakeBuildFiles.sh
 cd ../build
 echo "Build double debug"
 cmake .. -DBUILD_DEBUG=ON -DCOPY_LIB_PYTHON=ON -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GTESTALL=ON -DPARFIS_LOG_LEVEL=15
 cmake --build . --config Debug
-./bin/gtestAll/gtestAlld
+cd ..
+./build/bin/gtestAll/gtestAlld
