@@ -46,7 +46,7 @@ particle.specie.a.eCharge = 1 <int> # Charge is given in units of elementary cha
 particle.specie.a.velInitRandom = uniform <std::string> # Random generator for initial velocity vector \n\
 particle.specie.a.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double> # Array of v initial distribution minimums \n\
 particle.specie.a.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double> # Array of v initial distribution maximums \n\
-# particle.specie.a.randomSeed = 42 <std::string> # Seed for the random engine (random_device, <int>)\n\
+particle.specie.a.randomSeed = random_device <std::string> # Seed for the random engine (random_device, <int>)\n\
 \n\
 commandChain = [create, evolve] <parfis::CommandChain> (create, evolve) # Command chains for the program \n\
 commandChain.create = [createCells, createStates] (createCells, createStates) <parfis::Command> # Command chain for creation of data \n\

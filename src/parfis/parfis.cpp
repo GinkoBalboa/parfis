@@ -340,6 +340,16 @@ PARFIS_EXPORT const char* parfis::api::parfisInfo(uint32_t id)
 }
 
 /**
+ * @brief Returns the current log string from the Parfis object.
+ * @param id Id of the Parfis object
+ * @return The object's log string
+ */
+PARFIS_EXPORT const char* parfis::api::getLogStr(uint32_t id)
+{
+    return Parfis::s_parfisMap[id]->m_logger.m_str.c_str();
+}
+
+/**
  * @brief Gets the name of the log file as a const char*.
  * 
  * @param id Id of the Parfis object
