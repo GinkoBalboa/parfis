@@ -9,6 +9,7 @@ Features:
   - Added flag for nbexecution `NBSPHINX_EXECUTE` when generating doc.
   - Added selection of random seed for the random engine in the configuration file.
   - Added possibility to change the random engine by setting `randEngine_t` in `datastruct.h`.
+  - Loading configuration from files.
 
 ## 0.0.5
 
