@@ -294,6 +294,8 @@ namespace parfis {
         Vec3D<double> dvUniformE;
         /// Seed for random engine
         const char * randomSeed;
+        /// Vector of ids from the gasCollisionVec
+        std::vector<uint32_t> gasCollisionVecId;
     };
 
     /**
@@ -306,15 +308,13 @@ namespace parfis {
         /// Gas name
         const char* name;
         /// Gas particle mass in amu
-        double mass;
+        double amuMass;
         /// Gas (volume) fraction 
-        double fraction;
+        double volumeFraction;
         /// Temperature in K
         double temperature;
-        /// Pressure in Pa (partial pressure)
-        double pressure;
-        /// Number density 10^27/m^3
-        double numDensity;
+        /// Mol density mol/m^3
+        double molDensity;
     };
 
     /**
@@ -333,7 +333,7 @@ namespace parfis {
         /// Cross section in angstroms, with x-axis is in eV
         std::vector<double> crosxVec;
         /// Type of collision (elastic, inelastic)
-        uint32_t type;
+        int type;
         /// Scattering angle (random number sampled with scatterAngle gives deflection in radians)
         std::vector<double> scatterAngle;
     };
@@ -431,15 +431,11 @@ namespace parfis {
         /// Gas data
         std::vector<std::string> gasNameVec;
         /// Initial distribuition
-        std::vector<std::string> velInitRandomVec;
+        std::vector<std::string> velInitRandomStrVec;
         /// Seeds for the random engine
-        std::vector<std::string> randomSeedVec;
+        std::vector<std::string> randomSeedStrVec;
         /// GasCollision names
         std::vector<std::string> gasCollisionNameVec;
-        /// Engines used to generate random numbers
-        std::vector<randEngine_t> randomEngineVec;
-        /// Field data
-        Field field;
         /// PyCfgData points to data of this object
         PyCfgData pyCfgData;
         /// Get absolute cell id from i,j,k
@@ -505,8 +501,12 @@ namespace parfis {
         std::vector<Specie> specieVec;
         /// Vector of gases
         std::vector<Gas> gasVec;
+        /// Engines used to generate random numbers
+        std::vector<randEngine_t> randomEngineVec;
         /// Vector of gas collision data
         std::vector<GasCollision> gasCollisionVec;
+        /// Field data
+        Field field;
         /// PySimData points to data of this object
         PySimData pySimData;
         /// Evolution counter

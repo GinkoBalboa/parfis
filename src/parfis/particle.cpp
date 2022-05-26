@@ -13,20 +13,30 @@ int parfis::Particle::loadCfgData()
 {
     int retVal;
     std::string strTmp;
+    std::vector<std::string> strVec;
     getParamToVector("specie", m_pCfgData->specieNameVec);
-    m_pCfgData->velInitRandomVec.clear();
-    m_pCfgData->randomSeedVec.clear();
+    m_pCfgData->velInitRandomStrVec.clear();
+    m_pCfgData->randomSeedStrVec.clear();
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
         retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitRandom", strTmp);
         // If there is no parameter given, set the default
         if (retVal) strTmp = Const::velInitRandom;
-        m_pCfgData->velInitRandomVec.push_back(strTmp);
+        m_pCfgData->velInitRandomStrVec.push_back(strTmp);
 
         retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".randomSeed", strTmp);
         // If there is no parameter given, set the default
         if (retVal) strTmp = Const::randomSeed;
-        m_pCfgData->randomSeedVec.push_back(strTmp);
-        m_pCfgData->randomEngineVec.push_back(randEngine_t());
+        m_pCfgData->randomSeedStrVec.push_back(strTmp);
+
+        getParamToVector("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision", strVec);
+        // If there is no parameter given, there is no data so skip the vector creation
+        if (strVec.size()) {
+            for (auto& colName: strVec) {
+                m_pCfgData->gasCollisionNameVec.push_back(
+                    m_pCfgData->specieNameVec[i] + "." + colName);
+            }
+        }
+
     }
     return 0;
 }
@@ -46,14 +56,31 @@ int parfis::Particle::loadSimData()
             m_pSimData->specieVec[i].amuMass);
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".eCharge", 
             m_pSimData->specieVec[i].eCharge);
-        m_pSimData->specieVec[i].velInitRandom = m_pCfgData->velInitRandomVec[i].c_str();
+        m_pSimData->specieVec[i].velInitRandom = m_pCfgData->velInitRandomStrVec[i].c_str();
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMin", 
             m_pSimData->specieVec[i].velInitDistMin);
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMax", 
             m_pSimData->specieVec[i].velInitDistMax);
-        m_pSimData->specieVec[i].randomSeed = m_pCfgData->randomSeedVec[i].c_str();
-        
+        m_pSimData->specieVec[i].randomSeed = m_pCfgData->randomSeedStrVec[i].c_str();
+        m_pSimData->randomEngineVec.push_back(randEngine_t());
     }
+
+    // Gas collision data
+    for (size_t j = 0; j < m_pCfgData->gasCollisionNameVec.size(); j++) {
+        std::tuple<std::string, std::string> specGasColl = 
+            Global::splitDot(m_pCfgData->gasCollisionNameVec[j]);
+        for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
+            if (std::get<0>(specGasColl) == m_pSimData->specieVec[i].name) {
+                m_pSimData->gasCollisionVec.push_back({});
+                m_pSimData->gasCollisionVec[j].id = j;
+                m_pSimData->specieVec[i].gasCollisionVecId.push_back(j);
+                m_pSimData->gasCollisionVec[j].name = m_pCfgData->gasCollisionNameVec[j].c_str();                
+                getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision." + 
+                    std::get<1>(specGasColl) + ".type", m_pSimData->gasCollisionVec[j].type);
+            }
+        }
+    }
+
 
     for (auto& spec: m_pSimData->specieVec) {
         spec.mass = spec.amuMass*Const::amuKg;
@@ -119,13 +146,13 @@ int parfis::Particle::loadSimData()
                 std::string msg = "pushStates command defined with " + pcom->m_funcName + "\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
-            if (m_pCfgData->field.typeE == Vec3D<int>{0, 0, 0}) {
+            if (m_pSimData->field.typeE == Vec3D<int>{0, 0, 0}) {
                 stepState = 
                     [&](Specie* pSpec, State* pState) { return stepStateNoField(pSpec, pState); }; 
                 std::string msg = "stepStates function defined with Particle::stepStateNoField\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
-            if (m_pCfgData->field.typeE == Vec3D<int>{0, 0, 1}) {
+            if (m_pSimData->field.typeE == Vec3D<int>{0, 0, 1}) {
                 stepState = 
                     [&](Specie* pSpec, State* pState) { return stepStateUniformEz(pSpec, pState); }; 
                 std::string msg = "stepStates function defined with Particle::stepStateNoField\n";
@@ -145,11 +172,11 @@ int parfis::Particle::createStates()
     for (auto& spec : m_pSimData->specieVec) {
         if (std::string(spec.randomSeed) == "random_device") {
             std::random_device rd;
-            m_pCfgData->randomEngineVec[spec.id].seed(rd());
+            m_pSimData->randomEngineVec[spec.id].seed(rd());
         }
         else {
             int seedVal = atoi(spec.randomSeed);
-            m_pCfgData->randomEngineVec[spec.id].seed(seedVal);
+            m_pSimData->randomEngineVec[spec.id].seed(seedVal);
         }
     }
     
@@ -180,7 +207,7 @@ int parfis::Particle::createStates()
 int parfis::Particle::createStatesOfSpecie(Specie& spec)
 {
     // Get the random engine
-    randEngine_t &engine = m_pCfgData->randomEngineVec[spec.id];
+    randEngine_t &engine = m_pSimData->randomEngineVec[spec.id];
     // The range is[inclusive, inclusive].
     std::uniform_real_distribution<state_t> dist{ 0.0, 1.0 };
     State state;
@@ -279,15 +306,15 @@ int parfis::Particle::pushStatesCylindrical()
         pSpec = &m_pSimData->specieVec[specId];
         // velocity change in computational units:
         // DV = (q*E*dt^2)/(m*CellLength)
-        pSpec->dvUniformE.x = m_pCfgData->field.strengthE.x*(pSpec->charge*Const::eCharge * 
+        pSpec->dvUniformE.x = m_pSimData->field.strengthE.x*(pSpec->charge*Const::eCharge * 
             pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
             (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.x);
 
-        pSpec->dvUniformE.y = m_pCfgData->field.strengthE.y*(pSpec->charge*Const::eCharge * 
+        pSpec->dvUniformE.y = m_pSimData->field.strengthE.y*(pSpec->charge*Const::eCharge * 
             pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
             (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.y);
 
-        pSpec->dvUniformE.z = m_pCfgData->field.strengthE.z*(pSpec->charge*Const::eCharge * 
+        pSpec->dvUniformE.z = m_pSimData->field.strengthE.z*(pSpec->charge*Const::eCharge * 
             pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
             (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.z);
         // Go through cells that lie inside the geo

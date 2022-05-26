@@ -25,6 +25,7 @@ namespace parfis
         static std::tuple<std::string, std::string> splitKeyValue(const std::string& str);
         static std::tuple<std::string, std::string> splitKeyString(const std::string& str);
         static std::string childName(const std::string& str);
+        static std::tuple<std::string, std::string> splitDot(const std::string& str);
 
         /// Check if file @param fname exists
         static bool fileExists (const std::string& fname);
@@ -56,6 +57,8 @@ namespace parfis
         static constexpr double JeV = 1.602176634e-19;
         /// One electronvolt in joules [J]
         static constexpr double eVJ = 6.2415090744608e18;
+        /// Avogadro constant [mol^-1]
+        static constexpr double Na = 6.02214076e23;
         /// Version string
         static const uint32_t logLevel;
         /// Version string

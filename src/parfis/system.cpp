@@ -15,10 +15,7 @@ int parfis::System::loadCfgData()
     getParamToValue("geometrySize", m_pCfgData->geometrySize);
     getParamToValue("cellSize", m_pCfgData->cellSize);
     getParamToValue("periodicBoundary", m_pCfgData->periodicBoundary);
-    getParamToValue("field.typeE", m_pCfgData->field.typeE);
-    getParamToValue("field.typeB", m_pCfgData->field.typeB);
-    getParamToValue("field.strengthE", m_pCfgData->field.strengthE);
-    getParamToValue("field.strengthB", m_pCfgData->field.strengthB);
+    getParamToVector("gas", m_pCfgData->gasNameVec);
 
     m_pCfgData->cellCount.x = cellId_t(ceil(
         m_pCfgData->geometrySize.x / m_pCfgData->cellSize.x));
@@ -48,6 +45,26 @@ int parfis::System::loadCfgData()
   */
 int parfis::System::loadSimData()
 {
+    getParamToValue("field.typeE", m_pSimData->field.typeE);
+    getParamToValue("field.typeB", m_pSimData->field.typeB);
+    getParamToValue("field.strengthE", m_pSimData->field.strengthE);
+    getParamToValue("field.strengthB", m_pSimData->field.strengthB);
+
+    std::string strTmp;
+    m_pSimData->gasVec.resize(m_pCfgData->gasNameVec.size());
+    for (size_t i = 0; i < m_pCfgData->gasNameVec.size(); i++) {
+        m_pSimData->gasVec[i].id = i;
+        m_pSimData->gasVec[i].name = m_pCfgData->gasNameVec[i].c_str();
+        getParamToValue("gas." + m_pCfgData->gasNameVec[i] + ".amuMass", 
+            m_pSimData->gasVec[i].amuMass);
+        getParamToValue("gas." + m_pCfgData->gasNameVec[i] + ".volumeFraction", 
+            m_pSimData->gasVec[i].volumeFraction);
+        getParamToValue("gas." + m_pCfgData->gasNameVec[i] + ".temperature", 
+            m_pSimData->gasVec[i].temperature);
+        getParamToValue("gas." + m_pCfgData->gasNameVec[i] + ".molDensity", 
+            m_pSimData->gasVec[i].molDensity);
+    }
+
     // Create vector for cell id
     m_pSimData->cellIdVec.resize(
         m_pCfgData->cellCount.x*m_pCfgData->cellCount.y*m_pCfgData->cellCount.z, Const::noCellId);

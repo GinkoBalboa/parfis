@@ -102,9 +102,9 @@ TEST(physics, checkUniformField) {
     parfis::api::runCommandChain(id, "create");
     const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
     const parfis::SimData *pSimData = parfis::api::getSimData(id);
-    ASSERT_EQ(pCfgData->field.typeE.x, 0);
-    ASSERT_EQ(pCfgData->field.typeE.y, 0);
-    ASSERT_EQ(pCfgData->field.typeE.z, 1);
+    ASSERT_EQ(pSimData->field.typeE.x, 0);
+    ASSERT_EQ(pSimData->field.typeE.y, 0);
+    ASSERT_EQ(pSimData->field.typeE.z, 1);
     double prevVz = pSimData->stateVec[100].vel.z;
     for (uint32_t i = 0; i<10; i++) {
         parfis::api::runCommandChain(id, "evolve");
@@ -125,6 +125,12 @@ TEST(physics, gasCollisionDefinition) {
     parfis::api::runCommandChain(id, "create");
     const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
     const parfis::SimData *pSimData = parfis::api::getSimData(id);
+    ASSERT_EQ(pSimData->specieVec[0].gasCollisionVecId.size(), 2);
+    uint32_t id0, id1;
+    id0 = pSimData->specieVec[0].gasCollisionVecId[0];
+    id1 = pSimData->specieVec[0].gasCollisionVecId[1];
+    ASSERT_EQ(pSimData->gasCollisionVec[id0].type, 0);
+    ASSERT_EQ(pSimData->gasCollisionVec[id1].type, 1);
     parfis::api::deleteParfis(id);
 }
 

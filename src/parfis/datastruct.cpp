@@ -261,7 +261,8 @@ void parfis::Domain::getParamToVector(const std::string& key, std::vector<T>& ve
         pp = pp->m_childMap[inhvec[i]].get();
     }
     vecRef.clear();
-    vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
+    if (pp->m_childMap.count(inhvec[i]))
+        vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
 }
 
 template void parfis::Domain::getParamToVector<double>(
@@ -289,7 +290,7 @@ int parfis::CfgData::setPyCfgData()
     pyCfgData.periodicBoundary = &periodicBoundary;
     pyCfgData.cellCount = &cellCount;
     pyCfgData.specieNameVec = specieNameVec;
-    pyCfgData.velInitRandomVec = velInitRandomVec;
+    pyCfgData.velInitRandomVec = velInitRandomStrVec;
     return 0;
 }
 

@@ -80,6 +80,19 @@ std::string parfis::Global::childName(const std::string& str)
     return str.substr(dotPos+1, str.size() - dotPos - 1);
 }
 
+/**
+ * @brief Splits string with a dot to two strings, before and after the dot.
+ * 
+ * @param str The string that has data in the forman str1.str2
+ * @return Two strings, str1 str2 as tuple
+ */
+std::tuple<std::string, std::string> parfis::Global::splitDot(const std::string& str) 
+{
+    size_t dotPos = str.find('.');
+    size_t endPos = str.size();
+    return {str.substr(0,dotPos), str.substr(dotPos+1, endPos-dotPos-1)};
+}
+
 bool parfis::Global::fileExists(const std::string& fname) 
 {
     std::ifstream f(fname.c_str());
