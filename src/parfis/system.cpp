@@ -81,7 +81,7 @@ int parfis::System::loadSimData()
             m_pCmdChainMap->at(cmdChainName)->m_cmdMap.end()) {
             pcom = m_pCmdChainMap->at(cmdChainName)->m_cmdMap[cmdName].get();
             // Do this differently for different geometries
-            if (m_pCfgData->geometry == "cylindrical") {
+            if (m_pCfgData->geometry == 1) {
                 // Instead of lambda expression here, we can also use 
                 // pcom->m_func = std::bind(&System::createCellsCylindrical, this);
                 pcom->m_func = [&]()->int { return createCellsCylindrical(); };

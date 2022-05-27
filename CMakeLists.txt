@@ -4,6 +4,7 @@ include(cmake/Utils.cmake)
 project(parfis LANGUAGES CXX C)
 
 set_version()
+set_config_string()
 
 option(BUILD_LIB "Build parfis library" ON)
 option(PARFIS_STATE_TYPE_DOUBLE "Use double for state data type" ON)

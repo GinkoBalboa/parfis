@@ -122,7 +122,7 @@ int parfis::Particle::loadSimData()
             m_pCmdChainMap->at(cmdChainName)->m_cmdMap.end()) {
             pcom = m_pCmdChainMap->at(cmdChainName)->m_cmdMap[cmdName].get();
             // Do this differently for different geometries
-            if (m_pCfgData->geometry == "cylindrical") {
+            if (m_pCfgData->geometry == 1) {
                 // Instead of lambda expression here, we can also use 
                 // pcom->m_func = std::bind(&System::createCellsCylindrical, this);
                 pcom->m_func = [&]()->int { return createStates(); };
@@ -140,7 +140,7 @@ int parfis::Particle::loadSimData()
             m_pCmdChainMap->at(cmdChainName)->m_cmdMap.end()) {
             pcom = m_pCmdChainMap->at(cmdChainName)->m_cmdMap[cmdName].get();
             // Do this differently for different geometries
-            if (m_pCfgData->geometry == "cylindrical") {
+            if (m_pCfgData->geometry == 1) {
                 pcom->m_func = [&]()->int { return pushStatesCylindrical(); };
                 pcom->m_funcName = "Particle::pushStatesCylindrical";
                 std::string msg = "pushStates command defined with " + pcom->m_funcName + "\n";
@@ -250,7 +250,7 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             // If the cell is not whole in the geometry check state position, 
             // and if the state is not in the geometry, don't add it
             if (m_pSimData->nodeFlagVec[ci] != NodeFlag::InsideGeo && 
-                m_pCfgData->geometry == "cylindrical") {                
+                m_pCfgData->geometry == 1) {                
                 rx = state.pos.x + pCell->pos.x - geoCenter.x;
                 ry = state.pos.y + pCell->pos.y - geoCenter.y;
                 if (rx * rx + ry * ry > radiusSquared)

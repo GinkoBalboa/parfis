@@ -400,7 +400,7 @@ namespace parfis {
      */
     struct PyCfgData
     {
-        const char* geometry;
+        int geometry;
         double timestep;
         Vec3D<double>* geometrySize;
         Vec3D<double>* cellSize;
@@ -415,7 +415,7 @@ namespace parfis {
      */
     struct CfgData {
         /// Geometry type
-        std::string geometry;
+        int geometry;
         /// Timestep for the system in seconds
         double timestep;
         /// Geometry size in meters (bounding box of the simulation space)

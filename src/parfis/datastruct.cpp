@@ -283,7 +283,7 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
 
 int parfis::CfgData::setPyCfgData()
 {
-    pyCfgData.geometry = geometry.c_str();
+    pyCfgData.geometry = geometry;
     pyCfgData.timestep = timestep;
     pyCfgData.geometrySize = &geometrySize;
     pyCfgData.cellSize = &cellSize;

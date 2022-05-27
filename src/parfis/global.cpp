@@ -111,6 +111,8 @@ std::vector<std::string> parfis::Global::getVector(const std::string& str, char 
     std::vector<std::string> vec;
     size_t posStart, posEnd;
     std::string line = str;
+    // Remove '"' from the string
+    line.erase(remove(line.begin(), line.end(), '"'), line.end());
     posStart = line.find(bra);
     line = line.substr(posStart + 1, line.find(ket) - posStart - 1);
     posStart = 0;
