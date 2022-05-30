@@ -9,6 +9,7 @@ Features:
   - Selection of random seed for the random engine in the configuration file.
   - Possibility to change the random engine by setting `randEngine_t` in `datastruct.h`.
   - Loading configuration from files.
+  - Avoid using strings where int can be used (ex: clasiffied entries).
 
 Changes:
   - Turn off log printing to file by default.
