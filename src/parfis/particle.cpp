@@ -15,18 +15,16 @@ int parfis::Particle::loadCfgData()
     std::string strTmp;
     std::vector<std::string> strVec;
     getParamToVector("specie", m_pCfgData->specieNameVec);
-    m_pCfgData->velInitRandomStrVec.clear();
-    m_pCfgData->randomSeedStrVec.clear();
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
-        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitRandom", strTmp);
-        // If there is no parameter given, set the default
-        if (retVal) strTmp = Const::velInitRandom;
-        m_pCfgData->velInitRandomStrVec.push_back(strTmp);
+        // retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDist", strTmp);
+        // // If there is no parameter given, set the default
+        // if (retVal) strTmp = Const::velInitDist;
+        // m_pCfgData->velInitDistStrVec.push_back(strTmp);
 
-        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".randomSeed", strTmp);
-        // If there is no parameter given, set the default
-        if (retVal) strTmp = Const::randomSeed;
-        m_pCfgData->randomSeedStrVec.push_back(strTmp);
+        // retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".randomSeed", strTmp);
+        // // If there is no parameter given, set the default
+        // if (retVal) strTmp = Const::randomSeed;
+        // m_pCfgData->randomSeedStrVec.push_back(strTmp);
 
         getParamToVector("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision", strVec);
         // If there is no parameter given, there is no data so skip the vector creation
@@ -43,6 +41,7 @@ int parfis::Particle::loadCfgData()
 
 int parfis::Particle::loadSimData()
 {
+    int retVal;
     std::string strTmp;
     m_pSimData->specieVec.resize(m_pCfgData->specieNameVec.size());
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
@@ -56,12 +55,18 @@ int parfis::Particle::loadSimData()
             m_pSimData->specieVec[i].amuMass);
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".eCharge", 
             m_pSimData->specieVec[i].eCharge);
-        m_pSimData->specieVec[i].velInitRandom = m_pCfgData->velInitRandomStrVec[i].c_str();
-        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMin", 
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDist", 
+            m_pSimData->specieVec[i].velInitDist);
+        if (retVal) m_pSimData->specieVec[i].velInitDist = ParamDefault::velInitDist;
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMin", 
             m_pSimData->specieVec[i].velInitDistMin);
-        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMax", 
+        if (retVal) m_pSimData->specieVec[i].velInitDistMin = ParamDefault::velInitDistMin;
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMax", 
             m_pSimData->specieVec[i].velInitDistMax);
-        m_pSimData->specieVec[i].randomSeed = m_pCfgData->randomSeedStrVec[i].c_str();
+        if (retVal) m_pSimData->specieVec[i].velInitDistMax = ParamDefault::velInitDistMax;
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".randomSeed", 
+            m_pSimData->specieVec[i].randomSeed);
+        if (retVal) m_pSimData->specieVec[i].randomSeed = ParamDefault::randomSeed;
         m_pSimData->randomEngineVec.push_back(randEngine_t());
     }
 
@@ -170,13 +175,12 @@ int parfis::Particle::createStates()
     // Use random_device to generate a seed for Mersenne twister engine.
     // Use Mersenne twister engine to generate pseudo-random numbers.
     for (auto& spec : m_pSimData->specieVec) {
-        if (std::string(spec.randomSeed) == "random_device") {
+        if (spec.randomSeed == 0) {
             std::random_device rd;
             m_pSimData->randomEngineVec[spec.id].seed(rd());
         }
         else {
-            int seedVal = atoi(spec.randomSeed);
-            m_pSimData->randomEngineVec[spec.id].seed(seedVal);
+            m_pSimData->randomEngineVec[spec.id].seed(spec.randomSeed);
         }
     }
     
@@ -231,7 +235,8 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             state.pos.x = dist(engine);
             state.pos.y = dist(engine);
             state.pos.z = dist(engine);
-            if (std::string(spec.velInitRandom) == "uniform") {
+            // 0: uniform distribution
+            if (spec.velInitDist == 0) {
                 state.vel.x = (spec.velInitDistMax.x - spec.velInitDistMin.x)*dist(engine) + 
                     spec.velInitDistMin.x;
                 state.vel.y = (spec.velInitDistMax.y - spec.velInitDistMin.y)*dist(engine) + 

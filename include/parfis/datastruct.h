@@ -261,7 +261,7 @@ namespace parfis {
         /// Specie name
         const char * name;
         /// Initial velocty random generator
-        const char * velInitRandom;
+        int velInitDist;
         /// States per cell for creating initial particles
         int statesPerCell;
         /// Number of CfgData.timestep for one specie timestep
@@ -293,7 +293,7 @@ namespace parfis {
         /// Increase in dv for uniform field e
         Vec3D<double> dvUniformE;
         /// Seed for random engine
-        const char * randomSeed;
+        int randomSeed;
         /// Vector of ids from the gasCollisionVec
         std::vector<uint32_t> gasCollisionVecId;
     };
@@ -407,7 +407,7 @@ namespace parfis {
         Vec3D<int>* periodicBoundary;
         Vec3D<int>* cellCount;
         PyVec<std::string> specieNameVec;
-        PyVec<std::string> velInitRandomVec;
+        PyVec<std::string> velInitDistVec;
     };
 
     /**
@@ -430,10 +430,6 @@ namespace parfis {
         std::vector<std::string> specieNameVec;
         /// Gas data
         std::vector<std::string> gasNameVec;
-        /// Initial distribuition
-        std::vector<std::string> velInitRandomStrVec;
-        /// Seeds for the random engine
-        std::vector<std::string> randomSeedStrVec;
         /// GasCollision names
         std::vector<std::string> gasCollisionNameVec;
         /// PyCfgData points to data of this object
@@ -570,14 +566,12 @@ namespace parfis {
         std::string m_type;
         size_t m_size;
         ParamBase* m_parent;
-        bool inRange(const std::string& valstr);
         std::string getValueString(bool printType=false);
         /// Map of children ParamBase objects (functions as a data containter)
         std::map<std::string, std::unique_ptr<ParamBase>> m_childMap;
         template<class S>
         void addChild(const std::string& name);
         static void setValueVec(ParamBase* ppb, const std::string& valstr);
-        static void setRangeVec(ParamBase* ppb, const std::string& ranstr);
     };
 
     /**
@@ -591,11 +585,7 @@ namespace parfis {
         Param();
         /// Vector of parameter values
         std::vector<T> m_valueVec;
-        /// Vector with the range of allowed values
-        std::vector<T> m_rangeVec;
         void setValueVec(const std::string& valstr);
-        void setRangeVec(const std::string& ranstr);
-        bool inRange(T value);
     };
 
     template<>

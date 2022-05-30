@@ -122,7 +122,7 @@ class Specie(Structure):
     _fields_ = [
         ('id', c_uint32),
         ('name', c_char_p),
-        ('velInitRandom', c_char_p),
+        ('velInitDist', c_char_p),
         ('statesPerCell', c_int),
         ('timestepRatio', c_int),
         ('dt', c_double),

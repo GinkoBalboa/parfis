@@ -161,20 +161,27 @@ TEST(api, reconfigSpecie) {
     // Set two species
     parfis::api::setConfig(id, "particle.specie = [electron, atom] <parfis::Param>");
     parfis::api::setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
-    parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 7 <int>");
     parfis::api::setConfig(id, "particle.specie.electron.timestepRatio = 1 <int>");
     parfis::api::setConfig(id, "particle.specie.electron.amuMass = 0.00054858 <double>");
     parfis::api::setConfig(id, "particle.specie.electron.eCharge = -1 <int>");
     parfis::api::setConfig(id, "particle.specie.atom = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
-    parfis::api::setConfig(id, "particle.specie.atom.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.statesPerCell = 5 <int>");
     parfis::api::setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>");
     parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
     parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
     parfis::api::loadCfgData(id);
+    parfis::api::loadSimData(id);
     parfis::api::setPyCfgData(id);
+
     ASSERT_EQ(2, parfis::api::getCfgData(id)->specieNameVec.size());
+
     ASSERT_EQ("electron", parfis::api::getCfgData(id)->specieNameVec[0]);
+    ASSERT_EQ(7, parfis::api::getSimData(id)->specieVec[0].statesPerCell);
+
     ASSERT_EQ("atom", parfis::api::getCfgData(id)->specieNameVec[1]);
+    ASSERT_EQ(5, parfis::api::getSimData(id)->specieVec[1].statesPerCell);
+
     // Check as double
     ASSERT_EQ(double(4), std::stod(parfis::api::getConfigParam(id, "particle.specie.atom.amuMass"), nullptr));
     parfis::api::deleteParfis(id);
@@ -268,12 +275,12 @@ TEST(api, pySimData) {
     std::string cfgStr = "\n\n\
         \n\n\
         particle.specie = [electron] <parfis::Param>\n\
-        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge, velInitRandom, velInitDistMin, velInitDistMax] <parfis::Param>\n\
+        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge, velInitDist, velInitDistMin, velInitDistMax] <parfis::Param>\n\
         particle.specie.electron.statesPerCell = 10 <int>\n\
         particle.specie.electron.timestepRatio = 1 <int>\n\
         particle.specie.electron.amuMass = 0.00054858 <double>\n\
         particle.specie.electron.eCharge = -1 <int>\n\
-        particle.specie.electron.velInitRandom = uniform <std::string> \n\
+        particle.specie.electron.velInitDist = 0 <int> \n\
         particle.specie.electron.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double> \n\
         particle.specie.electron.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double> \n\
     ";
@@ -288,8 +295,7 @@ TEST(api, pySimData) {
     parfis::api::setPySimData(id);
     ASSERT_EQ(std::string("electron"), 
         std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].name));
-    ASSERT_EQ(std::string("uniform"), 
-        std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].velInitRandom));
+    ASSERT_EQ(0, parfis::api::getPySimData(id)->specieVec.ptr[0].velInitDist);
     ASSERT_EQ(parfis::api::getSimData(id)->stateVec.size(), 
         parfis::api::getPySimData(id)->stateVec.size);
     ASSERT_EQ(parfis::api::getSimData(id)->cellIdVec.size(), 

@@ -132,7 +132,7 @@ class TestApi(unittest.TestCase):
             particle.specie.electron.timestepRatio = 1 <int>
             particle.specie.electron.amuMass = 0.00054858 <double>
             particle.specie.electron.eCharge = -1 <int>
-            particle.specie.electron.velInitRandom = uniform <std::string>
+            particle.specie.electron.velInitDist = 0 <int>
             particle.specie.electron.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double>
             particle.specie.electron.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double>
         """
@@ -154,10 +154,11 @@ class TestApi(unittest.TestCase):
 
         Parfis.setPySimData(id)
         ptrSimData = Parfis.getPySimData(id)
-        self.assertEqual("electron",ptrSimData.specieVec.ptr[0].name.decode())
-        numStatesCyl =ptrSimData.stateVec.size
-        numCells =ptrSimData.cellIdVec.size
-        numStatesCub = numCells *ptrSimData.specieVec.ptr[0].statesPerCell
+        self.assertEqual("electron", ptrSimData.specieVec.ptr[0].name.decode())
+        self.assertEqual(10, ptrSimData.specieVec.ptr[0].statesPerCell)
+        numStatesCyl = ptrSimData.stateVec.size
+        numCells = ptrSimData.cellIdVec.size
+        numStatesCub = numCells * ptrSimData.specieVec.ptr[0].statesPerCell
         stateRatio = numStatesCyl/numStatesCub
         relativeDifference = abs(volRatio - stateRatio)/(0.5*(volRatio + stateRatio))
         precission = 5.0e-3

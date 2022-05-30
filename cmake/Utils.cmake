@@ -122,6 +122,8 @@ set(CONFIG_END_H "\
 
     string(REPLACE "\n" "\\n\\\n" DEFAULT_CONFIG ${DEFAULT_CONFIG})
     string(REPLACE "\"" "\\\"" DEFAULT_CONFIG ${DEFAULT_CONFIG})
+    # No need to treat single quote in c++ inside double quotes string
+    # string(REPLACE "\'" "\\\'" DEFAULT_CONFIG ${DEFAULT_CONFIG})
 
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h)
         file(READ ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h OLD_CONFIG_H)        

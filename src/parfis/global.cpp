@@ -10,8 +10,6 @@ const char* parfis::Const::version = VERSION;
 const char* parfis::Const::gitTag = GIT_TAG;
 const char* parfis::Const::buildConfig = BUILD_CONFIG;
 const uint32_t parfis::Const::logLevel = LOG_LEVEL;
-const char* parfis::Const::velInitRandom = "uniform";
-const char* parfis::Const::randomSeed = "random_device";
 const std::string parfis::Const::multilineSeparator = "---------------------------------------\n";
 
 /**
@@ -111,8 +109,9 @@ std::vector<std::string> parfis::Global::getVector(const std::string& str, char 
     std::vector<std::string> vec;
     size_t posStart, posEnd;
     std::string line = str;
-    // Remove '"' from the string
+    // Remove quotes from the string 
     line.erase(remove(line.begin(), line.end(), '"'), line.end());
+    line.erase(remove(line.begin(), line.end(), '\''), line.end());
     posStart = line.find(bra);
     line = line.substr(posStart + 1, line.find(ket) - posStart - 1);
     posStart = 0;
