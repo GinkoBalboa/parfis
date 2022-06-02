@@ -131,7 +131,7 @@ TEST(physics, gasCollisionDefinition) {
     id1 = pSimData->specieVec[0].gasCollisionVecId[1];
     ASSERT_EQ(pSimData->gasCollisionVec[id0].type, 0);
     ASSERT_EQ(pSimData->gasCollisionVec[id1].type, 1);
-    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id].fileName), "./data/cross_sections/simple_i.csv");
+    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id0].fileName), "./data/cross_sections/simple_i.csv");
     ASSERT_EQ(std::string(pSimData->gasCollisionVec[id1].fileName), "./data/cross_sections/simple_e.csv");
     parfis::api::deleteParfis(id);
 }

@@ -8,6 +8,6 @@ int main(int argc, char **argv) {
     // ::testing::GTEST_FLAG(filter) = "api.pySimData";
     // ::testing::GTEST_FLAG(filter) = "api.configureSpecieFromFile";
     // ::testing::GTEST_FLAG(filter) = "physics.checkUniformField";
-    ::testing::GTEST_FLAG(filter) = "physics.gasCollisionDefinition";
+    // ::testing::GTEST_FLAG(filter) = "physics.gasCollisionDefinition";
     return RUN_ALL_TESTS();
 }
