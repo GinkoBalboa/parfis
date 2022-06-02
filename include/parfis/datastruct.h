@@ -326,6 +326,8 @@ namespace parfis {
         uint32_t id;
         /// Collision name
         const char* name;
+        /// Cross section file name
+        const char* fileName;
         /// Id from the specie vector
         uint32_t specieId;
         /// Threshold in eV
@@ -432,6 +434,8 @@ namespace parfis {
         std::vector<std::string> gasNameVec;
         /// GasCollision names
         std::vector<std::string> gasCollisionNameVec;
+        /// GasCollision file names
+        std::vector<std::string> gasCollisionFileNameVec;
         /// PyCfgData points to data of this object
         PyCfgData pyCfgData;
         /// Get absolute cell id from i,j,k

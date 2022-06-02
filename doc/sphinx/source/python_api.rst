@@ -13,3 +13,23 @@ compiled dynamical library.
 .. autoclass:: parfis.Parfis
     :members:
 
+Data structure classes
+----------------------
+
+.. automodule:: parfis
+
+.. autoclass:: parfis.Vec3DBase
+    :members:
+
+
+.. autoclass:: parfis.Type
+    :members:
+
+Python tools
+============
+
+Tools in python are used for generating data (ex: cross-section tabulated functions)
+and data processing.  
+
+.. autofunction:: generateCrossSection
+

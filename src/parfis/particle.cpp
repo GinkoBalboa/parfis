@@ -32,6 +32,8 @@ int parfis::Particle::loadCfgData()
             for (auto& colName: strVec) {
                 m_pCfgData->gasCollisionNameVec.push_back(
                     m_pCfgData->specieNameVec[i] + "." + colName);
+                m_pCfgData->gasCollisionFileNameVec.push_back(
+                    m_pCfgData->specieNameVec[i] + "." + colName + ".crossSectionFile");
             }
         }
 
@@ -79,7 +81,8 @@ int parfis::Particle::loadSimData()
                 m_pSimData->gasCollisionVec.push_back({});
                 m_pSimData->gasCollisionVec[j].id = j;
                 m_pSimData->specieVec[i].gasCollisionVecId.push_back(j);
-                m_pSimData->gasCollisionVec[j].name = m_pCfgData->gasCollisionNameVec[j].c_str();                
+                m_pSimData->gasCollisionVec[j].name = m_pCfgData->gasCollisionNameVec[j].c_str();
+                m_pSimData->gasCollisionVec[j].fileName = m_pCfgData->gasCollisionFileNameVec[j].c_str();
                 getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision." + 
                     std::get<1>(specGasColl) + ".type", m_pSimData->gasCollisionVec[j].type);
             }

@@ -107,3 +107,15 @@ numfig = True
 
 # Allow errors
 nbsphinx_allow_errors = True
+
+# Document class and init
+autodoc_default_options = {
+    "content": "both",
+}
+# autodoc_default_options = {
+#     'members': True,
+#     'member-order': 'bysource',
+#     'special-members': '__init__',
+#     'undoc-members': True,
+#     'exclude-members': '__weakref__'
+# }

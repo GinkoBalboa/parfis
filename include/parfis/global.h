@@ -54,9 +54,9 @@ namespace parfis
         /// Elementary charge [C]
         static constexpr double eCharge = 1.602176634e-19;
         /// One joule in electronvolts [eV]
-        static constexpr double JeV = 1.602176634e-19;
+        static constexpr double JeV = 6.2415090744608e18;
         /// One electronvolt in joules [J]
-        static constexpr double eVJ = 6.2415090744608e18;
+        static constexpr double eVJ = 1.602176634e-19;
         /// Avogadro constant [mol^-1]
         static constexpr double Na = 6.02214076e23;
         /// Version string
