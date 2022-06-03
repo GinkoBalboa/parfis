@@ -126,6 +126,64 @@ std::vector<std::string> parfis::Global::getVector(const std::string& str, char 
 }
 
 /**
+ * @brief Parses string of the format key=[val1, val2, val3, ...], where vals are int. Fills
+ * the supplied vector referece. 
+ * 
+ * @tparam  int
+ * @param vecRef Vector referece to be filled with data
+ * @param str Data defined as string
+ * @param bra Vector starts with bra character (usually '[')
+ * @param ket Vector ends with character (usually ']')
+ * @return int Zero on success
+ */
+template<>
+int parfis::Global::setValueVec(
+    std::vector<int>& vecRef, 
+    const std::string& str, 
+    char bra, 
+    char ket) 
+{
+    std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(str);
+    std::string strTmp = std::get<1>(keyValue);
+    auto valvec = Global::getVector(strTmp, bra, ket);
+    vecRef.clear();
+    for (auto& val: valvec)
+        vecRef.push_back(std::strtol(val.c_str(), nullptr, 10));
+
+    return 0;
+}
+
+/**
+ * @brief Parses string of the format key=[val1, val2, val3, ...], where vals are double. Fills
+ * the supplied vector referece. 
+ * 
+ * @tparam  double
+ * @param vecRef Vector referece to be filled with data
+ * @param str Data defined as string
+ * @param bra Vector starts with bra character (usually '[')
+ * @param ket Vector ends with character (usually ']')
+ * @return int Zero on success
+ * 
+ * 
+ */
+template<>
+int parfis::Global::setValueVec(
+    std::vector<double>& vecRef, 
+    const std::string& str, 
+    char bra, 
+    char ket) 
+{
+    std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(str);
+    std::string strTmp = std::get<1>(keyValue);
+    auto valvec = Global::getVector(strTmp, bra, ket);
+    vecRef.clear();
+    for (auto& val: valvec)
+        vecRef.push_back(std::strtold(val.c_str(), nullptr));
+
+    return 0;
+}
+
+/**
  * @brief Returns vector of iheritance
  * @details Splits a string where the split character is dot and constructs a vector
  * @param str string in the format grandparent.parent.child

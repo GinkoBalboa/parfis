@@ -33,6 +33,9 @@ namespace parfis
         static std::vector<std::string> getVector(const std::string& str, char bra, char ket);
         static std::vector<std::string> getInheritanceVector(const std::string& str);
 
+        template<class T>
+        static int setValueVec(std::vector<T>& vecRef, const std::string& str, char bra, char ket);
+
         /// Convert double to string
         static std::string to_string(double num);
         /// Convert float to string

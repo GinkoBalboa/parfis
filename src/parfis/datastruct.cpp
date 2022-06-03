@@ -1,3 +1,5 @@
+#include <sstream>
+#include <string>
 #include "parfis.h"
 #include "datastruct.h"
 #include "global.h"
@@ -281,6 +283,32 @@ int parfis::Domain::initialize(const std::string& cstr)
         cp = pp->m_childMap[childName].get();
     }
     ParamBase::setValueVec(cp, std::get<1>(keyValue));
+    return 0;
+}
+
+/**
+ * @brief Loads data from the defined file name and based on 
+ * the object type.
+ * 
+ * @return int Zero on success
+ */
+int parfis::FuncTable::loadData()
+{
+    if (fileName == nullptr)
+        return 1;
+    std::ifstream infile(fileName);
+    std::string line;
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        if (line[0] == '#') {
+            // Find nbins
+            if (line.find("bins") != std::string::npos)
+                Global::setValueVec<int>(nbins, line, '[', ']');
+            // Find ranges
+            if (line.find("ranges") != std::string::npos)
+                Global::setValueVec<double>(ranges, line, '[', ']');
+        }
+    }
     return 0;
 }
 

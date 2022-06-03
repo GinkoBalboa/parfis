@@ -114,26 +114,4 @@ TEST(physics, checkUniformField) {
     parfis::api::deleteParfis(id);
 }
 
-/**
- * @brief Check gas definitions and particle-gas collision definitions
- */
-TEST(physics, gasCollisionDefinition) {
-    uint32_t id = parfis::api::newParfis();
-    parfis::api::setConfigFromFile(id, "./data/config_files/test_physics_gasCollisionDefinition.ini");
-    parfis::api::loadCfgData(id);
-    parfis::api::loadSimData(id);
-    parfis::api::runCommandChain(id, "create");
-    const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
-    const parfis::SimData *pSimData = parfis::api::getSimData(id);
-    ASSERT_EQ(pSimData->specieVec[0].gasCollisionVecId.size(), 2);
-    uint32_t id0, id1;
-    id0 = pSimData->specieVec[0].gasCollisionVecId[0];
-    id1 = pSimData->specieVec[0].gasCollisionVecId[1];
-    ASSERT_EQ(pSimData->gasCollisionVec[id0].type, 0);
-    ASSERT_EQ(pSimData->gasCollisionVec[id1].type, 1);
-    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id0].fileName), "./data/cross_sections/simple_i.csv");
-    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id1].fileName), "./data/cross_sections/simple_e.csv");
-    parfis::api::deleteParfis(id);
-}
-
 /** @} gtestAll*/

@@ -304,4 +304,32 @@ TEST(api, pySimData) {
         parfis::api::getPySimData(id)->specieVec.ptr[0].statesPerCell);
     parfis::api::deleteParfis(id);
 }
+
+/**
+ * @brief Check gas definitions and particle-gas collision definitions
+ */
+TEST(api, gasCollisionDefinition) {
+    uint32_t id = parfis::api::newParfis();
+    parfis::api::setConfigFromFile(id, "./data/config_files/test_physics_gasCollisionDefinition.ini");
+    parfis::api::loadCfgData(id);
+    parfis::api::loadSimData(id);
+    parfis::api::runCommandChain(id, "create");
+    const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
+    const parfis::SimData *pSimData = parfis::api::getSimData(id);
+    ASSERT_EQ(pSimData->specieVec[0].gasCollisionVecId.size(), 2);
+    uint32_t id0, id1;
+    id0 = pSimData->specieVec[0].gasCollisionVecId[0];
+    id1 = pSimData->specieVec[0].gasCollisionVecId[1];
+    ASSERT_EQ(pSimData->gasCollisionVec[id0].type, 0);
+    ASSERT_EQ(pSimData->gasCollisionVec[id1].type, 1);
+    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id0].fileName), "./data/cross_sections/simple_i.csv");
+    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id1].fileName), "./data/cross_sections/simple_e.csv");
+    std::vector<double> ranges = {1, 10, 100, 1000, 10000, 342000};
+    std::vector<int> nbins = {1000, 1000, 1000, 1000, 1000, 3000};
+    ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id0].ftab.nbins);
+    ASSERT_EQ(true, ranges == pSimData->gasCollisionVec[id0].ftab.ranges);
+    ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id1].ftab.nbins);
+    ASSERT_EQ(true, ranges == pSimData->gasCollisionVec[id1].ftab.ranges);
+    parfis::api::deleteParfis(id);
+}
 /** @} gtestAll*/

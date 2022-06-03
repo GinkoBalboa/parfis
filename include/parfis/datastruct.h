@@ -318,6 +318,31 @@ namespace parfis {
     };
 
     /**
+     * @brief Tabulated functions, linear and nonlinear tabulation is available
+     * 
+     */
+    struct FuncTable
+    {
+        /// File name
+        const char * fileName;
+        /// Vector of ranges
+        std::vector<double> ranges;
+        /// Vector of number of points per range
+        std::vector<int> nbins;
+        /// Vector of 1/dx per range
+        std::vector<double> idx;
+        /// X values
+        std::vector<double> x;
+        /// Y values
+        std::vector<double> y;
+        /// Type 0:linear, 1:nonlinear
+        int type;
+        /// Function to run the evaluation based on type
+        std::function<double(double)> eval;
+        int loadData();
+    };
+
+    /**
      * @brief Holds information about collisions with gas particles
      */
     struct GasCollision
@@ -338,6 +363,8 @@ namespace parfis {
         int type;
         /// Scattering angle (random number sampled with scatterAngle gives deflection in radians)
         std::vector<double> scatterAngle;
+        /// Tabulated func
+        FuncTable ftab;
     };
 
     /**
