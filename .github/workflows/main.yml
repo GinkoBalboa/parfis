@@ -207,5 +207,6 @@ jobs:
       # pip install -e ./python-package --force-reinstall -v
       run: |
         pip install --force-reinstall -v --find-links=./python-package/dist/ --no-index parfis
+        pip install -r ./python-package/requirements.txt
         python ./test/pytest/runAll.py float
         python ./test/pytest/runAll.py double
