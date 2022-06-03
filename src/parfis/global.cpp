@@ -163,8 +163,6 @@ int parfis::Global::setValueVec(
  * @param bra Vector starts with bra character (usually '[')
  * @param ket Vector ends with character (usually ']')
  * @return int Zero on success
- * 
- * 
  */
 template<>
 int parfis::Global::setValueVec(

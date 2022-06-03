@@ -17,16 +17,6 @@ int parfis::Particle::loadCfgData()
     getParamToVector("specie", m_pCfgData->specieNameVec);
     m_pCfgData->gasCollisionNameVec.clear();
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
-        // retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDist", strTmp);
-        // // If there is no parameter given, set the default
-        // if (retVal) strTmp = Const::velInitDist;
-        // m_pCfgData->velInitDistStrVec.push_back(strTmp);
-
-        // retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".randomSeed", strTmp);
-        // // If there is no parameter given, set the default
-        // if (retVal) strTmp = Const::randomSeed;
-        // m_pCfgData->randomSeedStrVec.push_back(strTmp);
-
         getParamToVector("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision", strVec);
         // If there is no parameter given, there is no data so skip the vector creation
         if (strVec.size()) {

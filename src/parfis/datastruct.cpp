@@ -308,6 +308,9 @@ int parfis::FuncTable::loadData()
             if (line.find("ranges") != std::string::npos)
                 Global::setValueVec<double>(ranges, line, '[', ']');
         }
+        else {
+            
+        }
     }
     return 0;
 }
