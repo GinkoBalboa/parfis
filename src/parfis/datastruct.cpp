@@ -298,20 +298,34 @@ int parfis::FuncTable::loadData()
         return 1;
     std::ifstream infile(fileName);
     std::string line;
+    int rowCnt = 0;
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         if (line[0] == '#') {
             // Find nbins
-            if (line.find("bins") != std::string::npos)
+            if (line.find("bins") != std::string::npos) {
                 Global::setValueVec<int>(nbins, line, '[', ']');
+                int vecSize = 0;
+                for (auto nbin : nbins)
+                    vecSize += nbin;
+                x.resize(vecSize);
+                y.resize(vecSize);
+            }
             // Find ranges
             if (line.find("ranges") != std::string::npos)
                 Global::setValueVec<double>(ranges, line, '[', ']');
         }
         else {
-            
+            if (rowCnt > x.size() - 1)
+                return 2;
+            // Else is pure data
+            x[rowCnt] = Global::getNthElement<double>(line, 0);
+            y[rowCnt] = Global::getNthElement<double>(line, 1);
+            rowCnt++;
         }
     }
+    if (rowCnt != x.size())
+        return 3;
     return 0;
 }
 

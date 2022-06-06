@@ -1,6 +1,8 @@
 # Change log
 
-## 0.0.6
+## 0.0.7 (unreleased)
+
+## 0.0.6 (released 2022-06-06)
 
 Features:
 
@@ -18,7 +20,7 @@ Changes:
   - Turn off log printing to file by default.
   - Actions for debug config are optional.
 
-## 0.0.5
+## 0.0.5 (released 2022-03-25)
 
 Features:
 

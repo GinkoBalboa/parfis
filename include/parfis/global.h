@@ -36,6 +36,9 @@ namespace parfis
         template<class T>
         static int setValueVec(std::vector<T>& vecRef, const std::string& str, char bra, char ket);
 
+        template<class T>
+        static T getNthElement(const std::string& str, int n, char splitChar = ',');
+
         /// Convert double to string
         static std::string to_string(double num);
         /// Convert float to string
