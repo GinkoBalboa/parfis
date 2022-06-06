@@ -15,6 +15,7 @@
 #include <math.h>
 #include <functional>
 #include <memory>
+#include <random>
 
 /// Logging level defined from cmake is or-ed with bitmask to log strings.
 #if defined(PARFIS_LOG_LEVEL)
@@ -36,6 +37,7 @@
 #endif // LOG_LEVEL
 /** @} logging */
 
+/// Data type used for state_t (float or double) defined before compiling
 #if defined(STATE_TYPE_DOUBLE)
 #define STATE_TYPE double
 #else
@@ -50,14 +52,14 @@ namespace parfis {
     typedef uint32_t cellId_t;
     /// Type for the state id
     typedef uint32_t stateId_t;
-    /// Type for the specie id
-    typedef size_t specieId_t;
     /// Type for cell position vector components
     typedef uint16_t cellPos_t;
     /// Type for node bitwise marking
     typedef uint8_t nodeFlag_t;
     /// Type for state flags
     typedef uint8_t stateFlag_t;
+    /// Type for random generator engine
+    typedef std::mt19937_64 randEngine_t;
 
     struct StateFlag {
         constexpr static stateFlag_t None = 0;
@@ -127,7 +129,7 @@ namespace parfis {
     /** @} logging */
 
     /**
-     * @defgroup data
+     * @defgroup data Data structures
      * @brief Data structures.
      * @{
      */
@@ -158,6 +160,18 @@ namespace parfis {
          */
         friend bool operator!=(const Vec3D<T>& lhs, const Vec3D<T>& rhs) {
             return (lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z);
+        }
+
+        /**
+         * @brief Oveload of std::out operator
+         * 
+         * @param os Output stream
+         * @param vec 3DVec to output
+         * @return ostream& 
+         */
+        friend std::ostream& operator<<(std::ostream& os, const Vec3D<T>& vec) {
+            os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
+            return os;
         }
 
         /** 
@@ -247,7 +261,7 @@ namespace parfis {
         /// Specie name
         const char * name;
         /// Initial velocty random generator
-        const char * velInitRandom;
+        int velInitDist;
         /// States per cell for creating initial particles
         int statesPerCell;
         /// Number of CfgData.timestep for one specie timestep
@@ -276,6 +290,97 @@ namespace parfis {
         uint32_t stateCount;
         /// Offset for headIdVec
         size_t headIdOffset;
+        /// Increase in dv for uniform field e
+        Vec3D<double> dvUniformE;
+        /// Seed for random engine
+        int randomSeed;
+        /// Vector of ids from the gasCollisionVec
+        std::vector<uint32_t> gasCollisionVecId;
+    };
+
+    /**
+     * @brief Holds information about each gas component
+     */
+    struct Gas
+    {
+        /// Id from the gas vector in CfgData
+        uint32_t id;
+        /// Gas name
+        const char* name;
+        /// Gas particle mass in amu
+        double amuMass;
+        /// Gas (volume) fraction 
+        double volumeFraction;
+        /// Temperature in K
+        double temperature;
+        /// Mol density mol/m^3
+        double molDensity;
+    };
+
+    /**
+     * @brief Tabulated functions, linear and nonlinear tabulation is available
+     * 
+     */
+    struct FuncTable
+    {
+        /// File name
+        const char * fileName;
+        /// Vector of ranges
+        std::vector<double> ranges;
+        /// Vector of number of points per range
+        std::vector<int> nbins;
+        /// Vector of 1/dx per range
+        std::vector<double> idx;
+        /// X values
+        std::vector<double> x;
+        /// Y values
+        std::vector<double> y;
+        /// Type 0:linear, 1:nonlinear
+        int type;
+        /// Function to run the evaluation based on type
+        std::function<double(double)> eval;
+        int loadData();
+    };
+
+    /**
+     * @brief Holds information about collisions with gas particles
+     */
+    struct GasCollision
+    {
+        /// Id from the gas collision vector in CfgData
+        uint32_t id;
+        /// Collision name
+        const char* name;
+        /// Cross section file name
+        const char* fileName;
+        /// Id from the specie vector
+        uint32_t specieId;
+        /// Threshold in eV
+        double threshold;
+        /// Cross section in angstroms, with x-axis is in eV
+        std::vector<double> crosxVec;
+        /// Type of collision (elastic, inelastic)
+        int type;
+        /// Scattering angle (random number sampled with scatterAngle gives deflection in radians)
+        std::vector<double> scatterAngle;
+        /// Tabulated func
+        FuncTable ftab;
+    };
+
+    /**
+     * @brief Holds data about the electromagnetic field.
+     * 
+     */
+    struct Field
+    {
+        /// E field type in a given direction (0:none, 1:uniform)
+        Vec3D<int> typeE;
+        /// B field type in a given direction (0:none, 1:uniform)
+        Vec3D<int> typeB;
+        /// Strength of E field in V/m in a given direction (when uniform)
+        Vec3D<double> strengthE;
+        /// Strength of B field in T in a given direction (when uniform)
+        Vec3D<double> strengthB;
     };
 
     /**
@@ -321,18 +426,17 @@ namespace parfis {
 
     /**
      * @brief Configuration data in format suitable for Python ctypes
-     * 
      */
     struct PyCfgData
     {
-        const char* geometry;
+        int geometry;
         double timestep;
         Vec3D<double>* geometrySize;
         Vec3D<double>* cellSize;
         Vec3D<int>* periodicBoundary;
         Vec3D<int>* cellCount;
         PyVec<std::string> specieNameVec;
-        PyVec<std::string> velInitRandomVec;
+        PyVec<std::string> velInitDistVec;
     };
 
     /**
@@ -340,7 +444,7 @@ namespace parfis {
      */
     struct CfgData {
         /// Geometry type
-        std::string geometry;
+        int geometry;
         /// Timestep for the system in seconds
         double timestep;
         /// Geometry size in meters (bounding box of the simulation space)
@@ -353,8 +457,12 @@ namespace parfis {
         Vec3D<int> cellCount;
         /// Specie names
         std::vector<std::string> specieNameVec;
-        /// Initial distribuition
-        std::vector<std::string> velInitRandomVec;
+        /// Gas data
+        std::vector<std::string> gasNameVec;
+        /// GasCollision names
+        std::vector<std::string> gasCollisionNameVec;
+        /// GasCollision file names
+        std::vector<std::string> gasCollisionFileNameVec;
         /// PyCfgData points to data of this object
         PyCfgData pyCfgData;
         /// Get absolute cell id from i,j,k
@@ -418,11 +526,18 @@ namespace parfis {
         std::vector<stateId_t> headIdVec;
         /// Vector of species
         std::vector<Specie> specieVec;
+        /// Vector of gases
+        std::vector<Gas> gasVec;
+        /// Engines used to generate random numbers
+        std::vector<randEngine_t> randomEngineVec;
+        /// Vector of gas collision data
+        std::vector<GasCollision> gasCollisionVec;
+        /// Field data
+        Field field;
         /// PySimData points to data of this object
         PySimData pySimData;
         /// Evolution counter
         uint64_t evolveCnt;
-        /// Set PyCfgData
         int setPySimData();
     };
     /** @} data */
@@ -467,7 +582,7 @@ namespace parfis {
     };
 
     /**
-     * @defgroup configuration
+     * @defgroup configuration Configuring structures
      * @brief Tree data structure used for configuring parfis.
      * @{
      */
@@ -482,14 +597,12 @@ namespace parfis {
         std::string m_type;
         size_t m_size;
         ParamBase* m_parent;
-        bool inRange(const std::string& valstr);
         std::string getValueString(bool printType=false);
         /// Map of children ParamBase objects (functions as a data containter)
         std::map<std::string, std::unique_ptr<ParamBase>> m_childMap;
         template<class S>
         void addChild(const std::string& name);
         static void setValueVec(ParamBase* ppb, const std::string& valstr);
-        static void setRangeVec(ParamBase* ppb, const std::string& ranstr);
     };
 
     /**
@@ -503,11 +616,7 @@ namespace parfis {
         Param();
         /// Vector of parameter values
         std::vector<T> m_valueVec;
-        /// Vector with the range of allowed values
-        std::vector<T> m_rangeVec;
         void setValueVec(const std::string& valstr);
-        void setRangeVec(const std::string& ranstr);
-        bool inRange(T value);
     };
 
     template<>

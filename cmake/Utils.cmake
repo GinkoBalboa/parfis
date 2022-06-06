@@ -89,6 +89,59 @@ function(set_properties target type suffix)
     endif()
 endfunction(set_properties)
 
+
+
+function(set_config_string)
+
+    set(CONFIG_START_H "\
+#ifndef PARFIS_CONFIG_H
+#define PARFIS_CONFIG_H
+/**
+    * @file config.h
+    *
+    * @brief Configuration and initialization strings.
+    */
+/** 
+    * @addtogroup configuration 
+    * @{
+    */
+/**
+    * @brief The default initialization string
+    */
+#define DEFAULT_INITIALIZATION_STRING \"\
+\\
+")
+
+set(CONFIG_END_H "\
+\"
+/** @} configuration */
+#endif // PARFIS_CONFIG_H
+")
+
+    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/data/config_files/default.ini DEFAULT_CONFIG)
+
+    string(REPLACE "\n" "\\n\\\n" DEFAULT_CONFIG ${DEFAULT_CONFIG})
+    string(REPLACE "\"" "\\\"" DEFAULT_CONFIG ${DEFAULT_CONFIG})
+    # No need to treat single quote in c++ inside double quotes string
+    # string(REPLACE "\'" "\\\'" DEFAULT_CONFIG ${DEFAULT_CONFIG})
+
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h)
+        file(READ ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h OLD_CONFIG_H)        
+    else()
+        set(OLD_CONFIG_H "")
+    endif()
+
+    set(CONFIG_H "${CONFIG_START_H}${DEFAULT_CONFIG}${CONFIG_END_H}")
+
+    if(NOT "${CONFIG_H}" STREQUAL "${OLD_CONFIG_H}")
+        message("Creating new config.h")
+        file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/include/parfis/config.h "${CONFIG_START_H}${DEFAULT_CONFIG}${CONFIG_END_H}")
+    endif()
+
+endfunction(set_config_string)
+
+
+
 function(set_version)
     set(GIT_REV "no-rev")
     execute_process(
@@ -136,6 +189,7 @@ function(set_version)
     string(STRIP "${GIT_TAG}" GIT_TAG)
     string(STRIP "${VERSION}" VERSION)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
+    message("VERSION_H=\n${VERSION_H}")
 
     set(BUILD_CONFIG_STR "Release")
     if(BUILD_DEBUG)

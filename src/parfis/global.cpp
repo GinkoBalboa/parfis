@@ -10,7 +10,6 @@ const char* parfis::Const::version = VERSION;
 const char* parfis::Const::gitTag = GIT_TAG;
 const char* parfis::Const::buildConfig = BUILD_CONFIG;
 const uint32_t parfis::Const::logLevel = LOG_LEVEL;
-const char* parfis::Const::velInitRandom = "uniform";
 const std::string parfis::Const::multilineSeparator = "---------------------------------------\n";
 
 /**
@@ -35,7 +34,7 @@ std::string parfis::Global::currentDateTime()
 std::string parfis::Global::removeWhitespace(const std::string& str)
 {
     std::string cstr = str;
-    cstr.erase(std::remove_if(cstr.begin(), cstr.end(), isspace), cstr.end());
+    cstr.erase(std::remove_if(cstr.begin(), cstr.end(), ::isspace), cstr.end());
     return cstr;
 }
 
@@ -51,7 +50,14 @@ std::tuple<std::string, std::string> parfis::Global::splitKeyValue(const std::st
     return {str.substr(0,eqPos), str.substr(eqPos+1, endPos-eqPos-1)};
 }
 
-/// @todo Write doxy
+/**
+ * @brief Gets string after '=' and '#' or end of string. Captures all
+ * data as value, range and type of the data string. Used mainly for parsing
+ * data that is not the value (ex. range).
+ * 
+ * @param str The string that has data in the forman key=value <additional data> (range data)
+ * @return Key value pair as str 
+ */
 std::tuple<std::string, std::string> parfis::Global::splitKeyString(const std::string& str)
 {
     size_t eqPos = str.find('=');
@@ -72,6 +78,19 @@ std::string parfis::Global::childName(const std::string& str)
     return str.substr(dotPos+1, str.size() - dotPos - 1);
 }
 
+/**
+ * @brief Splits string with a dot to two strings, before and after the dot.
+ * 
+ * @param str The string that has data in the forman str1.str2
+ * @return Two strings, str1 str2 as tuple
+ */
+std::tuple<std::string, std::string> parfis::Global::splitDot(const std::string& str) 
+{
+    size_t dotPos = str.find('.');
+    size_t endPos = str.size();
+    return {str.substr(0,dotPos), str.substr(dotPos+1, endPos-dotPos-1)};
+}
+
 bool parfis::Global::fileExists(const std::string& fname) 
 {
     std::ifstream f(fname.c_str());
@@ -90,6 +109,9 @@ std::vector<std::string> parfis::Global::getVector(const std::string& str, char 
     std::vector<std::string> vec;
     size_t posStart, posEnd;
     std::string line = str;
+    // Remove quotes from the string 
+    line.erase(remove(line.begin(), line.end(), '"'), line.end());
+    line.erase(remove(line.begin(), line.end(), '\''), line.end());
     posStart = line.find(bra);
     line = line.substr(posStart + 1, line.find(ket) - posStart - 1);
     posStart = 0;
@@ -101,6 +123,62 @@ std::vector<std::string> parfis::Global::getVector(const std::string& str, char 
     }
     vec.push_back(line.substr(posStart, posEnd - posStart));
     return vec;
+}
+
+/**
+ * @brief Parses string of the format key=[val1, val2, val3, ...], where vals are int. Fills
+ * the supplied vector referece. 
+ * 
+ * @tparam  int
+ * @param vecRef Vector referece to be filled with data
+ * @param str Data defined as string
+ * @param bra Vector starts with bra character (usually '[')
+ * @param ket Vector ends with character (usually ']')
+ * @return int Zero on success
+ */
+template<>
+int parfis::Global::setValueVec(
+    std::vector<int>& vecRef, 
+    const std::string& str, 
+    char bra, 
+    char ket) 
+{
+    std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(str);
+    std::string strTmp = std::get<1>(keyValue);
+    auto valvec = Global::getVector(strTmp, bra, ket);
+    vecRef.clear();
+    for (auto& val: valvec)
+        vecRef.push_back(std::strtol(val.c_str(), nullptr, 10));
+
+    return 0;
+}
+
+/**
+ * @brief Parses string of the format key=[val1, val2, val3, ...], where vals are double. Fills
+ * the supplied vector referece. 
+ * 
+ * @tparam  double
+ * @param vecRef Vector referece to be filled with data
+ * @param str Data defined as string
+ * @param bra Vector starts with bra character (usually '[')
+ * @param ket Vector ends with character (usually ']')
+ * @return int Zero on success
+ */
+template<>
+int parfis::Global::setValueVec(
+    std::vector<double>& vecRef, 
+    const std::string& str, 
+    char bra, 
+    char ket) 
+{
+    std::tuple<std::string, std::string> keyValue = Global::splitKeyValue(str);
+    std::string strTmp = std::get<1>(keyValue);
+    auto valvec = Global::getVector(strTmp, bra, ket);
+    vecRef.clear();
+    for (auto& val: valvec)
+        vecRef.push_back(std::strtold(val.c_str(), nullptr));
+
+    return 0;
 }
 
 /**
@@ -124,6 +202,7 @@ std::vector<std::string> parfis::Global::getInheritanceVector(const std::string&
     vec.push_back(line.substr(posStart, posEnd - posStart));
     return vec;
 }
+
 
 std::string parfis::Global::to_string(double num)
 {

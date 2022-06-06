@@ -31,6 +31,10 @@ namespace parfis
         int reflectCylindrical(State& state, Cell& cell, Vec3D<double>& geoCenter, 
             double invRadius);
         void setNewCell(State& state, size_t headIdPos, size_t newHeadIdPos);
+
+        std::function<void(Specie*, State*)> stepState;
+        void stepStateNoField(Specie *pSpec, State *pState);
+        void stepStateUniformEz(Specie *pSpec, State *pState);
     };
 }
 

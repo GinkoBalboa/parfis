@@ -15,6 +15,7 @@ int parfis::System::loadCfgData()
     getParamToValue("geometrySize", m_pCfgData->geometrySize);
     getParamToValue("cellSize", m_pCfgData->cellSize);
     getParamToValue("periodicBoundary", m_pCfgData->periodicBoundary);
+    getParamToVector("gas", m_pCfgData->gasNameVec);
 
     m_pCfgData->cellCount.x = cellId_t(ceil(
         m_pCfgData->geometrySize.x / m_pCfgData->cellSize.x));
@@ -29,7 +30,7 @@ int parfis::System::loadCfgData()
         std::string msg = 
         "System::" + std::string(__FUNCTION__) + 
         " cell number limit exceeded. Requested " + std::to_string(cellIdCount) + 
-        " cells, where the maximum number of cells is " + std::to_string(Const::cellIdMax) + "\n";
+        " cells, where the maximum number of cells is " + std::to_string(Const::cellIdMax) + "\n  ";
         LOG(*m_pLogger, LogMask::Error, msg);
         return 1;
     }
@@ -37,9 +38,33 @@ int parfis::System::loadCfgData()
     return 0;
 }
 
- 
+ /**
+  * @brief Loads the defined data from CfgData into SimData
+  * 
+  * @return int 
+  */
 int parfis::System::loadSimData()
 {
+    getParamToValue("field.typeE", m_pSimData->field.typeE);
+    getParamToValue("field.typeB", m_pSimData->field.typeB);
+    getParamToValue("field.strengthE", m_pSimData->field.strengthE);
+    getParamToValue("field.strengthB", m_pSimData->field.strengthB);
+
+    std::string strTmp;
+    m_pSimData->gasVec.resize(m_pCfgData->gasNameVec.size());
+    for (size_t i = 0; i < m_pCfgData->gasNameVec.size(); i++) {
+        m_pSimData->gasVec[i].id = i;
+        m_pSimData->gasVec[i].name = m_pCfgData->gasNameVec[i].c_str();
+        getParamToValue("gas." + m_pCfgData->gasNameVec[i] + ".amuMass", 
+            m_pSimData->gasVec[i].amuMass);
+        getParamToValue("gas." + m_pCfgData->gasNameVec[i] + ".volumeFraction", 
+            m_pSimData->gasVec[i].volumeFraction);
+        getParamToValue("gas." + m_pCfgData->gasNameVec[i] + ".temperature", 
+            m_pSimData->gasVec[i].temperature);
+        getParamToValue("gas." + m_pCfgData->gasNameVec[i] + ".molDensity", 
+            m_pSimData->gasVec[i].molDensity);
+    }
+
     // Create vector for cell id
     m_pSimData->cellIdVec.resize(
         m_pCfgData->cellCount.x*m_pCfgData->cellCount.y*m_pCfgData->cellCount.z, Const::noCellId);
@@ -56,7 +81,7 @@ int parfis::System::loadSimData()
             m_pCmdChainMap->at(cmdChainName)->m_cmdMap.end()) {
             pcom = m_pCmdChainMap->at(cmdChainName)->m_cmdMap[cmdName].get();
             // Do this differently for different geometries
-            if (m_pCfgData->geometry == "cylindrical") {
+            if (m_pCfgData->geometry == 1) {
                 // Instead of lambda expression here, we can also use 
                 // pcom->m_func = std::bind(&System::createCellsCylindrical, this);
                 pcom->m_func = [&]()->int { return createCellsCylindrical(); };
@@ -64,7 +89,6 @@ int parfis::System::loadSimData()
                 std::string msg = "createCells command defined with " + pcom->m_funcName + "\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
-
         }
     }
     return 0;
@@ -162,6 +186,7 @@ int parfis::System::createCellsCylindrical()
                                 add = true;
                             }
                         }
+                        // Force break from nested for loops
                         if (add) {
                             j = 2; 
                             i = 2;

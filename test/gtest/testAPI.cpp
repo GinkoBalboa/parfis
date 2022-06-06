@@ -8,7 +8,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 /**
- * @defgroup gtestAll
+ * @defgroup gtestAll Testing
  * @brief Tests for the c++ code using Googletest
  * @{
  */
@@ -161,15 +161,39 @@ TEST(api, reconfigSpecie) {
     // Set two species
     parfis::api::setConfig(id, "particle.specie = [electron, atom] <parfis::Param>");
     parfis::api::setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
-    parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 7 <int>");
     parfis::api::setConfig(id, "particle.specie.electron.timestepRatio = 1 <int>");
     parfis::api::setConfig(id, "particle.specie.electron.amuMass = 0.00054858 <double>");
     parfis::api::setConfig(id, "particle.specie.electron.eCharge = -1 <int>");
     parfis::api::setConfig(id, "particle.specie.atom = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
-    parfis::api::setConfig(id, "particle.specie.atom.statesPerCell = 10 <int>");
+    parfis::api::setConfig(id, "particle.specie.atom.statesPerCell = 5 <int>");
     parfis::api::setConfig(id, "particle.specie.atom.timestepRatio = 1 <int>");
     parfis::api::setConfig(id, "particle.specie.atom.amuMass = 4 <double>");
     parfis::api::setConfig(id, "particle.specie.atom.eCharge = 0 <int>");
+    parfis::api::loadCfgData(id);
+    parfis::api::loadSimData(id);
+    parfis::api::setPyCfgData(id);
+
+    ASSERT_EQ(2, parfis::api::getCfgData(id)->specieNameVec.size());
+
+    ASSERT_EQ("electron", parfis::api::getCfgData(id)->specieNameVec[0]);
+    ASSERT_EQ(7, parfis::api::getSimData(id)->specieVec[0].statesPerCell);
+
+    ASSERT_EQ("atom", parfis::api::getCfgData(id)->specieNameVec[1]);
+    ASSERT_EQ(5, parfis::api::getSimData(id)->specieVec[1].statesPerCell);
+
+    // Check as double
+    ASSERT_EQ(double(4), std::stod(parfis::api::getConfigParam(id, "particle.specie.atom.amuMass"), nullptr));
+    parfis::api::deleteParfis(id);
+}
+
+/**
+ * @brief Reconfigure from file (root dir is parfis)
+ */
+TEST(api, configureSpecieFromFile) {
+    uint32_t id = parfis::api::newParfis();
+    int retval = parfis::api::setConfigFromFile(id, "./data/config_files/test_api_configureSpecieFromFile.ini");
+    ASSERT_EQ(0, retval);
     parfis::api::loadCfgData(id);
     parfis::api::setPyCfgData(id);
     ASSERT_EQ(2, parfis::api::getCfgData(id)->specieNameVec.size());
@@ -251,12 +275,12 @@ TEST(api, pySimData) {
     std::string cfgStr = "\n\n\
         \n\n\
         particle.specie = [electron] <parfis::Param>\n\
-        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge, velInitRandom, velInitDistMin, velInitDistMax] <parfis::Param>\n\
+        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge, velInitDist, velInitDistMin, velInitDistMax] <parfis::Param>\n\
         particle.specie.electron.statesPerCell = 10 <int>\n\
         particle.specie.electron.timestepRatio = 1 <int>\n\
         particle.specie.electron.amuMass = 0.00054858 <double>\n\
         particle.specie.electron.eCharge = -1 <int>\n\
-        particle.specie.electron.velInitRandom = uniform <std::string> \n\
+        particle.specie.electron.velInitDist = 0 <int> \n\
         particle.specie.electron.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double> \n\
         particle.specie.electron.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double> \n\
     ";
@@ -271,14 +295,41 @@ TEST(api, pySimData) {
     parfis::api::setPySimData(id);
     ASSERT_EQ(std::string("electron"), 
         std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].name));
-    ASSERT_EQ(std::string("uniform"), 
-        std::string(parfis::api::getPySimData(id)->specieVec.ptr[0].velInitRandom));
+    ASSERT_EQ(0, parfis::api::getPySimData(id)->specieVec.ptr[0].velInitDist);
     ASSERT_EQ(parfis::api::getSimData(id)->stateVec.size(), 
         parfis::api::getPySimData(id)->stateVec.size);
     ASSERT_EQ(parfis::api::getSimData(id)->cellIdVec.size(), 
         parfis::api::getPySimData(id)->cellIdVec.size);
     ASSERT_EQ(parfis::api::getSimData(id)->specieVec[0].statesPerCell, 
         parfis::api::getPySimData(id)->specieVec.ptr[0].statesPerCell);
+    parfis::api::deleteParfis(id);
+}
+
+/**
+ * @brief Check gas definitions and particle-gas collision definitions
+ */
+TEST(api, gasCollisionDefinition) {
+    uint32_t id = parfis::api::newParfis();
+    parfis::api::setConfigFromFile(id, "./data/config_files/test_physics_gasCollisionDefinition.ini");
+    parfis::api::loadCfgData(id);
+    parfis::api::loadSimData(id);
+    parfis::api::runCommandChain(id, "create");
+    const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
+    const parfis::SimData *pSimData = parfis::api::getSimData(id);
+    ASSERT_EQ(pSimData->specieVec[0].gasCollisionVecId.size(), 2);
+    uint32_t id0, id1;
+    id0 = pSimData->specieVec[0].gasCollisionVecId[0];
+    id1 = pSimData->specieVec[0].gasCollisionVecId[1];
+    ASSERT_EQ(pSimData->gasCollisionVec[id0].type, 0);
+    ASSERT_EQ(pSimData->gasCollisionVec[id1].type, 1);
+    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id0].fileName), "./data/cross_sections/simple_i.csv");
+    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id1].fileName), "./data/cross_sections/simple_e.csv");
+    std::vector<double> ranges = {1, 10, 100, 1000, 10000, 342000};
+    std::vector<int> nbins = {1000, 1000, 1000, 1000, 1000, 3000};
+    ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id0].ftab.nbins);
+    ASSERT_EQ(true, ranges == pSimData->gasCollisionVec[id0].ftab.ranges);
+    ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id1].ftab.nbins);
+    ASSERT_EQ(true, ranges == pSimData->gasCollisionVec[id1].ftab.ranges);
     parfis::api::deleteParfis(id);
 }
 /** @} gtestAll*/

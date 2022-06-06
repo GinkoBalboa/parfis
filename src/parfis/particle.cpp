@@ -13,19 +13,26 @@ int parfis::Particle::loadCfgData()
 {
     int retVal;
     std::string strTmp;
+    std::vector<std::string> strVec;
     getParamToVector("specie", m_pCfgData->specieNameVec);
-    m_pCfgData->velInitRandomVec.clear();
+    m_pCfgData->gasCollisionNameVec.clear();
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
-        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitRandom", strTmp);
-        // If there is no parameter given, set the default
-        if (retVal) strTmp = Const::velInitRandom;
-        m_pCfgData->velInitRandomVec.push_back(strTmp);
+        getParamToVector("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision", strVec);
+        // If there is no parameter given, there is no data so skip the vector creation
+        if (strVec.size()) {
+            for (auto& colName: strVec) {
+                m_pCfgData->gasCollisionNameVec.push_back(
+                    m_pCfgData->specieNameVec[i] + "." + colName);
+            }
+        }
+
     }
     return 0;
 }
 
 int parfis::Particle::loadSimData()
 {
+    int retVal;
     std::string strTmp;
     m_pSimData->specieVec.resize(m_pCfgData->specieNameVec.size());
     for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
@@ -39,12 +46,46 @@ int parfis::Particle::loadSimData()
             m_pSimData->specieVec[i].amuMass);
         getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".eCharge", 
             m_pSimData->specieVec[i].eCharge);
-        m_pSimData->specieVec[i].velInitRandom = m_pCfgData->velInitRandomVec[i].c_str();
-        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMin", 
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDist", 
+            m_pSimData->specieVec[i].velInitDist);
+        if (retVal) m_pSimData->specieVec[i].velInitDist = ParamDefault::velInitDist;
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMin", 
             m_pSimData->specieVec[i].velInitDistMin);
-        getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMax", 
+        if (retVal) m_pSimData->specieVec[i].velInitDistMin = ParamDefault::velInitDistMin;
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".velInitDistMax", 
             m_pSimData->specieVec[i].velInitDistMax);
+        if (retVal) m_pSimData->specieVec[i].velInitDistMax = ParamDefault::velInitDistMax;
+        retVal = getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".randomSeed", 
+            m_pSimData->specieVec[i].randomSeed);
+        if (retVal) m_pSimData->specieVec[i].randomSeed = ParamDefault::randomSeed;
+        m_pSimData->randomEngineVec.push_back(randEngine_t());
     }
+
+    // Gas collision data
+    for (size_t j = 0; j < m_pCfgData->gasCollisionNameVec.size(); j++) {
+        std::tuple<std::string, std::string> specGasColl = 
+            Global::splitDot(m_pCfgData->gasCollisionNameVec[j]);
+        for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
+            if (std::get<0>(specGasColl) == m_pSimData->specieVec[i].name) {
+                m_pSimData->gasCollisionVec.push_back({});
+                m_pSimData->gasCollisionVec[j].id = j;
+                m_pSimData->specieVec[i].gasCollisionVecId.push_back(j);
+                m_pSimData->gasCollisionVec[j].name = m_pCfgData->gasCollisionNameVec[j].c_str();
+                getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision." + 
+                    std::get<1>(specGasColl) + ".type", m_pSimData->gasCollisionVec[j].type);
+                getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision." + 
+                    std::get<1>(specGasColl) + ".crossSectionFile", strTmp);
+                m_pCfgData->gasCollisionFileNameVec.push_back(strTmp);
+                m_pSimData->gasCollisionVec[j].fileName = 
+                    m_pCfgData->gasCollisionFileNameVec[j].c_str();
+                m_pSimData->gasCollisionVec[j].ftab.fileName = 
+                    m_pCfgData->gasCollisionFileNameVec[j].c_str();
+                m_pSimData->gasCollisionVec[j].ftab.type = 1;
+                m_pSimData->gasCollisionVec[j].ftab.loadData();
+            }
+        }
+    }
+
 
     for (auto& spec: m_pSimData->specieVec) {
         spec.mass = spec.amuMass*Const::amuKg;
@@ -86,7 +127,7 @@ int parfis::Particle::loadSimData()
             m_pCmdChainMap->at(cmdChainName)->m_cmdMap.end()) {
             pcom = m_pCmdChainMap->at(cmdChainName)->m_cmdMap[cmdName].get();
             // Do this differently for different geometries
-            if (m_pCfgData->geometry == "cylindrical") {
+            if (m_pCfgData->geometry == 1) {
                 // Instead of lambda expression here, we can also use 
                 // pcom->m_func = std::bind(&System::createCellsCylindrical, this);
                 pcom->m_func = [&]()->int { return createStates(); };
@@ -104,10 +145,22 @@ int parfis::Particle::loadSimData()
             m_pCmdChainMap->at(cmdChainName)->m_cmdMap.end()) {
             pcom = m_pCmdChainMap->at(cmdChainName)->m_cmdMap[cmdName].get();
             // Do this differently for different geometries
-            if (m_pCfgData->geometry == "cylindrical") {
+            if (m_pCfgData->geometry == 1) {
                 pcom->m_func = [&]()->int { return pushStatesCylindrical(); };
                 pcom->m_funcName = "Particle::pushStatesCylindrical";
                 std::string msg = "pushStates command defined with " + pcom->m_funcName + "\n";
+                LOG(*m_pLogger, LogMask::Info, msg);
+            }
+            if (m_pSimData->field.typeE == Vec3D<int>{0, 0, 0}) {
+                stepState = 
+                    [&](Specie* pSpec, State* pState) { return stepStateNoField(pSpec, pState); }; 
+                std::string msg = "stepStates function defined with Particle::stepStateNoField\n";
+                LOG(*m_pLogger, LogMask::Info, msg);
+            }
+            if (m_pSimData->field.typeE == Vec3D<int>{0, 0, 1}) {
+                stepState = 
+                    [&](Specie* pSpec, State* pState) { return stepStateUniformEz(pSpec, pState); }; 
+                std::string msg = "stepStates function defined with Particle::stepStateNoField\n";
                 LOG(*m_pLogger, LogMask::Info, msg);
             }
         }
@@ -118,17 +171,31 @@ int parfis::Particle::loadSimData()
 
 int parfis::Particle::createStates()
 {
+    // Initialize random engine
+    // Use random_device to generate a seed for Mersenne twister engine.
+    // Use Mersenne twister engine to generate pseudo-random numbers.
+    for (auto& spec : m_pSimData->specieVec) {
+        if (spec.randomSeed == 0) {
+            std::random_device rd;
+            m_pSimData->randomEngineVec[spec.id].seed(rd());
+        }
+        else {
+            m_pSimData->randomEngineVec[spec.id].seed(spec.randomSeed);
+        }
+    }
+    
     // Reserve space for states
     int stateSum = 0;
     for (auto& spec : m_pSimData->specieVec)
         stateSum += spec.statesPerCell;
 
-    // Reserve space as if all states 
+    // Reserve space as if all states are used
     m_pSimData->stateVec.reserve(stateSum * m_pSimData->cellVec.size());
     m_pSimData->stateFlagVec.reserve(stateSum * m_pSimData->cellVec.size());
     std::string msg = "reserved " + std::to_string(stateSum * m_pSimData->cellVec.size()) + 
         " states for all species" + "\n";
     LOG(*m_pLogger, LogMask::Memory, msg);
+
     // Resize headIdVec
     m_pSimData->headIdVec.resize(
         m_pSimData->specieVec.size()*m_pSimData->cellVec.size(), Const::noStateId);
@@ -143,11 +210,8 @@ int parfis::Particle::createStates()
 
 int parfis::Particle::createStatesOfSpecie(Specie& spec)
 {
-    // Use random_device to generate a seed for Mersenne twister engine.
-    std::random_device rd{};
-    // Use Mersenne twister engine to generate pseudo-random numbers.
-    // std::mt19937 engine{ rd() };
-    std::mt19937 engine;
+    // Get the random engine
+    randEngine_t &engine = m_pSimData->randomEngineVec[spec.id];
     // The range is[inclusive, inclusive].
     std::uniform_real_distribution<state_t> dist{ 0.0, 1.0 };
     State state;
@@ -171,7 +235,8 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             state.pos.x = dist(engine);
             state.pos.y = dist(engine);
             state.pos.z = dist(engine);
-            if (std::string(spec.velInitRandom) == "uniform") {
+            // 0: uniform distribution
+            if (spec.velInitDist == 0) {
                 state.vel.x = (spec.velInitDistMax.x - spec.velInitDistMin.x)*dist(engine) + 
                     spec.velInitDistMin.x;
                 state.vel.y = (spec.velInitDistMax.y - spec.velInitDistMin.y)*dist(engine) + 
@@ -190,7 +255,7 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
             // If the cell is not whole in the geometry check state position, 
             // and if the state is not in the geometry, don't add it
             if (m_pSimData->nodeFlagVec[ci] != NodeFlag::InsideGeo && 
-                m_pCfgData->geometry == "cylindrical") {                
+                m_pCfgData->geometry == 1) {                
                 rx = state.pos.x + pCell->pos.x - geoCenter.x;
                 ry = state.pos.y + pCell->pos.y - geoCenter.y;
                 if (rx * rx + ry * ry > radiusSquared)
@@ -241,9 +306,22 @@ int parfis::Particle::pushStatesCylindrical()
     double invRadius = 1.0 / geoCenter.x;
     // Reset pushed state vector
     std::fill(m_pSimData->stateFlagVec.begin(), m_pSimData->stateFlagVec.end(), 0);
-    for (specieId_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
+    for (size_t specId = 0; specId < m_pSimData->specieVec.size(); specId++) {
         // Define timestep and 1/timestep for specie
         pSpec = &m_pSimData->specieVec[specId];
+        // velocity change in computational units:
+        // DV = (q*E*dt^2)/(m*CellLength)
+        pSpec->dvUniformE.x = m_pSimData->field.strengthE.x*(pSpec->charge*Const::eCharge * 
+            pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
+            (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.x);
+
+        pSpec->dvUniformE.y = m_pSimData->field.strengthE.y*(pSpec->charge*Const::eCharge * 
+            pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
+            (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.y);
+
+        pSpec->dvUniformE.z = m_pSimData->field.strengthE.z*(pSpec->charge*Const::eCharge * 
+            pSpec->timestepRatio * pSpec->timestepRatio * pSpec->dt * pSpec->dt)/
+            (pSpec->amuMass*Const::amuKg * m_pCfgData->cellSize.z);
         // Go through cells that lie inside the geo
         for (cellId_t cellId : m_pSimData->cellIdAVec) {
             // New position for traversing cells
@@ -258,9 +336,7 @@ int parfis::Particle::pushStatesCylindrical()
                     continue;
                 }
                 pState = &m_pSimData->stateVec[stateId];
-                pState->pos.x += pState->vel.x;
-                pState->pos.y += pState->vel.y;
-                pState->pos.z += pState->vel.z;
+                stepState(pSpec, pState);
                 newCell.pos = pCell->pos;
                 traverseCell(*pState, newCell);
                 m_pSimData->stateFlagVec[stateId] = StateFlag::PushedState;
@@ -291,9 +367,7 @@ int parfis::Particle::pushStatesCylindrical()
                     continue;
                 }
                 pState = &m_pSimData->stateVec[stateId];
-                pState->pos.x += pState->vel.x;
-                pState->pos.y += pState->vel.y;
-                pState->pos.z += pState->vel.z;
+                stepState(pSpec, pState);                
                 rx = pState->pos.x + pCell->pos.x - geoCenter.x;
                 ry = pState->pos.y + pCell->pos.y - geoCenter.y;
                 if (rx * rx + ry * ry > radiusSquared) {
@@ -345,6 +419,21 @@ int parfis::Particle::pushStatesCylindrical()
         }
     }
     return 0;
+}
+
+void parfis::Particle::stepStateNoField(Specie *pSpec, State *pState)
+{
+    pState->pos.x += pState->vel.x;
+    pState->pos.y += pState->vel.y;
+    pState->pos.z += pState->vel.z;
+}
+
+void parfis::Particle::stepStateUniformEz(Specie *pSpec, State *pState)
+{
+    pState->vel.z += pSpec->dvUniformE.z;
+    pState->pos.x += pState->vel.x;
+    pState->pos.y += pState->vel.y;
+    pState->pos.z += pState->vel.z;
 }
 
 void parfis::Particle::traverseCell(State& state, Cell& newCell)

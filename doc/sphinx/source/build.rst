@@ -47,6 +47,7 @@ You can add build options through command-line arguments with the call to cmake.
   The location of the executable is ``/build/bin/gtestAll``.
 - ``COPY_LIB_PYTHON`` (default ``OFF``). Should parfis lib files be copied to the python-pacage for 
   generating pypi package.
+- ``NBSPHINX_EXECUTE`` (default ``ON``). Should nbsphinx be executed when generating doc.
 - ``PARFIS_LOG_LEVEL`` (default 0). Bitmask for the Logger, corresponds to bitmasks defined in 
   :cpp:enum:`parfis::LogMask`.
 

@@ -16,17 +16,21 @@ class Parfis:
     
     @staticmethod
     def load_lib(mode='Release', stateType='double'):
-        """ Loads speciffic library version
+        """ Loads speciffic library version in memory. This is needed
+        only once per script life. By loading with different parameters
+        the dynamic library get unloaded and different version is loaded.
 
         Args:
             mode (str): Available modes:
-            - 'Release' - load release version
-            - 'Debug' - load debug version
-            - 'Copy' - load debug version if python is in debug mode, otherwise load release version
+
+                - 'Release' - load release version
+                - 'Debug' - load debug version
+                - 'Copy' - load debug version if python is in debug mode, otherwise load release version
 
             stateType (str): Available state types:
-            - 'double' - load library with state type double
-            - 'float' - load library with state type float
+
+                - 'double' - load library with state type double
+                - 'float' - load library with state type float
         """
 
         linuxRelease32Lib = os.path.join(Parfis.currPath, "libparfis32.so")

@@ -1,6 +1,8 @@
 from ctypes import *
 
 class Type():
+    """Defines type names similary to the c++ module.
+    """
     cellId_t = c_uint32
     stateId_t = c_uint32
     state_t = c_double
@@ -12,6 +14,10 @@ class Const():
     noStateId = 0xFFFFFFFF
 
 class Vec3DBase():
+    """Base parent class for the Vec3D (resembles template Vec3D).
+    Class is inherited from other Vec3D_<type> classes.
+    
+    """
 
     def __init__(self, x=0, y=0, z=0):
         self.x = x
@@ -122,7 +128,7 @@ class Specie(Structure):
     _fields_ = [
         ('id', c_uint32),
         ('name', c_char_p),
-        ('velInitRandom', c_char_p),
+        ('velInitDist', c_int),
         ('statesPerCell', c_int),
         ('timestepRatio', c_int),
         ('dt', c_double),

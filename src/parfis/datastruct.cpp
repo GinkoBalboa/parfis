@@ -1,3 +1,5 @@
+#include <sstream>
+#include <string>
 #include "parfis.h"
 #include "datastruct.h"
 #include "global.h"
@@ -31,44 +33,6 @@ void parfis::Param<int>::setValueVec(const std::string& valstr)
     m_size = m_valueVec.size();
 }
 
-template<>
-void parfis::Param<std::string>::setRangeVec(const std::string& ranstr) 
-{
-    m_rangeVec = Global::getVector(ranstr, '(', ')');
-}
-
-template<>
-void parfis::Param<double>::setRangeVec(const std::string& ranstr) 
-{
-    auto ranvec = Global::getVector(ranstr, '(', ')');
-    for (auto& ran: ranvec)
-        m_rangeVec.push_back(std::strtold(ran.c_str(), nullptr));
-}
-
-template<>
-void parfis::Param<int>::setRangeVec(const std::string& ranstr) 
-{
-    auto ranvec = Global::getVector(ranstr, '(', ')');
-    for (auto& ran: ranvec)
-        m_rangeVec.push_back(std::strtol(ran.c_str(), nullptr, 10));
-}
-
-template<class T>
-bool parfis::Param<T>::inRange(T value)
-{
-    return value >= m_rangeVec[0] && value <= m_rangeVec[1];
-}
-
-template<>
-bool parfis::Param<std::string>::inRange(std::string valstr)
-{
-    for(auto& str: m_rangeVec)
-        if (str == valstr)
-            return true;
-    return false;
-}
-
-
 template<class S>
 void parfis::ParamBase::addChild(const std::string& name) 
 {
@@ -81,17 +45,6 @@ template void parfis::ParamBase::addChild<std::string>(const std::string& name);
 template void parfis::ParamBase::addChild<double>(const std::string& name);
 template void parfis::ParamBase::addChild<int>(const std::string& name);
 
-bool parfis::ParamBase::inRange(const std::string& valstr)
-{
-    if (m_type == "int")
-        return static_cast<Param<int>*>(this)->inRange(std::strtol(valstr.c_str(), nullptr, 10));
-    else if (m_type == "double")
-        return static_cast<Param<double>*>(this)->inRange(std::strtod(valstr.c_str(), nullptr));
-    else if (m_type == "std::string")
-        return static_cast<Param<std::string>*>(this)->inRange(valstr);
-    return false;
-}
-
 void parfis::ParamBase::setValueVec(ParamBase* ppb, const std::string& valstr)
 {
     if (ppb->m_type == "double")
@@ -100,16 +53,6 @@ void parfis::ParamBase::setValueVec(ParamBase* ppb, const std::string& valstr)
         static_cast<Param<int>*>(ppb)->setValueVec(valstr);
     else if (ppb->m_type == "std::string")
         static_cast<Param<std::string>*>(ppb)->setValueVec(valstr);
-}
-
-void parfis::ParamBase::setRangeVec(ParamBase* ppb, const std::string& ranstr)
-{
-    if (ppb->m_type == "double")
-        static_cast<Param<double>*>(ppb)->setRangeVec(ranstr);
-    else if (ppb->m_type == "int")
-        static_cast<Param<int>*>(ppb)->setRangeVec(ranstr);
-    else if (ppb->m_type == "std::string")
-        static_cast<Param<std::string>*>(ppb)->setRangeVec(ranstr);
 }
 
 std::string parfis::ParamBase::getValueString(bool printType)
@@ -255,7 +198,8 @@ void parfis::Domain::getParamToVector(const std::string& key, std::vector<T>& ve
         pp = pp->m_childMap[inhvec[i]].get();
     }
     vecRef.clear();
-    vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
+    if (pp->m_childMap.count(inhvec[i]))
+        vecRef = static_cast<Param<T>*>(pp->m_childMap[inhvec[i]].get())->m_valueVec;
 }
 
 template void parfis::Domain::getParamToVector<double>(
@@ -276,17 +220,24 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
 
 int parfis::CfgData::setPyCfgData()
 {
-    pyCfgData.geometry = geometry.c_str();
+    pyCfgData.geometry = geometry;
     pyCfgData.timestep = timestep;
     pyCfgData.geometrySize = &geometrySize;
     pyCfgData.cellSize = &cellSize;
     pyCfgData.periodicBoundary = &periodicBoundary;
     pyCfgData.cellCount = &cellCount;
     pyCfgData.specieNameVec = specieNameVec;
-    pyCfgData.velInitRandomVec = velInitRandomVec;
     return 0;
 }
 
+/**
+ * @brief Sets the PySimData pointers to coresponding references from SimData
+ * @details PySimData is used to wrap the data structure in order to be
+ * usable by python through ctypes. The need for this structure is mainly
+ * because in ctypes there isn't a built-in representation of the std::vector
+ * structure.
+ * @return int Zero on success 
+ */
 int parfis::SimData::setPySimData()
 {
     pySimData.stateVec = stateVec;
@@ -331,8 +282,36 @@ int parfis::Domain::initialize(const std::string& cstr)
             pp->addChild<int>(childName);
         cp = pp->m_childMap[childName].get();
     }
-    ParamBase::setRangeVec(cp, std::get<1>(keyString));
     ParamBase::setValueVec(cp, std::get<1>(keyValue));
+    return 0;
+}
+
+/**
+ * @brief Loads data from the defined file name and based on 
+ * the object type.
+ * 
+ * @return int Zero on success
+ */
+int parfis::FuncTable::loadData()
+{
+    if (fileName == nullptr)
+        return 1;
+    std::ifstream infile(fileName);
+    std::string line;
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        if (line[0] == '#') {
+            // Find nbins
+            if (line.find("bins") != std::string::npos)
+                Global::setValueVec<int>(nbins, line, '[', ']');
+            // Find ranges
+            if (line.find("ranges") != std::string::npos)
+                Global::setValueVec<double>(ranges, line, '[', ']');
+        }
+        else {
+            
+        }
+    }
     return 0;
 }
 

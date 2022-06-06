@@ -6,9 +6,6 @@ if [[ $curdir != "script" ]]; then
   exit 1
 fi
 ./removeLogFiles.sh
-# echo "Install parfis locally"
-# cd ../python-package
-# pip install -e . --force-reinstall -v
 echo "Run python tests"
 cd ..
 python3 ./test/pytest/runAll.py

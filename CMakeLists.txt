@@ -4,6 +4,7 @@ include(cmake/Utils.cmake)
 project(parfis LANGUAGES CXX C)
 
 set_version()
+set_config_string()
 
 option(BUILD_LIB "Build parfis library" ON)
 option(PARFIS_STATE_TYPE_DOUBLE "Use double for state data type" ON)
@@ -14,6 +15,7 @@ option(BUILD_SPHINX "Build documentation using Sphinx." OFF)
 option(BUILD_GOOGLE_TEST "Build google test" OFF)
 option(BUILD_GTESTALL "Build gtestAll" OFF)
 option(COPY_LIB_PYTHON "Copy parfis lib for python module" OFF)
+option(NBSPHINX_EXECUTE "Should nbsphinx be executed when generating doc." ON)
 
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -104,6 +106,12 @@ endif()
 # Sphinx
 if(BUILD_SPHINX)
     message("Building sphinx")
+    if(NBSPHINX_EXECUTE)
+        set(NBSPHINX_EXECUTE_STR "always")
+    else()
+        set(NBSPHINX_EXECUTE_STR "never")
+    endif(NBSPHINX_EXECUTE)
+    message("NBSPHINX_EXECUTE_STR=${NBSPHINX_EXECUTE_STR}")
     run_sphinx_build()
 endif()
 

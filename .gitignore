@@ -63,6 +63,9 @@ _build
 # Log files
 *.log
 
+# hypothesis
+.hypothesis
+
 # Python distribution
 python-package/dist
 python-package/build

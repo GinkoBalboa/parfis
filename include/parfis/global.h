@@ -25,12 +25,16 @@ namespace parfis
         static std::tuple<std::string, std::string> splitKeyValue(const std::string& str);
         static std::tuple<std::string, std::string> splitKeyString(const std::string& str);
         static std::string childName(const std::string& str);
+        static std::tuple<std::string, std::string> splitDot(const std::string& str);
 
         /// Check if file @param fname exists
         static bool fileExists (const std::string& fname);
 
         static std::vector<std::string> getVector(const std::string& str, char bra, char ket);
         static std::vector<std::string> getInheritanceVector(const std::string& str);
+
+        template<class T>
+        static int setValueVec(std::vector<T>& vecRef, const std::string& str, char bra, char ket);
 
         /// Convert double to string
         static std::string to_string(double num);
@@ -53,9 +57,11 @@ namespace parfis
         /// Elementary charge [C]
         static constexpr double eCharge = 1.602176634e-19;
         /// One joule in electronvolts [eV]
-        static constexpr double JeV = 1.602176634e-19;
+        static constexpr double JeV = 6.2415090744608e18;
         /// One electronvolt in joules [J]
-        static constexpr double eVJ = 6.2415090744608e18;
+        static constexpr double eVJ = 1.602176634e-19;
+        /// Avogadro constant [mol^-1]
+        static constexpr double Na = 6.02214076e23;
         /// Version string
         static const uint32_t logLevel;
         /// Version string
@@ -72,8 +78,19 @@ namespace parfis
         static constexpr cellId_t noCellId = UINT32_MAX;
         /// Id that represents that no state exists
         static constexpr stateId_t noStateId = UINT32_MAX;
-        /// Defaul velInitRandom value
-        static const char* velInitRandom;
+    };
+
+    /// Default values of parameters
+    struct ParamDefault 
+    {
+        /// Defaul velocity initial distribution 0: uniform
+        static constexpr int velInitDist = 0;
+        /// Defaul velocity initial distribution minimum value
+        static constexpr Vec3D<double> velInitDistMin = {-0.1, -0.1, -0.1};
+        /// Defaul velocity initial distribution maximum value
+        static constexpr Vec3D<double> velInitDistMax = {0.1, 0.1, 0.1};
+        /// Defaul random seed 0: random device
+        static constexpr int randomSeed = 0;
     };
 }
 

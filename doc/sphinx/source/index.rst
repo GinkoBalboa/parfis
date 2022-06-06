@@ -55,12 +55,20 @@ the :doc:`demo_files/simple_demo`.
    :caption: Algorithms:
 
    physics
+   workflow
 
 .. toctree::
    :maxdepth: 2
-   :caption: CPP API:
+   :caption: Data structures:
 
-   cpp
+   sim_data
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API:
+
+   cpp_api
+   python_api
 
 .. toctree::
    :maxdepth: 1
