@@ -10,9 +10,13 @@ Features:
   - Possibility to change the random engine by setting `randEngine_t` in `datastruct.h`.
   - Loading configuration from files.
   - Avoid using strings where int can be used (ex: clasiffied entries).
+  - Nonlinear function tabulation.
+  - Gas collision definitions.
 
 Changes:
+
   - Turn off log printing to file by default.
+  - Actions for debug config are optional.
 
 ## 0.0.5
 
