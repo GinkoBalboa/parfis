@@ -143,6 +143,9 @@ class Parfis:
         Parfis.lib.runCommandChain.argtypes = [c_uint32, c_char_p]
         Parfis.lib.runCommandChain.restype = c_int
 
+        Parfis.lib.setConfigFromFile.argtypes = [c_uint32, c_char_p]
+        Parfis.lib.setConfigFromFile.restype = c_int
+
     @staticmethod
     def unload_lib():
         print(f"Unload lib: {Parfis.libPath[len(Parfis.currPath)+1:]}")
@@ -209,6 +212,10 @@ class Parfis:
     @staticmethod
     def runCommandChain(id: int, cmdStr: str) -> int:
         return Parfis.lib.runCommandChain(id, cmdStr.encode())
+
+    @staticmethod
+    def setConfigFromFile(id: int, fileName: str) -> int:
+        return Parfis.lib.setConfigFromFile(id, fileName.encode())
 
     
 def getAbsoluteCellId(cellCount: Vec3DBase, node: Vec3DBase) -> int:

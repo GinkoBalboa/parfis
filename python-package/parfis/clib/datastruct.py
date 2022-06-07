@@ -219,7 +219,7 @@ class PyCfgData(Structure):
         cellCount: Pointer to Vec3D_int, number of cells
     """
     _fields_ = [
-        ('geometry', c_char_p),
+        ('geometry', c_int),
         ('timestep', c_double),
         ('geometrySize', POINTER(Vec3DClass(c_double))),
         ('cellSize', POINTER(Vec3DClass(c_double))),

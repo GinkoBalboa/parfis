@@ -227,6 +227,9 @@ int parfis::CfgData::setPyCfgData()
     pyCfgData.periodicBoundary = &periodicBoundary;
     pyCfgData.cellCount = &cellCount;
     pyCfgData.specieNameVec = specieNameVec;
+    pyCfgData.gasNameVec = gasNameVec;
+    pyCfgData.gasCollisionNameVec = gasCollisionNameVec;
+    pyCfgData.gasCollisionFileNameVec = gasCollisionFileNameVec;
     return 0;
 }
 
@@ -308,24 +311,62 @@ int parfis::FuncTable::loadData()
                 int vecSize = 0;
                 for (auto nbin : nbins)
                     vecSize += nbin;
-                x.resize(vecSize);
-                y.resize(vecSize);
+                xVec.resize(vecSize);
+                yVec.resize(vecSize);
             }
             // Find ranges
             if (line.find("ranges") != std::string::npos)
                 Global::setValueVec<double>(ranges, line, '[', ']');
         }
         else {
-            if (rowCnt > x.size() - 1)
+            if (rowCnt > xVec.size() - 1)
                 return 2;
             // Else is pure data
-            x[rowCnt] = Global::getNthElement<double>(line, 0);
-            y[rowCnt] = Global::getNthElement<double>(line, 1);
+            yVec[rowCnt] = Global::getNthElement<double>(line, 0);
+            xVec[rowCnt] = Global::getNthElement<double>(line, 1);
             rowCnt++;
         }
     }
-    if (rowCnt != x.size())
+    if (rowCnt != xVec.size())
         return 3;
+
+    return 0;
+}
+
+/**
+ * @brief Calculates collision frequency from the cx
+ * 
+ * @param spec Specie reference
+ * @param gas Gas reference
+ * @param dt Timestep
+ * @return int Zero on success
+ */
+int parfis::GasCollision::calculateColFreq(
+    const Specie & spec, const Gas & gas, double dt) 
+{
+    colFreqFtab.nbins.resize(xSecFtab.nbins.size());
+    colFreqFtab.ranges.resize(xSecFtab.ranges.size());
+    colFreqFtab.xVec.resize(xSecFtab.xVec.size());
+    colFreqFtab.yVec.resize(xSecFtab.yVec.size());
+    double vMaxSq = spec.maxVel.lenSq();
+    double ivMaxSq = 1.0/vMaxSq;
+    double im = 1.0/spec.mass;
+    double idt = 1.0/(spec.timestepRatio*dt);
+    // Convert ranges from eV to v^2
+    for(auto i = 0; i<colFreqFtab.ranges.size(); i++) {
+        colFreqFtab.ranges[i] = 2.0*xSecFtab.ranges[i]*Const::eVJ*im*ivMaxSq;
+        colFreqFtab.nbins[i] = xSecFtab.nbins[i];
+    }
+    // Convert x axis from eV to v^2 and y axis from cross section
+    // area to collisional frequency 
+    for(auto i = 0; i<colFreqFtab.xVec.size(); i++) {
+        colFreqFtab.xVec[i] = 2.0*xSecFtab.xVec[i]*Const::eVJ*im;
+        colFreqFtab.yVec[i] = 
+            gas.molDensity*Const::Na*xSecFtab.yVec[i]*sqrt(colFreqFtab.xVec[i]);
+        // To code values
+        colFreqFtab.xVec[i] *= ivMaxSq;
+        colFreqFtab.yVec[i] *= idt;
+    }
     return 0;
 }
 

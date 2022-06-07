@@ -30,6 +30,11 @@ int parfis::Particle::loadCfgData()
     return 0;
 }
 
+/**
+ * @brief Loads data into SimData object 
+ * @details We access the SimData object through a pointer, and the data object 
+ * itself is a member of the Parfis class.
+ */
 int parfis::Particle::loadSimData()
 {
     int retVal;
@@ -71,17 +76,34 @@ int parfis::Particle::loadSimData()
                 m_pSimData->gasCollisionVec[j].id = j;
                 m_pSimData->specieVec[i].gasCollisionVecId.push_back(j);
                 m_pSimData->gasCollisionVec[j].name = m_pCfgData->gasCollisionNameVec[j].c_str();
+                // Get type of collision
                 getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision." + 
                     std::get<1>(specGasColl) + ".type", m_pSimData->gasCollisionVec[j].type);
+                // Get gas id from gas name
+                getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision." + 
+                    std::get<1>(specGasColl) + ".gas", strTmp);
+                for (size_t k=0; k<m_pSimData->gasVec.size(); k++) {
+                    if (m_pSimData->gasVec[k].name == strTmp) {
+                        m_pSimData->gasCollisionVec[j].gasId = k;
+                        break;
+                    }
+                }
+                // Load data from cross section file
                 getParamToValue("specie." + m_pCfgData->specieNameVec[i] + ".gasCollision." + 
                     std::get<1>(specGasColl) + ".crossSectionFile", strTmp);
                 m_pCfgData->gasCollisionFileNameVec.push_back(strTmp);
                 m_pSimData->gasCollisionVec[j].fileName = 
                     m_pCfgData->gasCollisionFileNameVec[j].c_str();
-                m_pSimData->gasCollisionVec[j].ftab.fileName = 
+                m_pSimData->gasCollisionVec[j].xSecFtab.fileName = 
                     m_pCfgData->gasCollisionFileNameVec[j].c_str();
-                m_pSimData->gasCollisionVec[j].ftab.type = 1;
-                m_pSimData->gasCollisionVec[j].ftab.loadData();
+                // Cross section is nonlinear tabulated data
+                m_pSimData->gasCollisionVec[j].xSecFtab.type = 1;
+                m_pSimData->gasCollisionVec[j].xSecFtab.loadData();
+                m_pSimData->gasCollisionVec[j].calculateColFreq(
+                    m_pSimData->specieVec[i], 
+                    m_pSimData->gasVec[m_pSimData->gasCollisionVec[j].gasId],
+                    m_pCfgData->timestep);
+
             }
         }
     }
@@ -243,12 +265,6 @@ int parfis::Particle::createStatesOfSpecie(Specie& spec)
                     spec.velInitDistMin.y;
                 state.vel.z = (spec.velInitDistMax.z - spec.velInitDistMin.z)*dist(engine) + 
                     spec.velInitDistMin.z;
-            }
-            if (ci==0 && si==0) {
-                msg = "the first three position vector components: " + 
-                std::to_string(state.pos.x) + ", " + std::to_string(state.pos.y) + ", " + 
-                std::to_string(state.pos.z) + "\n";
-                LOG(*m_pLogger, LogMask::Info, msg);
             }
 
             pCell = &m_pSimData->cellVec[ci];

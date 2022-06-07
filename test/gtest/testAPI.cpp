@@ -326,14 +326,14 @@ TEST(api, gasCollisionDefinition) {
     ASSERT_EQ(std::string(pSimData->gasCollisionVec[id1].fileName), "./data/cross_sections/simple_e.csv");
     std::vector<double> ranges = {1, 10, 100, 1000, 10000, 342000};
     std::vector<int> nbins = {1000, 1000, 1000, 1000, 1000, 3000};
-    ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id0].ftab.nbins);
-    ASSERT_EQ(true, ranges == pSimData->gasCollisionVec[id0].ftab.ranges);
-    ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id1].ftab.nbins);
-    ASSERT_EQ(true, ranges == pSimData->gasCollisionVec[id1].ftab.ranges);
-    ASSERT_EQ(8000, pSimData->gasCollisionVec[id0].ftab.x.size());
-    ASSERT_EQ(8000, pSimData->gasCollisionVec[id0].ftab.y.size());
-    ASSERT_EQ(8000, pSimData->gasCollisionVec[id1].ftab.x.size());
-    ASSERT_EQ(8000, pSimData->gasCollisionVec[id1].ftab.y.size());
+    ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id0].xSecFtab.nbins);
+    ASSERT_EQ(true, ranges == pSimData->gasCollisionVec[id0].xSecFtab.ranges);
+    ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id1].xSecFtab.nbins);
+    ASSERT_EQ(true, ranges == pSimData->gasCollisionVec[id1].xSecFtab.ranges);
+    ASSERT_EQ(8000, pSimData->gasCollisionVec[id0].xSecFtab.xVec.size());
+    ASSERT_EQ(8000, pSimData->gasCollisionVec[id0].xSecFtab.yVec.size());
+    ASSERT_EQ(8000, pSimData->gasCollisionVec[id1].xSecFtab.xVec.size());
+    ASSERT_EQ(8000, pSimData->gasCollisionVec[id1].xSecFtab.yVec.size());
     parfis::api::deleteParfis(id);
 }
 /** @} gtestAll*/

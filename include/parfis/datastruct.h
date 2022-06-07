@@ -178,13 +178,13 @@ namespace parfis {
          * @brief Returns the vector length in Eucledian metric.
          * @details The length is calculated as @f$ \sqrt{x^2 + y^2 + z^2} @f$
          */
-        T len() { return sqrt(x * x + y * y + z * z); }
+        T len() const { return sqrt(x * x + y * y + z * z); }
 
         /** 
          * @brief Returns the squared vector length in Eucledian metric.
          * @details The length is calculated as @f$ x^2 + y^2 + z^2 @f$
          */
-        T lenSq() { return x * x + y * y + z * z; }
+        T lenSq() const { return x * x + y * y + z * z; }
     };
 
     /**
@@ -332,9 +332,9 @@ namespace parfis {
         /// Vector of 1/dx per range
         std::vector<double> idx;
         /// X values
-        std::vector<double> x;
+        std::vector<double> xVec;
         /// Y values
-        std::vector<double> y;
+        std::vector<double> yVec;
         /// Type 0:linear, 1:nonlinear
         int type;
         /// Function to run the evaluation based on type
@@ -355,16 +355,19 @@ namespace parfis {
         const char* fileName;
         /// Id from the specie vector
         uint32_t specieId;
+        /// Id from the gas vector
+        uint32_t gasId;
         /// Threshold in eV
         double threshold;
-        /// Cross section in angstroms, with x-axis is in eV
-        std::vector<double> crosxVec;
         /// Type of collision (elastic, inelastic)
         int type;
         /// Scattering angle (random number sampled with scatterAngle gives deflection in radians)
         std::vector<double> scatterAngle;
-        /// Tabulated func
-        FuncTable ftab;
+        /// Cross section in angstroms, with x-axis is in eV
+        FuncTable xSecFtab;
+        /// Collision frequency, x-axis is in code velocity magnitude
+        FuncTable colFreqFtab;
+        int calculateColFreq(const Specie & spec, const Gas & gas, double dt);
     };
 
     /**
@@ -436,7 +439,9 @@ namespace parfis {
         Vec3D<int>* periodicBoundary;
         Vec3D<int>* cellCount;
         PyVec<std::string> specieNameVec;
-        PyVec<std::string> velInitDistVec;
+        PyVec<std::string> gasNameVec;
+        PyVec<std::string> gasCollisionNameVec;
+        PyVec<std::string> gasCollisionFileNameVec;
     };
 
     /**

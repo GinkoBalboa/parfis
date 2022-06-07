@@ -23,6 +23,10 @@ class TestTools(unittest.TestCase):
         nbins =  [1000, 1000, 1000, 1000,  1000,   3000]
         pfs.generateCrossSection(sigma_e, ranges, nbins, file="./data/cross_sections/simple_e.csv")
         pfs.generateCrossSection(sigma_i, ranges, nbins, file="./data/cross_sections/simple_i.csv")
+        parId = pfs.Parfis.newParfis()
+        pfs.Parfis.setConfigFromFile(parId, "./data/config_files/test_physics_gasCollisionDefinition.ini")
+        pfs.Parfis.loadCfgData(parId)
+        pfs.Parfis.setPyCfgData(parId)
     
 if __name__ == '__main__':
 
