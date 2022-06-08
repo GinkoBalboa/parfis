@@ -209,7 +209,13 @@ TEST(api, configureSpecieFromFile) {
  */
 TEST(api, pyCfgData) {
     uint32_t id = parfis::api::newParfis();
-    // Set two species
+    // Background gas and two species
+    parfis::api::setConfig(id, "system.gas = bck <parfis::Param>");
+    parfis::api::setConfig(id, "system.gas.bck = [amuMass, volumeFraction, temperature, molDensity] <parfis::Param>");
+    parfis::api::setConfig(id, "system.gas.bck.amuMass = 4.0 <double>");
+    parfis::api::setConfig(id, "system.gas.bck.volumeFraction = 1.0 <double>");
+    parfis::api::setConfig(id, "system.gas.bck.temperature = 0.0 <double>");
+    parfis::api::setConfig(id, "system.gas.bck.molDensity = 0.1660539067173 <double>");
     parfis::api::setConfig(id, "particle.specie = [electron, atom] <parfis::Param>");
     parfis::api::setConfig(id, "particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge] <parfis::Param>");
     parfis::api::setConfig(id, "particle.specie.electron.statesPerCell = 10 <int>");
@@ -225,6 +231,8 @@ TEST(api, pyCfgData) {
     retval = parfis::api::loadCfgData(id);
     ASSERT_EQ(0, retval);
     parfis::api::setPyCfgData(id);
+    ASSERT_EQ(1, parfis::api::getPyCfgData(id)->gasNameVec.size);
+    ASSERT_EQ(std::string("bck"), std::string(parfis::api::getPyCfgData(id)->gasNameVec.ptr[0]));
     ASSERT_EQ(2, parfis::api::getPyCfgData(id)->specieNameVec.size);
     ASSERT_EQ(std::string("electron"), std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]));
     ASSERT_EQ(std::string("atom"), std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[1]));
@@ -306,6 +314,39 @@ TEST(api, pySimData) {
 }
 
 /**
+ * @brief Check multiple PyVec<std::strings> in a structure
+ */
+TEST(api, multiplePyVecStr) {
+    std::string fileName = "./data/config_files/test_physics_gasCollisionDefinition.ini";
+    uint32_t id = parfis::api::newParfis();
+    parfis::api::setConfigFromFile(id, fileName.c_str());
+    parfis::api::loadCfgData(id);
+    parfis::api::loadSimData(id);
+    parfis::api::runCommandChain(id, "create");
+    const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
+    const parfis::SimData *pSimData = parfis::api::getSimData(id);
+    ASSERT_EQ("a", pCfgData->specieNameVec[0]);
+    ASSERT_EQ("bck", pCfgData->gasNameVec[0]);
+    ASSERT_EQ("a.elastic", pCfgData->gasCollisionNameVec[0]);
+    ASSERT_EQ("a.inelastic", pCfgData->gasCollisionNameVec[1]);
+    ASSERT_EQ("./data/cross_sections/simple_e.csv", pCfgData->gasCollisionFileNameVec[0]);
+    ASSERT_EQ("./data/cross_sections/simple_i.csv", pCfgData->gasCollisionFileNameVec[1]);
+    parfis::api::setPyCfgData(id);
+    ASSERT_EQ(1, parfis::api::getPyCfgData(id)->specieNameVec.size);
+    ASSERT_EQ("a", std::string(parfis::api::getPyCfgData(id)->specieNameVec.ptr[0]));
+    ASSERT_EQ(1, parfis::api::getPyCfgData(id)->gasNameVec.size);
+    ASSERT_EQ("bck", std::string(parfis::api::getPyCfgData(id)->gasNameVec.ptr[0]));
+    ASSERT_EQ(2, parfis::api::getPyCfgData(id)->gasCollisionNameVec.size);
+    ASSERT_EQ("a.elastic", std::string(parfis::api::getPyCfgData(id)->gasCollisionNameVec.ptr[0]));
+    ASSERT_EQ("a.inelastic", std::string(parfis::api::getPyCfgData(id)->gasCollisionNameVec.ptr[1]));
+    ASSERT_EQ(2, parfis::api::getPyCfgData(id)->gasCollisionFileNameVec.size);
+    ASSERT_EQ("./data/cross_sections/simple_e.csv", 
+        std::string(parfis::api::getPyCfgData(id)->gasCollisionFileNameVec.ptr[0]));
+    ASSERT_EQ("./data/cross_sections/simple_i.csv", 
+        std::string(parfis::api::getPyCfgData(id)->gasCollisionFileNameVec.ptr[1]));
+}
+
+/**
  * @brief Check gas definitions and particle-gas collision definitions
  */
 TEST(api, gasCollisionDefinition) {
@@ -316,6 +357,7 @@ TEST(api, gasCollisionDefinition) {
     parfis::api::runCommandChain(id, "create");
     const parfis::CfgData *pCfgData = parfis::api::getCfgData(id);
     const parfis::SimData *pSimData = parfis::api::getSimData(id);
+    ASSERT_EQ("bck", pCfgData->gasNameVec[0]);
     ASSERT_EQ(pSimData->specieVec[0].gasCollisionVecId.size(), 2);
     uint32_t id0, id1;
     id0 = pSimData->specieVec[0].gasCollisionVecId[0];

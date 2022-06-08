@@ -386,6 +386,11 @@ namespace parfis {
         Vec3D<double> strengthB;
     };
 
+    struct PyVecContainer
+    {
+        static std::vector<const char *> pyStrVec;
+    };
+
     /**
      * @brief Structure used instead of std::vector<T> for python bindings
      * @tparam T type of vector
@@ -415,17 +420,20 @@ namespace parfis {
         const char ** ptr;
         size_t size;
 
-        std::vector<const char *> vec;
-
         PyVec<std::string>& operator=(const std::vector<std::string>& strVec) {
-            vec.clear();
-            for (auto & str: strVec)
-                vec.push_back(str.c_str());
-            ptr = &vec[0];
-            size = vec.size();
+            bool init = true;
+            for (auto & str: strVec) {
+                PyVecContainer::pyStrVec.push_back(str.c_str());
+                if (init) {
+                    ptr = &PyVecContainer::pyStrVec.back();
+                    size = strVec.size();
+                    init = false;
+                }
+            }
             return *this;
         }
     };
+
 
     /**
      * @brief Configuration data in format suitable for Python ctypes

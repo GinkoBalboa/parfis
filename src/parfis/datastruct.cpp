@@ -218,6 +218,8 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     return pp;
 }
 
+std::vector<const char*> parfis::PyVecContainer::pyStrVec;
+
 int parfis::CfgData::setPyCfgData()
 {
     pyCfgData.geometry = geometry;
@@ -226,6 +228,15 @@ int parfis::CfgData::setPyCfgData()
     pyCfgData.cellSize = &cellSize;
     pyCfgData.periodicBoundary = &periodicBoundary;
     pyCfgData.cellCount = &cellCount;
+    // Reserve space in the PyVecContainer::pyStrVec for strings
+    auto sizeRes = 0;
+    sizeRes += specieNameVec.size();
+    sizeRes += gasNameVec.size();
+    sizeRes += gasCollisionNameVec.size();
+    sizeRes += gasCollisionFileNameVec.size();
+    PyVecContainer::pyStrVec.clear();
+    PyVecContainer::pyStrVec.reserve(sizeRes);
+    // Fill containter with pointer to strings
     pyCfgData.specieNameVec = specieNameVec;
     pyCfgData.gasNameVec = gasNameVec;
     pyCfgData.gasCollisionNameVec = gasCollisionNameVec;

@@ -94,6 +94,18 @@ def Vec3DClass(cType = c_int):
         return Vec3D_uint16
     else:
         return None
+    
+class Gas(Structure):
+    """Wrapper for the parfis::Gas class
+    """
+    _fields_ = [
+        ('id', c_uint32),
+        ('name', c_char_p),
+        ('amuMass', c_double),
+        ('volumeFraction', c_double),
+        ('temperature', c_double),
+        ('molDensity', c_double)
+    ]
 
 class State_float(Structure):
     _fields_ = [
@@ -192,12 +204,21 @@ class PyVec_Specie(Structure, PyVecBase):
     ]
 
 def PyVecClass(cType = c_char_p):
+    """Function returns a class PyVec class for a coresponding argument.
+
+    Args:
+        cType (ctypes type, optional): Type of class. Defaults to c_char_p.
+
+    Returns:
+        PyVec_<type>: Class that inherited PyVecBase and has data of the
+        specified type.
+    """
     if cType == c_char_p:
         return PyVec_char_p
     elif cType == c_uint32:
-            return PyVec_uint32
+        return PyVec_uint32
     elif cType == c_uint8:
-            return PyVec_uint8
+        return PyVec_uint8
     elif cType == State_float:
         return PyVec_State_float
     elif cType == State_double:
@@ -213,8 +234,8 @@ class PyCfgData(Structure):
     """PyCfgData(ctypes.Structure)
 
     Args:
-        geometry: Name of the geometry (ex. 'cylindrical')
-        timestep: Timestep in seconds, double
+        geometry: Geometry type (0: cubical, 1: cylindrical)
+        timestep: Timestep in seconds
         geometrySize: Pointer to Vec3D_double, size of geometry in meters
         cellCount: Pointer to Vec3D_int, number of cells
     """
@@ -225,7 +246,10 @@ class PyCfgData(Structure):
         ('cellSize', POINTER(Vec3DClass(c_double))),
         ('periodicBoundary', POINTER(Vec3DClass(c_int))),
         ('cellCount', POINTER(Vec3DClass(c_int))),
-        ('specieNameVec', PyVecClass(c_char_p))
+        ('specieNameVec', PyVecClass(c_char_p)),
+        ('gasNameVec', PyVecClass(c_char_p)),
+        ('gasCollisionNameVec', PyVecClass(c_char_p)),
+        ('gasCollisionFileNameVec', PyVecClass(c_char_p))
     ]
 
 class PySimData_float(Structure):
