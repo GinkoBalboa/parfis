@@ -364,8 +364,8 @@ TEST(api, gasCollisionDefinition) {
     id1 = pSimData->specieVec[0].gasCollisionVecId[1];
     ASSERT_EQ(pSimData->gasCollisionVec[id0].type, 0);
     ASSERT_EQ(pSimData->gasCollisionVec[id1].type, 1);
-    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id0].fileName), "./data/cross_sections/simple_i.csv");
-    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id1].fileName), "./data/cross_sections/simple_e.csv");
+    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id0].fileName), "./data/cross_sections/simple_e.csv");
+    ASSERT_EQ(std::string(pSimData->gasCollisionVec[id1].fileName), "./data/cross_sections/simple_i.csv");
     std::vector<double> ranges = {1, 10, 100, 1000, 10000, 342000};
     std::vector<int> nbins = {1000, 1000, 1000, 1000, 1000, 3000};
     ASSERT_EQ(true, nbins == pSimData->gasCollisionVec[id0].xSecFtab.nbins);
