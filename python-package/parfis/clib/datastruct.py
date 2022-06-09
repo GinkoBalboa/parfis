@@ -145,9 +145,13 @@ class Specie(Structure):
         ('timestepRatio', c_int),
         ('dt', c_double),
         ('idt', c_double),
-        ('maxVel', Vec3DClass(c_double)),
+        ('maxVel', c_double),
+        ('maxEv', c_double),
         ('velInitDistMin', Vec3DClass(c_double)),
-        ('velInitDistMax', Vec3DClass(c_double))
+        ('velInitDistMax', Vec3DClass(c_double)),
+        ('qm', c_double),
+        ('amuMass', c_double),
+        ('mass', c_double)
     ]
 
 class PyVecBase:
@@ -269,7 +273,8 @@ class PySimData_float(Structure):
         ('specieVec', PyVecClass(Specie)),
         ('cellVec', PyVecClass(Cell)),
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
-        ('headIdVec', PyVecClass(Type.stateId_t))
+        ('headIdVec', PyVecClass(Type.stateId_t)),
+        ('gasVec', PyVecClass(Gas))
     ]
 
 class PySimData_double(Structure):
@@ -281,7 +286,8 @@ class PySimData_double(Structure):
         ('specieVec', PyVecClass(Specie)),
         ('cellVec', PyVecClass(Cell)),
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
-        ('headIdVec', PyVecClass(Type.stateId_t))
+        ('headIdVec', PyVecClass(Type.stateId_t)),
+        ('gasVec', PyVecClass(Gas))
     ]
 
 def PySimDataClass():

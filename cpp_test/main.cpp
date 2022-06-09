@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
     // ::testing::GTEST_FLAG(filter) = "api.configureSpecieFromFile";
     // ::testing::GTEST_FLAG(filter) = "api.multiplePyVecStr";
     // ::testing::GTEST_FLAG(filter) = "api.gasCollisionDefinition";
+    // ::testing::GTEST_FLAG(filter) = "api.structPyFuncTable";
     // ::testing::GTEST_FLAG(filter) = "physics.checkUniformField";
     return RUN_ALL_TESTS();
 }

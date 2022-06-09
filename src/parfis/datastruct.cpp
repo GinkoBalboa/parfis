@@ -263,6 +263,12 @@ int parfis::SimData::setPySimData()
     pySimData.nodeFlagVec = nodeFlagVec;
     pySimData.headIdVec = headIdVec;
     pySimData.gasVec = gasVec;
+    // First set the wrapper data
+    pyGasCollisionVec.resize(gasCollisionVec.size());
+    for (auto i = 0; i < gasCollisionVec.size(); i++) {
+        pyGasCollisionVec[i] = gasCollisionVec[i];
+    }
+    pySimData.pyGasCollisionVec = pyGasCollisionVec;
     return 0;
 }
 
@@ -360,7 +366,7 @@ int parfis::GasCollision::calculateColFreq(
     colFreqFtab.ranges.resize(xSecFtab.ranges.size());
     colFreqFtab.xVec.resize(xSecFtab.xVec.size());
     colFreqFtab.yVec.resize(xSecFtab.yVec.size());
-    double vMaxSq = spec.maxVel.lenSq();
+    double vMaxSq = spec.maxVel*spec.maxVel;
     double ivMaxSq = 1.0/vMaxSq;
     double im = 1.0/spec.mass;
     double idt = 1.0/(spec.timestepRatio*dt);
