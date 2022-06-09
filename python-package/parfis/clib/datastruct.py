@@ -203,6 +203,12 @@ class PyVec_Specie(Structure, PyVecBase):
         ('size', c_size_t)
     ]
 
+class PyVec_Gas(Structure, PyVecBase):
+    _fields_ = [
+        ('ptr', POINTER(Gas)),
+        ('size', c_size_t)
+    ]
+
 def PyVecClass(cType = c_char_p):
     """Function returns a class PyVec class for a coresponding argument.
 
@@ -227,6 +233,8 @@ def PyVecClass(cType = c_char_p):
         return PyVec_Specie
     elif cType == Cell:
         return PyVec_Cell
+    elif cType == Gas:
+        return PyVec_Gas
     else:
         return None
 

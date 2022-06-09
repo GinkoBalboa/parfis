@@ -21,9 +21,16 @@ jobs:
   build-and-gtest:
   
     strategy:
+    - if: ${{ github.event.inputs.runDebug=='true' }}
       matrix:
         os: [ubuntu-latest, windows-latest]
         config: [Release, Debug]
+        state_t: [float, double]
+
+    - if: ${{ github.event.inputs.runDebug=='false' }}
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        config: [Release]
         state_t: [float, double]
 
     name: Build and run gtestAll
@@ -52,14 +59,14 @@ jobs:
         cmake .. -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON -DPARFIS_STATE_TYPE_DOUBLE=ON
         cmake --build . --config Release
 
-    - if: ${{ matrix.config=='Debug' && matrix.state_t=='float' && github.event.inputs.runDebug=='true' }}
+    - if: ${{ matrix.config=='Debug' && matrix.state_t=='float' }}
       name: Build Debug float
       run: |
         cd build
         cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON
         cmake --build . --config Debug
 
-    - if: ${{ matrix.config=='Debug' && matrix.state_t=='double' && github.event.inputs.runDebug=='true' }}
+    - if: ${{ matrix.config=='Debug' && matrix.state_t=='double' }}
       name: Build Debug double
       run: |
         cd build
@@ -76,11 +83,11 @@ jobs:
       name: Run gtestAll.exe
       run: build/bin/gtestAll/gtestAll.exe
 
-    - if: ${{ matrix.config=='Debug' && matrix.os=='ubuntu-latest' && github.event.inputs.runDebug=='true' }} 
+    - if: ${{ matrix.config=='Debug' && matrix.os=='ubuntu-latest' }} 
       name: Run gtestAlld
       run: build/bin/gtestAll/gtestAlld
 
-    - if: ${{ matrix.config=='Debug' && matrix.os=='windows-latest' && github.event.inputs.runDebug=='true' }} 
+    - if: ${{ matrix.config=='Debug' && matrix.os=='windows-latest' }} 
       name: Run gtestAlld.exe
       run: build/bin/gtestAll/gtestAlld.exe
 
@@ -213,5 +220,5 @@ jobs:
       run: |
         pip install --force-reinstall -v --find-links=./python-package/dist/ --no-index parfis
         pip install -r ./python-package/requirements.txt
-        python ./test/pytest/runAll.py float
-        python ./test/pytest/runAll.py double
+        python ./python_test/runAll.py float
+        python ./python_test/runAll.py double

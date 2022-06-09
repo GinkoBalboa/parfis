@@ -152,7 +152,7 @@ endif()
 # gtestAll
 if(BUILD_GTESTALL)
     message("Build gtestAll")
-    include(${parfis_SOURCE_DIR}/test/CMakeLists.txt)
+    include(${parfis_SOURCE_DIR}/cpp_test/CMakeLists.txt)
 endif()
 
 message("VERSION = ${VERSION}")

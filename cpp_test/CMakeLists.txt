@@ -1,7 +1,7 @@
 # Collect all .h and .cpp files from parfis directory
 file(GLOB_RECURSE GTESTALL_SOURCES LIST_DIRECTORIES true
-    ${parfis_SOURCE_DIR}/test/gtest/*.h 
-    ${parfis_SOURCE_DIR}/test/gtest/*.cpp)
+    ${parfis_SOURCE_DIR}/cpp_test/*.h 
+    ${parfis_SOURCE_DIR}/cpp_test/*.cpp)
 
 # Enable testing
 # enable_testing()

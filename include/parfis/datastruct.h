@@ -500,6 +500,8 @@ namespace parfis {
         PyVec<Cell> cellVec;
         PyVec<nodeFlag_t> nodeFlagVec;
         PyVec<stateId_t> headIdVec;
+        PyVec<Gas> gasVec;
+        PyVec<GasCollision> gasCollisionVec;
     };
 
     /**

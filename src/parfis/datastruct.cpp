@@ -262,6 +262,7 @@ int parfis::SimData::setPySimData()
     pySimData.cellVec = cellVec;
     pySimData.nodeFlagVec = nodeFlagVec;
     pySimData.headIdVec = headIdVec;
+    pySimData.gasVec = gasVec;
     return 0;
 }
 
