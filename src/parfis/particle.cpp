@@ -94,11 +94,10 @@ int parfis::Particle::loadSimData()
                 m_pCfgData->gasCollisionFileNameVec.push_back(strTmp);
                 m_pSimData->gasCollisionVec[j].fileName = 
                     m_pCfgData->gasCollisionFileNameVec[j].c_str();
-                m_pSimData->gasCollisionVec[j].xSecFtab.fileName = 
-                    m_pCfgData->gasCollisionFileNameVec[j].c_str();
                 // Cross section is nonlinear tabulated data
                 m_pSimData->gasCollisionVec[j].xSecFtab.type = 1;
-                m_pSimData->gasCollisionVec[j].xSecFtab.loadData();
+                m_pSimData->gasCollisionVec[j].xSecFtab.loadData(
+                    m_pCfgData->gasCollisionFileNameVec[j]);
                 m_pSimData->gasCollisionVec[j].calculateColFreq(
                     m_pSimData->specieVec[i], 
                     m_pSimData->gasVec[m_pSimData->gasCollisionVec[j].gasId],

@@ -313,10 +313,8 @@ int parfis::Domain::initialize(const std::string& cstr)
  * 
  * @return int Zero on success
  */
-int parfis::FuncTable::loadData()
+int parfis::FuncTable::loadData(const std::string& fileName)
 {
-    if (fileName == nullptr)
-        return 1;
     std::ifstream infile(fileName);
     std::string line;
     int rowCnt = 0;
@@ -340,8 +338,8 @@ int parfis::FuncTable::loadData()
             if (rowCnt > xVec.size() - 1)
                 return 2;
             // Else is pure data
-            yVec[rowCnt] = Global::getNthElement<double>(line, 0);
-            xVec[rowCnt] = Global::getNthElement<double>(line, 1);
+            xVec[rowCnt] = Global::getNthElement<double>(line, 0);
+            yVec[rowCnt] = Global::getNthElement<double>(line, 1);
             rowCnt++;
         }
     }

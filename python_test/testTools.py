@@ -48,6 +48,13 @@ class TestTools(unittest.TestCase):
         self.assertEqual([
             "./data/cross_sections/simple_e.csv", 
             "./data/cross_sections/simple_i.csv"], ptrCfgData.gasCollisionFileNameVec.asList())
+        # Check sim data
+        self.assertEqual(
+            "./data/cross_sections/simple_e.csv", ptrSimData.pyGasCollisionVec.ptr[0].fileName.decode())
+        self.assertEqual(
+            "./data/cross_sections/simple_i.csv", ptrSimData.pyGasCollisionVec.ptr[1].fileName.decode())
+        self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[0].xSecFtab.nbins.asList())
+        self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[0].xSecFtab.ranges.asList())
         
 
     

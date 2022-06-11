@@ -76,3 +76,4 @@ parfis.egg-info
 .ipynb_checkpoints
 *.pdf
 *.html
+doc/sphinx/source/collisional_files/*csv

@@ -373,8 +373,8 @@ namespace parfis {
      */
     struct FuncTable
     {
-        /// File name
-        const char * fileName;
+        /// Type 0:linear, 1:nonlinear
+        int type;
         /// Vector of ranges
         std::vector<double> ranges;
         /// Vector of number of points per range
@@ -385,11 +385,9 @@ namespace parfis {
         std::vector<double> xVec;
         /// Y values
         std::vector<double> yVec;
-        /// Type 0:linear, 1:nonlinear
-        int type;
         /// Function to run the evaluation based on type
         std::function<double(double)> eval;
-        int loadData();
+        int loadData(const std::string& fileName);
     };
 
     /**
@@ -401,8 +399,6 @@ namespace parfis {
     {
         /// Type 0:linear, 1:nonlinear
         int type;
-        /// File name
-        const char * fileName;
         /// Vector of ranges
         PyVec<double> ranges;
         /// Vector of number of points per range
@@ -416,7 +412,6 @@ namespace parfis {
         /// Overload of the equal operator for easier manipulation
         PyFuncTable& operator=(const FuncTable& ftab) {
             type = ftab.type;
-            fileName = ftab.fileName;
             ranges = ftab.ranges;
             nbins = ftab.nbins;
             idx = ftab.idx;
