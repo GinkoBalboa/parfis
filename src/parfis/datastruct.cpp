@@ -366,8 +366,7 @@ int parfis::GasCollision::calculateColFreq(
     colFreqFtab.yVec.resize(xSecFtab.yVec.size());
     double vMaxSq = spec.maxVel*spec.maxVel;
     double ivMaxSq = 1.0/vMaxSq;
-    double im = 1.0/spec.mass;
-    double idt = 1.0/(spec.timestepRatio*dt);
+    double im = 1.0/spec.mass; 
     // Convert ranges from eV to v^2
     for(auto i = 0; i<colFreqFtab.ranges.size(); i++) {
         colFreqFtab.ranges[i] = 2.0*xSecFtab.ranges[i]*Const::eVJ*im*ivMaxSq;
@@ -378,10 +377,9 @@ int parfis::GasCollision::calculateColFreq(
     for(auto i = 0; i<colFreqFtab.xVec.size(); i++) {
         colFreqFtab.xVec[i] = 2.0*xSecFtab.xVec[i]*Const::eVJ*im;
         colFreqFtab.yVec[i] = 
-            gas.molDensity*Const::Na*xSecFtab.yVec[i]*sqrt(colFreqFtab.xVec[i]);
+            gas.molDensity*Const::Na*xSecFtab.yVec[i]*1.0e-20*sqrt(colFreqFtab.xVec[i])*spec.dt;
         // To code values
         colFreqFtab.xVec[i] *= ivMaxSq;
-        colFreqFtab.yVec[i] *= idt;
     }
     return 0;
 }

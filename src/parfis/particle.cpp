@@ -66,6 +66,29 @@ int parfis::Particle::loadSimData()
         m_pSimData->randomEngineVec.push_back(randEngine_t());
     }
 
+    // Specie calculated data
+    for (auto& spec: m_pSimData->specieVec) {
+        spec.mass = spec.amuMass*Const::amuKg;
+        spec.charge = spec.eCharge*Const::eCharge;
+        spec.dt = double(spec.timestepRatio)*m_pCfgData->timestep;
+        spec.idt = 1.0 / spec.dt;
+        spec.maxVel = std::min(m_pCfgData->cellSize.z, 
+            std::min(m_pCfgData->cellSize.x, m_pCfgData->cellSize.y))*spec.idt;
+        spec.qm = spec.charge*Const::eCharge / spec.mass;
+        spec.maxEv = 0.5*spec.maxVel*spec.maxVel*spec.mass*Const::JeV;
+
+        std::string msg = 
+            "specie " + std::string(spec.name) + " configuration:\n" +
+            Const::multilineSeparator + 
+            "mass [kg]: " + Global::to_string(spec.mass) + "\n" +
+            "dt [s]: " + Global::to_string(spec.dt) + "\n" +
+            "max velocity [m/s]: " + Global::to_string(spec.maxVel) + "\n" +
+            "max energy [eV]: " + Global::to_string(spec.maxEv) + "\n" +
+            "charge/mass ratio [C/kg]: " + Global::to_string(spec.qm) + "\n" +
+            Const::multilineSeparator;
+        LOG(*m_pLogger, LogMask::Info, msg);
+    }
+
     // Gas collision data
     for (size_t j = 0; j < m_pCfgData->gasCollisionNameVec.size(); j++) {
         std::tuple<std::string, std::string> specGasColl = 
@@ -105,29 +128,6 @@ int parfis::Particle::loadSimData()
 
             }
         }
-    }
-
-
-    for (auto& spec: m_pSimData->specieVec) {
-        spec.mass = spec.amuMass*Const::amuKg;
-        spec.charge = spec.eCharge*Const::eCharge;
-        spec.dt = double(spec.timestepRatio)*m_pCfgData->timestep;
-        spec.idt = 1.0 / spec.dt;
-        spec.maxVel = std::min(m_pCfgData->cellSize.z, 
-            std::min(m_pCfgData->cellSize.x, m_pCfgData->cellSize.y))*spec.idt;
-        spec.qm = spec.charge*Const::eCharge / spec.mass;
-        spec.maxEv = 0.5*spec.maxVel*spec.maxVel*spec.mass*Const::JeV;
-
-        std::string msg = 
-            "specie " + std::string(spec.name) + " configuration:\n" +
-            Const::multilineSeparator + 
-            "mass [kg]: " + Global::to_string(spec.mass) + "\n" +
-            "dt [s]: " + Global::to_string(spec.dt) + "\n" +
-            "max velocity [m/s]: " + Global::to_string(spec.maxVel) + "\n" +
-            "max energy [eV]: " + Global::to_string(spec.maxEv) + "\n" +
-            "charge/mass ratio [C/kg]: " + Global::to_string(spec.qm) + "\n" +
-            Const::multilineSeparator;
-        LOG(*m_pLogger, LogMask::Info, msg);
     }
 
     // Set command for creating states
