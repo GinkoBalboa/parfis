@@ -346,6 +346,8 @@ namespace parfis {
         int randomSeed;
         /// Vector of ids from the gasCollisionVec
         std::vector<uint32_t> gasCollisionVecId;
+        /// Id for the total collision probability matrix, from gasCollisionProbMat
+        uint32_t gasCollisionProbMatId;
     };
 
     /**
@@ -368,7 +370,7 @@ namespace parfis {
     };
 
     /**
-     * @brief Tabulated functions, linear and nonlinear tabulation is available
+     * @brief Tabulated function, linear and nonlinear tabulation is available
      * 
      */
     struct FuncTable
@@ -421,6 +423,58 @@ namespace parfis {
         }
     };
 
+
+    /**
+     * @brief Tabulated matrix, linear and nonlinear tabulation is available
+     * 
+     */
+    struct MatrixTable
+    {
+        /// Type 0:linear, 1:nonlinear
+        int type;
+        /// Vector of ranges
+        std::vector<double> ranges;
+        /// Vector of number of points per range
+        std::vector<int> nbins;
+        /// Matrix row count
+        size_t rowCnt;
+        /// Matrix column count
+        size_t colCnt;
+        /// Vector of 1/dx per range
+        std::vector<double> idx;
+        /// X values
+        std::vector<double> xVec;
+        /// Y values
+        std::vector<double> yVec;
+        /// Function to run the evaluation based on type
+        std::function<double(double)> eval;
+    };
+
+     /**
+     * @brief Wrapper for tabulated matrix structure, to be 
+     * used by ctypes
+     * 
+     */
+    struct PyMatrixTable
+    {
+        /// Type 0:linear, 1:nonlinear
+        int type;
+        /// Vector of ranges
+        PyVec<double> ranges;
+        /// Vector of number of points per range
+        PyVec<int> nbins;
+        /// Matrix row count
+        int rowCnt;
+        /// Matrix column count
+        int colCnt;
+        /// Vector of 1/dx per range
+        PyVec<double> idx;
+        /// X values
+        PyVec<double> xVec;
+        /// Y values
+        PyVec<PyVec<double>> yVec;
+    };
+
     /**
      * @brief Holds information about collisions with gas particles
      */
@@ -444,9 +498,9 @@ namespace parfis {
         std::vector<double> scatterAngle;
         /// Cross section in angstroms, with x-axis is in eV
         FuncTable xSecFtab;
-        /// Collision frequency, x-axis is in code velocity magnitude
-        FuncTable colFreqFtab;
-        int calculateColFreq(const Specie & spec, const Gas & gas, double dt);
+        /// Collision frequency, x-axis is in code velocity squared
+        FuncTable freqFtab;
+        int calculateColFreq(const Specie & specie, const Gas& gas);
     };
 
     /**
@@ -473,8 +527,8 @@ namespace parfis {
         PyVec<double> scatterAngle;
         /// Cross section in angstroms, with x-axis is in eV
         PyFuncTable xSecFtab;
-        /// Collision frequency, x-axis is in code velocity magnitude
-        PyFuncTable colFreqFtab;
+        /// Collision frequency, x-axis is in code velocity squared units
+        PyFuncTable freqFtab;
         /// Overload of the equal operator for easier manipulation
         PyGasCollision& operator=(const GasCollision& gasCol) {
             id = gasCol.id;
@@ -486,7 +540,7 @@ namespace parfis {
             type = gasCol.type;
             scatterAngle = gasCol.scatterAngle;
             xSecFtab = gasCol.xSecFtab;
-            colFreqFtab = gasCol.colFreqFtab;
+            freqFtab = gasCol.freqFtab;
             return *this;
         }
     };
@@ -575,6 +629,7 @@ namespace parfis {
         PyVec<stateId_t> headIdVec;
         PyVec<Gas> gasVec;
         PyVec<PyGasCollision> pyGasCollisionVec;
+        PyVec<PyMatrixTable> pyGasCollisionProbMTabVec;
     };
 
     /**
@@ -622,6 +677,10 @@ namespace parfis {
         std::vector<GasCollision> gasCollisionVec;
         /// Vector for the ctypes wrapper
         std::vector<PyGasCollision> pyGasCollisionVec;
+        /// Vector of total gas collision probability data
+        std::vector<MatrixTable> gasCollisionProbMtabVec;
+        /// Vector for the ctypes wrapper
+        std::vector<PyMatrixTable> pyGasCollisionProbMTabVec;
         /// Field data
         Field field;
         /// PySimData points to data of this object
@@ -629,6 +688,7 @@ namespace parfis {
         /// Evolution counter
         uint64_t evolveCnt;
         int setPySimData();
+        int calculateColProb(const CfgData * pCfgData);
     };
     /** @} data */
 

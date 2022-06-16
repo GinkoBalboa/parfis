@@ -294,7 +294,7 @@ class PyGasCollision(Structure):
         ('type', c_int),
         ('scatterAngle', PyVecClass(c_double)),
         ('xSecFtab', PyFuncTable),
-        ('colFreqFtab', PyFuncTable)
+        ('freqFtab', PyFuncTable)
     ]
 
 class PyVec_PyGasCollision(Structure, PyVecBase):
@@ -336,7 +336,8 @@ class PySimData_float(Structure):
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
         ('headIdVec', PyVecClass(Type.stateId_t)),
         ('gasVec', PyVecClass(Gas)),
-        ('pyGasCollisionVec', PyVecClass(PyGasCollision))
+        ('pyGasCollisionVec', PyVecClass(PyGasCollision)),
+        ('pyGasCollisionTotalVec', PyVecClass(PyGasCollision))
     ]
 
 class PySimData_double(Structure):
@@ -350,7 +351,8 @@ class PySimData_double(Structure):
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
         ('headIdVec', PyVecClass(Type.stateId_t)),
         ('gasVec', PyVecClass(Gas)),
-        ('pyGasCollisionVec', PyVecClass(PyGasCollision))
+        ('pyGasCollisionVec', PyVecClass(PyGasCollision)),
+        ('pyGasCollisionTotalVec', PyVecClass(PyGasCollision))
     ]
 
 def PySimDataClass():

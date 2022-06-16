@@ -16,6 +16,13 @@
 /// Main namespace of the library
 namespace parfis 
 {
+    /// Collision type
+    enum struct Collision : int {
+        Total = -1,
+        Elastic = 0,
+        Inelastic = 1
+    };
+
     /// Global functions
     struct Global {
         /// Get current date and time in the format YYYY-MM-DD HH:mm:ss

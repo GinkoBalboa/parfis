@@ -406,9 +406,19 @@ TEST(api, structPyFuncTable) {
         std::string(parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].fileName));
     ASSERT_EQ(6, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[0].xSecFtab.nbins.size);
     ASSERT_EQ(6, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].xSecFtab.nbins.size);
+    ASSERT_EQ(6, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[0].xSecFtab.ranges.size);
+    ASSERT_EQ(6, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].xSecFtab.ranges.size);
+    ASSERT_EQ(6, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[0].freqFtab.nbins.size);
+    ASSERT_EQ(6, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].freqFtab.nbins.size);
+    ASSERT_EQ(6, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[0].freqFtab.ranges.size);
+    ASSERT_EQ(6, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].freqFtab.ranges.size);
     ASSERT_EQ(8000, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[0].xSecFtab.xVec.size);
     ASSERT_EQ(8000, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].xSecFtab.xVec.size);
     ASSERT_EQ(8000, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[0].xSecFtab.yVec.size);
     ASSERT_EQ(8000, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].xSecFtab.yVec.size);
+    ASSERT_EQ(8000, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[0].freqFtab.xVec.size);
+    ASSERT_EQ(8000, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].freqFtab.xVec.size);
+    ASSERT_EQ(8000, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[0].freqFtab.yVec.size);
+    ASSERT_EQ(8000, parfis::api::getPySimData(id)->pyGasCollisionVec.ptr[1].freqFtab.yVec.size);
 }
 /** @} gtestAll*/

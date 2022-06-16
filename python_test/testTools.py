@@ -55,6 +55,16 @@ class TestTools(unittest.TestCase):
             "./data/cross_sections/simple_i.csv", ptrSimData.pyGasCollisionVec.ptr[1].fileName.decode())
         self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[0].xSecFtab.nbins.asList())
         self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[0].xSecFtab.ranges.asList())
+        self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[1].xSecFtab.nbins.asList())
+        self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[1].xSecFtab.ranges.asList())
+        self.assertEqual(nbins, ptrSimData.pyGasCollisionTotalVec.ptr[0].xSecFtab.nbins.asList())
+        self.assertEqual(ranges, ptrSimData.pyGasCollisionTotalVec.ptr[0].xSecFtab.ranges.asList())
+        self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[0].freqFtab.nbins.asList())
+        self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[0].freqFtab.ranges.asList())
+        self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[1].freqFtab.nbins.asList())
+        self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[1].freqFtab.ranges.asList())
+        self.assertEqual(nbins, ptrSimData.pyGasCollisionTotalVec.ptr[0].freqFtab.nbins.asList())
+        self.assertEqual(ranges, ptrSimData.pyGasCollisionTotalVec.ptr[0].freqFtab.ranges.asList())
         
 
     

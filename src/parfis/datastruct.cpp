@@ -268,7 +268,17 @@ int parfis::SimData::setPySimData()
     for (auto i = 0; i < gasCollisionVec.size(); i++) {
         pyGasCollisionVec[i] = gasCollisionVec[i];
     }
+    // Get references
     pySimData.pyGasCollisionVec = pyGasCollisionVec;
+
+    // // First set the wrapper data
+    // pyGasCollisionTotalVec.resize(gasCollisionTotalVec.size());
+    // for (auto i = 0; i < gasCollisionTotalVec.size(); i++) {
+    //     pyGasCollisionTotalVec[i] = gasCollisionTotalVec[i];
+    // }
+    // // Get references
+    // pySimData.pyGasCollisionTotalVec = pyGasCollisionTotalVec;
+
     return 0;
 }
 
@@ -350,37 +360,130 @@ int parfis::FuncTable::loadData(const std::string& fileName)
 }
 
 /**
- * @brief Calculates collision frequency from the cx
+ * @brief Calculates the collision frequency.
  * 
- * @param spec Specie reference
- * @param gas Gas reference
- * @param dt Timestep
  * @return int Zero on success
  */
-int parfis::GasCollision::calculateColFreq(
-    const Specie & spec, const Gas & gas, double dt) 
+int parfis::GasCollision::calculateColFreq(const Specie & spec, const Gas& gas)
 {
-    colFreqFtab.nbins.resize(xSecFtab.nbins.size());
-    colFreqFtab.ranges.resize(xSecFtab.ranges.size());
-    colFreqFtab.xVec.resize(xSecFtab.xVec.size());
-    colFreqFtab.yVec.resize(xSecFtab.yVec.size());
     double vMaxSq = spec.maxVel*spec.maxVel;
     double ivMaxSq = 1.0/vMaxSq;
-    double im = 1.0/spec.mass; 
-    // Convert ranges from eV to v^2
-    for(auto i = 0; i<colFreqFtab.ranges.size(); i++) {
-        colFreqFtab.ranges[i] = 2.0*xSecFtab.ranges[i]*Const::eVJ*im*ivMaxSq;
-        colFreqFtab.nbins[i] = xSecFtab.nbins[i];
+    double im = 1.0/spec.mass;
+    double dt = spec.dt;
+    // Probability data
+    freqFtab.nbins = xSecFtab.nbins;
+    freqFtab.ranges.resize(freqFtab.nbins.size());
+    for(auto i = 0; i < xSecFtab.ranges.size(); i++) {
+        freqFtab.ranges[i] = 
+            2.0*xSecFtab.ranges[i]*Const::eVJ*im*ivMaxSq;
     }
-    // Convert x axis from eV to v^2 and y axis from cross section
-    // area to collisional frequency 
-    for(auto i = 0; i<colFreqFtab.xVec.size(); i++) {
-        colFreqFtab.xVec[i] = 2.0*xSecFtab.xVec[i]*Const::eVJ*im;
-        colFreqFtab.yVec[i] = 
-            gas.molDensity*Const::Na*xSecFtab.yVec[i]*1.0e-20*sqrt(colFreqFtab.xVec[i])*spec.dt;
-        // To code values
-        colFreqFtab.xVec[i] *= ivMaxSq;
+    freqFtab.xVec.resize(xSecFtab.xVec.size());
+    freqFtab.yVec.resize(xSecFtab.xVec.size());
+    for(auto i = 0; i < xSecFtab.xVec.size(); i++) {
+        freqFtab.xVec[i] = 2.0*xSecFtab.xVec[i]*Const::eVJ*im;
+        freqFtab.yVec[i] = 
+            gas.molDensity*Const::Na*xSecFtab.yVec[i]*1.0e-20*sqrt(freqFtab.xVec[i])*spec.dt;
+        freqFtab.xVec[i] *= ivMaxSq;
     }
+
+    return 0;
+}
+
+/**
+ * @brief Calculates collision probability from the cx
+ * 
+ * @return int Zero on success
+ */
+int parfis::SimData::calculateColProb(const CfgData * pCfgData) 
+{
+    // Calculate total collison data
+    for (size_t i = 0; i < pCfgData->specieNameVec.size(); i++) {
+        if (specieVec[i].gasCollisionVecId.size() == 0) continue;
+        gasCollisionProbMtabVec.push_back({});
+        MatrixTable * pmt = &gasCollisionProbMtabVec.back();
+        specieVec[i].gasCollisionProbMatId = gasCollisionProbMtabVec.size() - 1;
+        pmt->type = 1; // nonlinear tabulation
+        pmt->rowCnt = specieVec[i].gasCollisionVecId.size();
+        for (size_t j = 0; j < pmt->rowCnt; j++) {
+            GasCollision * pGasCol = &gasCollisionVec[specieVec[i].gasCollisionVecId[j]];
+            // Initialize
+            if (j == 0) {
+                pmt->colCnt = pGasCol->freqFtab.xVec.size();
+                pmt->xVec = pGasCol->freqFtab.xVec;
+                pmt->yVec.resize(pmt->colCnt*pmt->rowCnt, 0);
+            }
+            for (auto k = 0; k < pmt->colCnt; k++) {
+                pmt->yVec[k*pmt->rowCnt + j] = pGasCol->freqFtab.yVec[j];
+                if (j > 0)
+                    pmt->yVec[k*pmt->rowCnt + j] += pmt->yVec[k*pmt->rowCnt + j - 1];
+            }
+        }
+    }
+
+    //         // colFreqFtab.xVec.resize(xSecFtab.xVec.size());
+    //         // colFreqFtab.yVec.resize(xSecFtab.yVec.size());
+    //         double vMaxSq = specieVec[i].maxVel*specieVec[i].maxVel;
+    //         double ivMaxSq = 1.0/vMaxSq;
+    //         double im = 1.0/specieVec[i].mass;
+    //         double dt = specieVec[i].dt;
+    //         uint32_t id = specieVec[i].gasCollisionTotalVecId;
+    //         GasCollision * pTotalCol = &gasCollisionTotalVec[id];
+    //         // Sum cross sections and create probabilites
+    //         for (size_t j = 0; j < specieVec[i].gasCollisionVecId.size(); j++) {
+    //             GasCollision * pGasCol = &gasCollisionVec[id];
+    //             Gas * pGas = &gasVec[pGasCol->gasId];
+    //             // Initialize
+    //             if (j == 0) {
+    //                 // Cross-section data
+    //                 pTotalCol->xSecFtab.nbins = pGasCol->xSecFtab.nbins;
+    //                 pTotalCol->xSecFtab.ranges = pGasCol->xSecFtab.ranges;
+    //                 pTotalCol->xSecFtab.xVec = pGasCol->xSecFtab.xVec;
+    //                 pTotalCol->xSecFtab.yVec.resize(pGasCol->xSecFtab.xVec.size(), 0);
+    //                 // Probability data
+    //                 pTotalCol->colProbFtab.nbins = pGasCol->xSecFtab.nbins;
+    //                 for(auto k = 0; k < pGasCol->xSecFtab.ranges.size(); k++) {
+    //                     pTotalCol->colProbFtab.ranges[k] = 
+    //                         2.0*pGasCol->xSecFtab.ranges[k]*Const::eVJ*im*ivMaxSq;
+    //                 }
+    //                 for (size_t k = 0; k < pTotalCol->xSecFtab.xVec.size(); k++) {
+    //                     pTotalCol->colProbFtab.xVec[k] = 
+    //                         2.0* pTotalCol->xSecFtab.xVec[k]*Const::eVJ*im*ivMaxSq;
+    //                 }
+    //             }
+    //             for (size_t k = 0; k < pGasCol->xSecFtab.xVec.size(); k++) {
+    //                 pTotalCol->xSecFtab.yVec[k] += pGas->molDensity*pGasCol->xSecFtab.yVec[k];
+    //             }
+    //         }
+    //         // for (size_t k = 0; k < pTotalCol->xSecFtab.xVec.size(); k++) {
+    //         //      pTotalCol->colProbFtab.yVec[k] += 
+    //         //             Const::Na*pTotalCol->xSecFtab.yVec[k]*1.0e-20*
+    //         //             sqrt(pTotalCol->colProbFtab.xVec[k]*vMaxSq)*dt;
+    //         //      pTotalCol->colProbFtab.yVec[i] = 
+    //         //          gas.molDensity*Const::Na*xSecFtab.yVec[i]*1.0e-20*sqrt(colFreqFtab.xVec[i])*spec.dt;
+    //         // }
+    //     }
+    // }
+    // colFreqFtab.nbins.resize(xSecFtab.nbins.size());
+    // colFreqFtab.ranges.resize(xSecFtab.ranges.size());
+    // colFreqFtab.xVec.resize(xSecFtab.xVec.size());
+    // colFreqFtab.yVec.resize(xSecFtab.yVec.size());
+    // double vMaxSq = spec.maxVel*spec.maxVel;
+    // double ivMaxSq = 1.0/vMaxSq;
+    // double im = 1.0/spec.mass; 
+    // // Convert ranges from eV to v^2
+    // for(auto i = 0; i<colFreqFtab.ranges.size(); i++) {
+    //     colFreqFtab.ranges[i] = 2.0*xSecFtab.ranges[i]*Const::eVJ*im*ivMaxSq;
+    //     colFreqFtab.nbins[i] = xSecFtab.nbins[i];
+    // }
+    // // Convert x axis from eV to v^2 and y axis from cross section
+    // // area to collisional frequency 
+    // for(auto i = 0; i<colFreqFtab.xVec.size(); i++) {
+    //     colFreqFtab.xVec[i] = 2.0*xSecFtab.xVec[i]*Const::eVJ*im;
+    //     colFreqFtab.yVec[i] = 
+    //         gas.molDensity*Const::Na*xSecFtab.yVec[i]*1.0e-20*sqrt(colFreqFtab.xVec[i])*spec.dt;
+    //     // To code values
+    //     colFreqFtab.xVec[i] *= ivMaxSq;
+    // }
     return 0;
 }
 
