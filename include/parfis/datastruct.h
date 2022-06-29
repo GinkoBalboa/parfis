@@ -346,8 +346,8 @@ namespace parfis {
         int randomSeed;
         /// Vector of ids from the gasCollisionVec
         std::vector<uint32_t> gasCollisionVecId;
-        /// Id for the total collision probability matrix, from gasCollisionProbMat
-        uint32_t gasCollisionProbMatId;
+        /// Id for the total collision probability matrix, from gasCollisionProbVec
+        uint32_t gasCollisionProbId;
     };
 
     /**
@@ -377,6 +377,11 @@ namespace parfis {
     {
         /// Type 0:linear, 1:nonlinear
         int type;
+        /// Row count
+        /// Column count (index increase by 1, is column increase)
+        int colCnt;
+        /// Row count
+        int rowCnt;
         /// Vector of ranges
         std::vector<double> ranges;
         /// Vector of number of points per range
@@ -401,6 +406,10 @@ namespace parfis {
     {
         /// Type 0:linear, 1:nonlinear
         int type;
+        /// Column count (index increase by 1, is column increase)
+        int colCnt;
+        /// Row count
+        int rowCnt;
         /// Vector of ranges
         PyVec<double> ranges;
         /// Vector of number of points per range
@@ -414,6 +423,8 @@ namespace parfis {
         /// Overload of the equal operator for easier manipulation
         PyFuncTable& operator=(const FuncTable& ftab) {
             type = ftab.type;
+            rowCnt = ftab.rowCnt;
+            colCnt = ftab.colCnt;
             ranges = ftab.ranges;
             nbins = ftab.nbins;
             idx = ftab.idx;
@@ -421,58 +432,6 @@ namespace parfis {
             yVec = ftab.yVec;
             return *this;
         }
-    };
-
-
-    /**
-     * @brief Tabulated matrix, linear and nonlinear tabulation is available
-     * 
-     */
-    struct MatrixTable
-    {
-        /// Type 0:linear, 1:nonlinear
-        int type;
-        /// Vector of ranges
-        std::vector<double> ranges;
-        /// Vector of number of points per range
-        std::vector<int> nbins;
-        /// Matrix row count
-        size_t rowCnt;
-        /// Matrix column count
-        size_t colCnt;
-        /// Vector of 1/dx per range
-        std::vector<double> idx;
-        /// X values
-        std::vector<double> xVec;
-        /// Y values
-        std::vector<double> yVec;
-        /// Function to run the evaluation based on type
-        std::function<double(double)> eval;
-    };
-
-     /**
-     * @brief Wrapper for tabulated matrix structure, to be 
-     * used by ctypes
-     * 
-     */
-    struct PyMatrixTable
-    {
-        /// Type 0:linear, 1:nonlinear
-        int type;
-        /// Vector of ranges
-        PyVec<double> ranges;
-        /// Vector of number of points per range
-        PyVec<int> nbins;
-        /// Matrix row count
-        int rowCnt;
-        /// Matrix column count
-        int colCnt;
-        /// Vector of 1/dx per range
-        PyVec<double> idx;
-        /// X values
-        PyVec<double> xVec;
-        /// Y values
-        PyVec<PyVec<double>> yVec;
     };
 
     /**
@@ -629,7 +588,7 @@ namespace parfis {
         PyVec<stateId_t> headIdVec;
         PyVec<Gas> gasVec;
         PyVec<PyGasCollision> pyGasCollisionVec;
-        PyVec<PyMatrixTable> pyGasCollisionProbMTabVec;
+        PyVec<PyFuncTable> pyGasCollisionProbVec;
     };
 
     /**
@@ -678,9 +637,9 @@ namespace parfis {
         /// Vector for the ctypes wrapper
         std::vector<PyGasCollision> pyGasCollisionVec;
         /// Vector of total gas collision probability data
-        std::vector<MatrixTable> gasCollisionProbMtabVec;
+        std::vector<FuncTable> gasCollisionProbVec;
         /// Vector for the ctypes wrapper
-        std::vector<PyMatrixTable> pyGasCollisionProbMTabVec;
+        std::vector<PyFuncTable> pyGasCollisionProbVec;
         /// Field data
         Field field;
         /// PySimData points to data of this object

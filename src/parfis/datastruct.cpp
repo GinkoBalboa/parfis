@@ -271,13 +271,13 @@ int parfis::SimData::setPySimData()
     // Get references
     pySimData.pyGasCollisionVec = pyGasCollisionVec;
 
-    // // First set the wrapper data
-    // pyGasCollisionTotalVec.resize(gasCollisionTotalVec.size());
-    // for (auto i = 0; i < gasCollisionTotalVec.size(); i++) {
-    //     pyGasCollisionTotalVec[i] = gasCollisionTotalVec[i];
-    // }
-    // // Get references
-    // pySimData.pyGasCollisionTotalVec = pyGasCollisionTotalVec;
+    // First set the wrapper data
+    pyGasCollisionProbVec.resize(gasCollisionProbVec.size());
+    for (auto i = 0; i < gasCollisionProbVec.size(); i++) {
+        pyGasCollisionProbVec[i] = gasCollisionProbVec[i];
+    }
+    // Get references
+    pySimData.pyGasCollisionProbVec = pyGasCollisionProbVec;
 
     return 0;
 }
@@ -327,7 +327,8 @@ int parfis::FuncTable::loadData(const std::string& fileName)
 {
     std::ifstream infile(fileName);
     std::string line;
-    int rowCnt = 0;
+    rowCnt = 1;
+    colCnt = 0;
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         if (line[0] == '#') {
@@ -345,15 +346,15 @@ int parfis::FuncTable::loadData(const std::string& fileName)
                 Global::setValueVec<double>(ranges, line, '[', ']');
         }
         else {
-            if (rowCnt > xVec.size() - 1)
+            if (colCnt > xVec.size() - 1)
                 return 2;
             // Else is pure data
-            xVec[rowCnt] = Global::getNthElement<double>(line, 0);
-            yVec[rowCnt] = Global::getNthElement<double>(line, 1);
-            rowCnt++;
+            xVec[colCnt] = Global::getNthElement<double>(line, 0);
+            yVec[colCnt] = Global::getNthElement<double>(line, 1);
+            colCnt++;
         }
     }
-    if (rowCnt != xVec.size())
+    if (colCnt != xVec.size())
         return 3;
 
     return 0;
@@ -373,6 +374,8 @@ int parfis::GasCollision::calculateColFreq(const Specie & spec, const Gas& gas)
     // Probability data
     freqFtab.nbins = xSecFtab.nbins;
     freqFtab.ranges.resize(freqFtab.nbins.size());
+    freqFtab.rowCnt = xSecFtab.rowCnt;
+    freqFtab.colCnt = xSecFtab.colCnt;
     for(auto i = 0; i < xSecFtab.ranges.size(); i++) {
         freqFtab.ranges[i] = 
             2.0*xSecFtab.ranges[i]*Const::eVJ*im*ivMaxSq;
@@ -399,23 +402,26 @@ int parfis::SimData::calculateColProb(const CfgData * pCfgData)
     // Calculate total collison data
     for (size_t i = 0; i < pCfgData->specieNameVec.size(); i++) {
         if (specieVec[i].gasCollisionVecId.size() == 0) continue;
-        gasCollisionProbMtabVec.push_back({});
-        MatrixTable * pmt = &gasCollisionProbMtabVec.back();
-        specieVec[i].gasCollisionProbMatId = gasCollisionProbMtabVec.size() - 1;
-        pmt->type = 1; // nonlinear tabulation
-        pmt->rowCnt = specieVec[i].gasCollisionVecId.size();
-        for (size_t j = 0; j < pmt->rowCnt; j++) {
+        gasCollisionProbVec.push_back({});
+        FuncTable * pft = &gasCollisionProbVec.back();
+        specieVec[i].gasCollisionProbId = gasCollisionProbVec.size() - 1;
+        pft->type = 1; // nonlinear tabulation
+        // Construct matrix dimensions here
+        pft->colCnt = specieVec[i].gasCollisionVecId.size();
+        for (size_t j = 0; j < pft->colCnt; j++) {
             GasCollision * pGasCol = &gasCollisionVec[specieVec[i].gasCollisionVecId[j]];
             // Initialize
             if (j == 0) {
-                pmt->colCnt = pGasCol->freqFtab.xVec.size();
-                pmt->xVec = pGasCol->freqFtab.xVec;
-                pmt->yVec.resize(pmt->colCnt*pmt->rowCnt, 0);
+                pft->nbins = pGasCol->freqFtab.nbins;
+                pft->ranges = pGasCol->freqFtab.ranges;
+                pft->rowCnt = pGasCol->freqFtab.xVec.size();
+                pft->xVec = pGasCol->freqFtab.xVec;
+                pft->yVec.resize(pft->rowCnt*pft->colCnt, 0);
             }
-            for (auto k = 0; k < pmt->colCnt; k++) {
-                pmt->yVec[k*pmt->rowCnt + j] = pGasCol->freqFtab.yVec[j];
+            for (auto k = 0; k < pft->rowCnt; k++) {
+                pft->yVec[k*pft->colCnt + j] = pGasCol->freqFtab.yVec[j];
                 if (j > 0)
-                    pmt->yVec[k*pmt->rowCnt + j] += pmt->yVec[k*pmt->rowCnt + j - 1];
+                    pft->yVec[k*pft->colCnt + j] += pft->yVec[k*pft->colCnt + j - 1];
             }
         }
     }

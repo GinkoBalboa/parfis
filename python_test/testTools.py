@@ -31,6 +31,8 @@ class TestTools(unittest.TestCase):
                 
         ranges = [   1,   10,  100, 1000, 10000, 342000]
         nbins =  [1000, 1000, 1000, 1000,  1000,   3000]
+        
+        
         pfs.generateCrossSection(sigma_e, ranges, nbins, file="./data/cross_sections/simple_e.csv")
         pfs.generateCrossSection(sigma_i, ranges, nbins, file="./data/cross_sections/simple_i.csv")
         id = Parfis.newParfis()
@@ -52,21 +54,20 @@ class TestTools(unittest.TestCase):
         self.assertEqual(
             "./data/cross_sections/simple_e.csv", ptrSimData.pyGasCollisionVec.ptr[0].fileName.decode())
         self.assertEqual(
-            "./data/cross_sections/simple_i.csv", ptrSimData.pyGasCollisionVec.ptr[1].fileName.decode())
+            "./data/cross_sections/simple_i.csv", ptrSimData.pyGasCollisionVec.ptr[1].fileName.decode())        
         self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[0].xSecFtab.nbins.asList())
         self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[0].xSecFtab.ranges.asList())
         self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[1].xSecFtab.nbins.asList())
         self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[1].xSecFtab.ranges.asList())
-        self.assertEqual(nbins, ptrSimData.pyGasCollisionTotalVec.ptr[0].xSecFtab.nbins.asList())
-        self.assertEqual(ranges, ptrSimData.pyGasCollisionTotalVec.ptr[0].xSecFtab.ranges.asList())
         self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[0].freqFtab.nbins.asList())
-        self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[0].freqFtab.ranges.asList())
         self.assertEqual(nbins, ptrSimData.pyGasCollisionVec.ptr[1].freqFtab.nbins.asList())
-        self.assertEqual(ranges, ptrSimData.pyGasCollisionVec.ptr[1].freqFtab.ranges.asList())
-        self.assertEqual(nbins, ptrSimData.pyGasCollisionTotalVec.ptr[0].freqFtab.nbins.asList())
-        self.assertEqual(ranges, ptrSimData.pyGasCollisionTotalVec.ptr[0].freqFtab.ranges.asList())
-        
-
+        self.assertEqual(8000, ptrSimData.pyGasCollisionVec.ptr[0].freqFtab.colCnt)
+        self.assertEqual(1, ptrSimData.pyGasCollisionVec.ptr[0].freqFtab.rowCnt)
+        self.assertEqual(nbins, ptrSimData.pyGasCollisionProbVec.ptr[0].nbins.asList())
+        self.assertEqual(2, ptrSimData.pyGasCollisionProbVec.ptr[0].colCnt)
+        self.assertEqual(8000, ptrSimData.pyGasCollisionProbVec.ptr[0].rowCnt)
+        self.assertEqual(8000, ptrSimData.pyGasCollisionProbVec.ptr[0].xVec.size)
+        self.assertEqual(2*8000, ptrSimData.pyGasCollisionProbVec.ptr[0].yVec.size)
     
 if __name__ == '__main__':
 

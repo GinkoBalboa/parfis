@@ -95,18 +95,6 @@ int parfis::Particle::loadSimData()
             Global::splitDot(m_pCfgData->gasCollisionNameVec[j]);
         for (size_t i = 0; i < m_pCfgData->specieNameVec.size(); i++) {
             if (std::get<0>(specGasColl) == m_pSimData->specieVec[i].name) {
-                // // When adding the first vector element add the total collision - a sum of all 
-                // // other collision cross-sections
-                // if (m_pSimData->specieVec[i].gasCollisionVecId.size() == 0) {
-                //     m_pSimData->gasCollisionTotalVec.push_back({});
-                //     uint32_t id = m_pSimData->gasCollisionTotalVec.size() - 1;
-                //     m_pSimData->gasCollisionTotalVec.back().id =  id;
-                //     m_pSimData->gasCollisionTotalVec.back().type = int(Collision::Total);
-                //     m_pSimData->gasCollisionTotalVec.back().specieId = i;
-                //     m_pSimData->gasCollisionTotalVec.back().name = nullptr;
-                //     m_pSimData->gasCollisionTotalVec.back().fileName = nullptr;
-                //     m_pSimData->specieVec[i].gasCollisionTotalVecId = id;
-                // }
                 m_pSimData->gasCollisionVec.push_back({});
                 m_pSimData->gasCollisionVec[j].id = j;
                 m_pSimData->specieVec[i].gasCollisionVecId.push_back(j);

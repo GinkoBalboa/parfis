@@ -266,6 +266,8 @@ def PyVecClass(cType = c_char_p):
         return PyVec_Gas
     elif cType == PyGasCollision:
         return PyVec_PyGasCollision
+    elif cType == PyFuncTable:
+        return PyVec_PyFuncTable
     else:
         return None
 
@@ -274,6 +276,8 @@ class PyFuncTable(Structure):
     """
     _fields_ = [
         ('type', c_int),
+        ('colCnt', c_int),        
+        ('rowCnt', c_int),
         ('ranges', PyVecClass(c_double)),
         ('nbins', PyVecClass(c_int)),
         ('idx', PyVecClass(c_double)),
@@ -300,6 +304,12 @@ class PyGasCollision(Structure):
 class PyVec_PyGasCollision(Structure, PyVecBase):
     _fields_ = [
         ('ptr', POINTER(PyGasCollision)),
+        ('size', c_size_t)
+    ]
+    
+class PyVec_PyFuncTable(Structure, PyVecBase):
+    _fields_ = [
+        ('ptr', POINTER(PyFuncTable)),
         ('size', c_size_t)
     ]
 
@@ -337,7 +347,7 @@ class PySimData_float(Structure):
         ('headIdVec', PyVecClass(Type.stateId_t)),
         ('gasVec', PyVecClass(Gas)),
         ('pyGasCollisionVec', PyVecClass(PyGasCollision)),
-        ('pyGasCollisionTotalVec', PyVecClass(PyGasCollision))
+        ('pyGasCollisionProbVec', PyVecClass(PyFuncTable))
     ]
 
 class PySimData_double(Structure):
@@ -352,7 +362,7 @@ class PySimData_double(Structure):
         ('headIdVec', PyVecClass(Type.stateId_t)),
         ('gasVec', PyVecClass(Gas)),
         ('pyGasCollisionVec', PyVecClass(PyGasCollision)),
-        ('pyGasCollisionTotalVec', PyVecClass(PyGasCollision))
+        ('pyGasCollisionProbVec', PyVecClass(PyFuncTable))
     ]
 
 def PySimDataClass():
