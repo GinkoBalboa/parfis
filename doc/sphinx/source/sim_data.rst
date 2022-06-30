@@ -34,3 +34,12 @@ The particle data is organized in the following manner:
 
 - Vector of head ids :cpp:member:`parfis::SimData::headIdVec` holds id of the first 
   state, of each specie, of each cell.
+
+
+Function tabulation
+-------------------
+
+We often have the need for tabulated functions in the code. Especially for the collision
+algorithms. Collision cross-sections can be defined in an extremely broad range, where it can 
+be highly nonlinear in a very small part of the range. To solve that problem we have used nonlinear
+tabulation.
