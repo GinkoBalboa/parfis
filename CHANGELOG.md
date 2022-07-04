@@ -1,6 +1,6 @@
 # Change log
 
-## 0.0.7 (unreleased)
+## 0.0.7 (released 2022-07-04)
 
 Features:
   - **FuncTable** structure - to have nonlinear function tabulation. This is needed 
