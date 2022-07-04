@@ -13,7 +13,7 @@ add_executable(gtestAll ${GTESTALL_SOURCES})
 message("Google test executable = gtestAll")
 target_include_directories(gtestAll PUBLIC
     $<BUILD_INTERFACE:${parfis_SOURCE_DIR}/build/lib/googletest/include>
-    $<INSTALL_INTERFACE:test/googletest/include>  # <prefix>/include
+    $<INSTALL_INTERFACE:${parfis_SOURCE_DIR}/build/lib/googletest/include>  # <prefix>/include
 )
 # Link with parfis library
 get_target_property(GTEST_IMPORTED_LOCATION gtest IMPORTED_LOCATION)

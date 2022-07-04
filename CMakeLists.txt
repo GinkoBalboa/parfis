@@ -24,10 +24,10 @@ endif()
 
 if(BUILD_DEBUG)
     message("Build Debug version")
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE "Debug")
 else()
     message("Build Release version")
-    set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 # Core parfis
@@ -125,8 +125,9 @@ if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)
     if (BUILD_GOOGLE_TEST)
         message("Build googletest")
         include(ExternalProject)
-        ExternalProject_Add(googletest
-            GIT_REPOSITORY https://github.com/google/googletest
+        ExternalProject_Add(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
             GIT_TAG main
             CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${parfis_SOURCE_DIR}/build/lib/googletest 
                     -DBUILD_SHARED_LIBS=ON
@@ -137,6 +138,7 @@ if(BUILD_GOOGLE_TEST OR BUILD_GTESTALL)
         set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     endif()
     add_library(gtest SHARED IMPORTED)
+    add_dependencies(gtest googletest)
     if(UNIX)
         set_target_properties(gtest PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/googletest/lib)
         set_target_properties(gtest PROPERTIES IMPORTED_LOCATION ${parfis_SOURCE_DIR}/build/lib/googletest/lib/libgtest.so)
