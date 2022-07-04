@@ -203,8 +203,9 @@ namespace parfis {
         size_t size;
 
         PyVec<T>& operator=(const std::vector<T>& tVec) {
-            ptr = &tVec[0];
             size = tVec.size();
+            if (size > 0)
+                ptr = &tVec[0];
             return *this;
         }
     };
