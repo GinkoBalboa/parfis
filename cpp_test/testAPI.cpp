@@ -282,8 +282,8 @@ TEST(api, pySimData) {
     // Set two species
     std::string cfgStr = "\n\n\
         \n\n\
-        particle.specie = [electron] <parfis::Param>\n\
-        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge, velInitDist, velInitDistMin, velInitDistMax] <parfis::Param>\n\
+        particle.specie = electron <parfis::Param>\n\
+        particle.specie.electron = [statesPerCell, timestepRatio, amuMass, eCharge, velInitDist, velInitDistMin, velInitDistMax, randomSeed] <parfis::Param>\n\
         particle.specie.electron.statesPerCell = 10 <int>\n\
         particle.specie.electron.timestepRatio = 1 <int>\n\
         particle.specie.electron.amuMass = 0.00054858 <double>\n\
@@ -291,6 +291,7 @@ TEST(api, pySimData) {
         particle.specie.electron.velInitDist = 0 <int> \n\
         particle.specie.electron.velInitDistMin = [-0.5773502691, -0.5773502691, -0.5773502691] <double> \n\
         particle.specie.electron.velInitDistMax = [0.5773502691, 0.5773502691, 0.5773502691] <double> \n\
+        particle.specie.electron.randomSeed = 0 <int>\n\
     ";
     parfis::api::setConfig(id, cfgStr.c_str());
     parfis::api::loadCfgData(id);
