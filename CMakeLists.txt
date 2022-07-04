@@ -18,6 +18,7 @@ option(COPY_LIB_PYTHON "Copy parfis lib for python module" OFF)
 option(NBSPHINX_EXECUTE "Should nbsphinx be executed when generating doc." OFF)
 
 if(MSVC)
+    message("MSVC is set")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
@@ -59,6 +60,7 @@ endif()
 
 # Copy shared libs for the python-package
 if(BUILD_LIB AND COPY_LIB_PYTHON)
+    message("Copy lib to python")
     add_custom_command(TARGET parfis POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy 
         ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
@@ -68,6 +70,7 @@ endif()
 
 # parfisApp
 if(BUILD_PARFISAPP)
+    message("Bulding parfisApp")
     file(GLOB_RECURSE PARFIS_APP_SOURCES ${parfis_SOURCE_DIR}/src/parfisApp/*.cpp ${parfis_SOURCE_DIR}/src/parfisApp/*.h)
     add_executable(parfisApp)
     target_sources(parfisApp PRIVATE ${PARFIS_APP_SOURCES})

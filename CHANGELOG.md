@@ -14,7 +14,7 @@ Changes:
 
 Fixes:
   - Fixed multiple PyVec<std::string> objects in PyCfgData. This wasn't
-    noticed as a bug since we didn't have this situation. Basically, the problem
+    noticed as a bug since we didn't have this situation. The problem
     was with the concept of keeping pointers to the strings in the data structure.
 
 ## 0.0.6 (released 2022-06-06)

@@ -272,7 +272,23 @@ def PyVecClass(cType = c_char_p):
         return None
 
 class PyFuncTable(Structure):
-    """Wrapper for the parfis::PyFuncTable classs
+    """Wrapper for the parfis::PyFuncTable class. The structure
+    is coppied from :cpp:class:`parfis::PyFuncTable`.
+    
+    Attributes:
+        type (c_int): Type of tabulation (0: linear, 1:nonlinear).
+        colCnt (c_int): Number of columns (increase of 1, in memory 
+            address increases the column counter). If you want values ordered in memory
+            pack them in successive columns.
+        rowCnt (c_int): Number of rows.
+        ranges (c_double): Ranges for tabulation.
+        nbins (c_int): Number of bins per range.
+        idx (c_double): Delta x in every range.
+        xVec (c_double): X axis.
+        yVec (c_double): Y axis (or multiple axis - a matrix).
+        
+    Example:
+        :ref:`/collisional_files/generating_simple_cross_sections.ipynb`
     """
     _fields_ = [
         ('type', c_int),

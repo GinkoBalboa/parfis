@@ -18,11 +18,15 @@ Data structure classes
 
 .. automodule:: parfis
 
+
 .. autoclass:: parfis.Vec3DBase
     :members:
 
 
 .. autoclass:: parfis.Type
+    :members:
+
+.. autoclass:: parfis.PyFuncTable
     :members:
 
 Python tools
