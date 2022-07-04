@@ -12,6 +12,9 @@ vectors of data concerning different aspects of the system.
 .. doxygenstruct:: parfis::State
     :members:
 
+.. doxygenstruct:: parfis::GasCollision
+    :members:
+
 .. doxygentypedef:: parfis::stateId_t
 
 

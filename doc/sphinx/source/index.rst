@@ -62,6 +62,7 @@ the :doc:`demo_files/simple_demo`.
    :caption: Data structures:
 
    sim_data
+   func_table
 
 .. toctree::
    :maxdepth: 2

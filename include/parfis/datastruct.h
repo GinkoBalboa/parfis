@@ -178,13 +178,62 @@ namespace parfis {
          * @brief Returns the vector length in Eucledian metric.
          * @details The length is calculated as @f$ \sqrt{x^2 + y^2 + z^2} @f$
          */
-        T len() { return sqrt(x * x + y * y + z * z); }
+        T len() const { return sqrt(x * x + y * y + z * z); }
 
         /** 
          * @brief Returns the squared vector length in Eucledian metric.
          * @details The length is calculated as @f$ x^2 + y^2 + z^2 @f$
          */
-        T lenSq() { return x * x + y * y + z * z; }
+        T lenSq() const { return x * x + y * y + z * z; }
+    };
+
+        struct PyVecContainer
+    {
+        static std::vector<const char *> pyStrVec;
+    };
+
+    /**
+     * @brief Structure used instead of std::vector<T> for python bindings
+     * @tparam T type of vector
+     */
+    template <class T>
+    struct PyVec 
+    {
+        const T* ptr;
+        size_t size;
+
+        PyVec<T>& operator=(const std::vector<T>& tVec) {
+            size = tVec.size();
+            if (size > 0)
+                ptr = &tVec[0];
+            return *this;
+        }
+    };
+
+    /**
+     * @brief Overload of PyVec for type std::string
+     * @details Dealing with std::string requires different treatment since the
+     * const char pointers are not aligned in memory
+     * @tparam T std::string
+     */
+    template<>
+    struct PyVec<std::string>
+    {   
+        const char ** ptr;
+        size_t size;
+
+        PyVec<std::string>& operator=(const std::vector<std::string>& strVec) {
+            bool init = true;
+            for (auto & str: strVec) {
+                PyVecContainer::pyStrVec.push_back(str.c_str());
+                if (init) {
+                    ptr = &PyVecContainer::pyStrVec.back();
+                    size = strVec.size();
+                    init = false;
+                }
+            }
+            return *this;
+        }
     };
 
     /**
@@ -271,7 +320,9 @@ namespace parfis {
         /// 1/dt
         double idt;
         /// Maximal velocity allowed for the specie in m/s
-        Vec3D<double> maxVel;
+        double maxVel;
+        /// Maximal energy in eV
+        double maxEv;
         /// Minimal velocity value for initial distribution
         Vec3D<double> velInitDistMin;
         /// Maximal velocity value for initial distribution
@@ -296,6 +347,8 @@ namespace parfis {
         int randomSeed;
         /// Vector of ids from the gasCollisionVec
         std::vector<uint32_t> gasCollisionVecId;
+        /// Id for the total collision probability matrix, from gasCollisionProbVec
+        uint32_t gasCollisionProbId;
     };
 
     /**
@@ -318,13 +371,18 @@ namespace parfis {
     };
 
     /**
-     * @brief Tabulated functions, linear and nonlinear tabulation is available
+     * @brief Tabulated function, linear and nonlinear tabulation is available
      * 
      */
     struct FuncTable
     {
-        /// File name
-        const char * fileName;
+        /// Type 0:linear, 1:nonlinear
+        int type;
+        /// Row count
+        /// Column count (index increase by 1, is column increase)
+        int colCnt;
+        /// Row count
+        int rowCnt;
         /// Vector of ranges
         std::vector<double> ranges;
         /// Vector of number of points per range
@@ -332,14 +390,49 @@ namespace parfis {
         /// Vector of 1/dx per range
         std::vector<double> idx;
         /// X values
-        std::vector<double> x;
+        std::vector<double> xVec;
         /// Y values
-        std::vector<double> y;
-        /// Type 0:linear, 1:nonlinear
-        int type;
+        std::vector<double> yVec;
         /// Function to run the evaluation based on type
         std::function<double(double)> eval;
-        int loadData();
+        int loadData(const std::string& fileName);
+    };
+
+    /**
+     * @brief Wrapper for the FuncTable structure to be used by 
+     * ctypes in python.
+     * 
+     */
+    struct PyFuncTable
+    {
+        /// Type 0:linear, 1:nonlinear
+        int type;
+        /// Column count (index increase by 1, is column increase)
+        int colCnt;
+        /// Row count
+        int rowCnt;
+        /// Vector of ranges
+        PyVec<double> ranges;
+        /// Vector of number of points per range
+        PyVec<int> nbins;
+        /// Vector of 1/dx per range
+        PyVec<double> idx;
+        /// X values
+        PyVec<double> xVec;
+        /// Y values
+        PyVec<double> yVec;
+        /// Overload of the equal operator for easier manipulation
+        PyFuncTable& operator=(const FuncTable& ftab) {
+            type = ftab.type;
+            rowCnt = ftab.rowCnt;
+            colCnt = ftab.colCnt;
+            ranges = ftab.ranges;
+            nbins = ftab.nbins;
+            idx = ftab.idx;
+            xVec = ftab.xVec;
+            yVec = ftab.yVec;
+            return *this;
+        }
     };
 
     /**
@@ -355,17 +448,63 @@ namespace parfis {
         const char* fileName;
         /// Id from the specie vector
         uint32_t specieId;
+        /// Id from the gas vector
+        uint32_t gasId;
         /// Threshold in eV
         double threshold;
-        /// Cross section in angstroms, with x-axis is in eV
-        std::vector<double> crosxVec;
         /// Type of collision (elastic, inelastic)
         int type;
         /// Scattering angle (random number sampled with scatterAngle gives deflection in radians)
         std::vector<double> scatterAngle;
-        /// Tabulated func
-        FuncTable ftab;
+        /// Cross section in angstroms, with x-axis is in eV
+        FuncTable xSecFtab;
+        /// Collision frequency, x-axis is in code velocity squared
+        FuncTable freqFtab;
+        int calculateColFreq(const Specie & specie, const Gas& gas);
     };
+
+    /**
+     * @brief Wrapper for the GasCollilsion structure to be used by 
+     * ctypes in python.
+     */
+    struct PyGasCollision
+    {
+        /// Id from the gas collision vector in CfgData
+        uint32_t id;
+        /// Collision name
+        const char* name;
+        /// Cross section file name
+        const char* fileName;
+        /// Id from the specie vector
+        uint32_t specieId;
+        /// Id from the gas vector
+        uint32_t gasId;
+        /// Threshold in eV
+        double threshold;
+        /// Type of collision (elastic, inelastic)
+        int type;
+        /// Scattering angle (random number sampled with scatterAngle gives deflection in radians)
+        PyVec<double> scatterAngle;
+        /// Cross section in angstroms, with x-axis is in eV
+        PyFuncTable xSecFtab;
+        /// Collision frequency, x-axis is in code velocity squared units
+        PyFuncTable freqFtab;
+        /// Overload of the equal operator for easier manipulation
+        PyGasCollision& operator=(const GasCollision& gasCol) {
+            id = gasCol.id;
+            name = gasCol.name;
+            fileName = gasCol.fileName;
+            specieId = gasCol.specieId;
+            gasId = gasCol.gasId;
+            threshold = gasCol.threshold;
+            type = gasCol.type;
+            scatterAngle = gasCol.scatterAngle;
+            xSecFtab = gasCol.xSecFtab;
+            freqFtab = gasCol.freqFtab;
+            return *this;
+        }
+    };
+
 
     /**
      * @brief Holds data about the electromagnetic field.
@@ -384,47 +523,6 @@ namespace parfis {
     };
 
     /**
-     * @brief Structure used instead of std::vector<T> for python bindings
-     * @tparam T type of vector
-     */
-    template <class T>
-    struct PyVec 
-    {
-        const T* ptr;
-        size_t size;
-
-        PyVec<T>& operator=(const std::vector<T>& tVec) {
-            ptr = &tVec[0];
-            size = tVec.size();
-            return *this;
-        }
-    };
-
-    /**
-     * @brief Overload of PyVec for type std::string
-     * @details Dealing with std::string requires different treatment since the
-     * const char pointers are not aligned in memory
-     * @tparam T std::string
-     */
-    template<>
-    struct PyVec<std::string>
-    {   
-        const char ** ptr;
-        size_t size;
-
-        std::vector<const char *> vec;
-
-        PyVec<std::string>& operator=(const std::vector<std::string>& strVec) {
-            vec.clear();
-            for (auto & str: strVec)
-                vec.push_back(str.c_str());
-            ptr = &vec[0];
-            size = vec.size();
-            return *this;
-        }
-    };
-
-    /**
      * @brief Configuration data in format suitable for Python ctypes
      */
     struct PyCfgData
@@ -436,7 +534,9 @@ namespace parfis {
         Vec3D<int>* periodicBoundary;
         Vec3D<int>* cellCount;
         PyVec<std::string> specieNameVec;
-        PyVec<std::string> velInitDistVec;
+        PyVec<std::string> gasNameVec;
+        PyVec<std::string> gasCollisionNameVec;
+        PyVec<std::string> gasCollisionFileNameVec;
     };
 
     /**
@@ -487,6 +587,9 @@ namespace parfis {
         PyVec<Cell> cellVec;
         PyVec<nodeFlag_t> nodeFlagVec;
         PyVec<stateId_t> headIdVec;
+        PyVec<Gas> gasVec;
+        PyVec<PyGasCollision> pyGasCollisionVec;
+        PyVec<PyFuncTable> pyGasCollisionProbVec;
     };
 
     /**
@@ -532,6 +635,12 @@ namespace parfis {
         std::vector<randEngine_t> randomEngineVec;
         /// Vector of gas collision data
         std::vector<GasCollision> gasCollisionVec;
+        /// Vector for the ctypes wrapper
+        std::vector<PyGasCollision> pyGasCollisionVec;
+        /// Vector of total gas collision probability data
+        std::vector<FuncTable> gasCollisionProbVec;
+        /// Vector for the ctypes wrapper
+        std::vector<PyFuncTable> pyGasCollisionProbVec;
         /// Field data
         Field field;
         /// PySimData points to data of this object
@@ -539,6 +648,7 @@ namespace parfis {
         /// Evolution counter
         uint64_t evolveCnt;
         int setPySimData();
+        int calculateColProb(const CfgData * pCfgData);
     };
     /** @} data */
 

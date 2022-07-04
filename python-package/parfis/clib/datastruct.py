@@ -94,6 +94,18 @@ def Vec3DClass(cType = c_int):
         return Vec3D_uint16
     else:
         return None
+    
+class Gas(Structure):
+    """Wrapper for the parfis::Gas class
+    """
+    _fields_ = [
+        ('id', c_uint32),
+        ('name', c_char_p),
+        ('amuMass', c_double),
+        ('volumeFraction', c_double),
+        ('temperature', c_double),
+        ('molDensity', c_double)
+    ]
 
 class State_float(Structure):
     _fields_ = [
@@ -133,19 +145,44 @@ class Specie(Structure):
         ('timestepRatio', c_int),
         ('dt', c_double),
         ('idt', c_double),
-        ('maxVel', Vec3DClass(c_double)),
+        ('maxVel', c_double),
+        ('maxEv', c_double),
         ('velInitDistMin', Vec3DClass(c_double)),
-        ('velInitDistMax', Vec3DClass(c_double))
+        ('velInitDistMax', Vec3DClass(c_double)),
+        ('qm', c_double),
+        ('amuMass', c_double),
+        ('mass', c_double)
     ]
+
+class PyStructBase:
+    """A common base class so PyVec can have a defined struct for 
+    overloaded types tha have PyVec inside them.
+    """
+    def className(self):
+        return "PyStructBase"
 
 class PyVecBase:
     def asList(self):
         if self.__class__ == PyVec_char_p:
             return [self.ptr[i].decode() for i in range(self.size)]
+        else:
+            return [self.ptr[i] for i in range(self.size)]
 
 class PyVec_char_p(Structure, PyVecBase):
     _fields_ = [
         ('ptr', POINTER(c_char_p)),
+        ('size', c_size_t)
+    ]
+
+class PyVec_double(Structure, PyVecBase):
+    _fields_ = [
+        ('ptr', POINTER(c_double)),
+        ('size', c_size_t)
+    ]
+
+class PyVec_int(Structure, PyVecBase):
+    _fields_ = [
+        ('ptr', POINTER(c_int)),
         ('size', c_size_t)
     ]
 
@@ -191,13 +228,32 @@ class PyVec_Specie(Structure, PyVecBase):
         ('size', c_size_t)
     ]
 
+class PyVec_Gas(Structure, PyVecBase):
+    _fields_ = [
+        ('ptr', POINTER(Gas)),
+        ('size', c_size_t)
+    ]
+
 def PyVecClass(cType = c_char_p):
+    """Function returns a class PyVec class for a coresponding argument.
+
+    Args:
+        cType (ctypes type, optional): Type of class. Defaults to c_char_p.
+
+    Returns:
+        PyVec_<type>: Class that inherited PyVecBase and has data of the
+        specified type.
+    """
     if cType == c_char_p:
         return PyVec_char_p
+    elif cType == c_int:
+        return PyVec_int
+    elif cType == c_double:
+        return PyVec_double
     elif cType == c_uint32:
-            return PyVec_uint32
+        return PyVec_uint32
     elif cType == c_uint8:
-            return PyVec_uint8
+        return PyVec_uint8
     elif cType == State_float:
         return PyVec_State_float
     elif cType == State_double:
@@ -206,26 +262,93 @@ def PyVecClass(cType = c_char_p):
         return PyVec_Specie
     elif cType == Cell:
         return PyVec_Cell
+    elif cType == Gas:
+        return PyVec_Gas
+    elif cType == PyGasCollision:
+        return PyVec_PyGasCollision
+    elif cType == PyFuncTable:
+        return PyVec_PyFuncTable
     else:
         return None
+
+class PyFuncTable(Structure):
+    """Wrapper for the parfis::PyFuncTable class. The structure
+    is coppied from :cpp:class:`parfis::PyFuncTable`.
+    
+    Attributes:
+        type (c_int): Type of tabulation (0: linear, 1:nonlinear).
+        colCnt (c_int): Number of columns (increase of 1, in memory 
+            address increases the column counter). If you want values ordered in memory
+            pack them in successive columns.
+        rowCnt (c_int): Number of rows.
+        ranges (c_double): Ranges for tabulation.
+        nbins (c_int): Number of bins per range.
+        idx (c_double): Delta x in every range.
+        xVec (c_double): X axis.
+        yVec (c_double): Y axis (or multiple axis - a matrix).
+        
+    Example:
+        :ref:`/collisional_files/generating_simple_cross_sections.ipynb`
+    """
+    _fields_ = [
+        ('type', c_int),
+        ('colCnt', c_int),        
+        ('rowCnt', c_int),
+        ('ranges', PyVecClass(c_double)),
+        ('nbins', PyVecClass(c_int)),
+        ('idx', PyVecClass(c_double)),
+        ('xVec', PyVecClass(c_double)),
+        ('yVec', PyVecClass(c_double))
+    ]
+
+class PyGasCollision(Structure):
+    """Wrapper for the parfis::PyGasCollision class
+    """
+    _fields_ = [
+        ('id', c_uint32),
+        ('name', c_char_p),
+        ('fileName', c_char_p),
+        ('specieId', c_uint32),
+        ('gasId', c_uint32),
+        ('threshold', c_double),
+        ('type', c_int),
+        ('scatterAngle', PyVecClass(c_double)),
+        ('xSecFtab', PyFuncTable),
+        ('freqFtab', PyFuncTable)
+    ]
+
+class PyVec_PyGasCollision(Structure, PyVecBase):
+    _fields_ = [
+        ('ptr', POINTER(PyGasCollision)),
+        ('size', c_size_t)
+    ]
+    
+class PyVec_PyFuncTable(Structure, PyVecBase):
+    _fields_ = [
+        ('ptr', POINTER(PyFuncTable)),
+        ('size', c_size_t)
+    ]
 
 class PyCfgData(Structure):
     """PyCfgData(ctypes.Structure)
 
     Args:
-        geometry: Name of the geometry (ex. 'cylindrical')
-        timestep: Timestep in seconds, double
+        geometry: Geometry type (0: cubical, 1: cylindrical)
+        timestep: Timestep in seconds
         geometrySize: Pointer to Vec3D_double, size of geometry in meters
         cellCount: Pointer to Vec3D_int, number of cells
     """
     _fields_ = [
-        ('geometry', c_char_p),
+        ('geometry', c_int),
         ('timestep', c_double),
         ('geometrySize', POINTER(Vec3DClass(c_double))),
         ('cellSize', POINTER(Vec3DClass(c_double))),
         ('periodicBoundary', POINTER(Vec3DClass(c_int))),
         ('cellCount', POINTER(Vec3DClass(c_int))),
-        ('specieNameVec', PyVecClass(c_char_p))
+        ('specieNameVec', PyVecClass(c_char_p)),
+        ('gasNameVec', PyVecClass(c_char_p)),
+        ('gasCollisionNameVec', PyVecClass(c_char_p)),
+        ('gasCollisionFileNameVec', PyVecClass(c_char_p))
     ]
 
 class PySimData_float(Structure):
@@ -237,7 +360,10 @@ class PySimData_float(Structure):
         ('specieVec', PyVecClass(Specie)),
         ('cellVec', PyVecClass(Cell)),
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
-        ('headIdVec', PyVecClass(Type.stateId_t))
+        ('headIdVec', PyVecClass(Type.stateId_t)),
+        ('gasVec', PyVecClass(Gas)),
+        ('pyGasCollisionVec', PyVecClass(PyGasCollision)),
+        ('pyGasCollisionProbVec', PyVecClass(PyFuncTable))
     ]
 
 class PySimData_double(Structure):
@@ -249,7 +375,10 @@ class PySimData_double(Structure):
         ('specieVec', PyVecClass(Specie)),
         ('cellVec', PyVecClass(Cell)),
         ('nodeFlagVec', PyVecClass(Type.nodeFlag_t)),
-        ('headIdVec', PyVecClass(Type.stateId_t))
+        ('headIdVec', PyVecClass(Type.stateId_t)),
+        ('gasVec', PyVecClass(Gas)),
+        ('pyGasCollisionVec', PyVecClass(PyGasCollision)),
+        ('pyGasCollisionProbVec', PyVecClass(PyFuncTable))
     ]
 
 def PySimDataClass():
@@ -259,6 +388,7 @@ def PySimDataClass():
         return PySimData_double
     else:
         return None
+
 
 if __name__ == '__main__':
     pass

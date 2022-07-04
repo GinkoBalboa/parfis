@@ -203,6 +203,31 @@ std::vector<std::string> parfis::Global::getInheritanceVector(const std::string&
     return vec;
 }
 
+/**
+ * @brief Gets the n-th element from the array contained in the
+ * string and separated by the sepStr
+ * 
+ * @tparam double 
+ * @param str String containing the array of values
+ * @param n Order of element to be returned
+ * @param splitChar Spliting character (default is ',')
+ * @return double Nth value of the array, parsed as double.
+ */
+template<>
+double parfis::Global::getNthElement(const std::string& str, int n, char splitChar)
+{
+    double retVal;
+    size_t posStart, posEnd;
+    posStart = 0;
+    posEnd = str.find(',', posStart); 
+    int cnt = 0;
+    while(posEnd != std::string::npos && cnt < n) {
+        posStart = posEnd + 1;
+        posEnd = str.find(',', posStart);
+        cnt++;
+    }
+    return std::strtold(str.substr(posStart, posEnd - posStart).c_str(), nullptr);
+}
 
 std::string parfis::Global::to_string(double num)
 {

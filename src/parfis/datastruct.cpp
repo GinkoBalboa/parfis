@@ -218,6 +218,8 @@ parfis::Param<std::string>* parfis::Domain::getParent(const std::string& cstr) {
     return pp;
 }
 
+std::vector<const char*> parfis::PyVecContainer::pyStrVec;
+
 int parfis::CfgData::setPyCfgData()
 {
     pyCfgData.geometry = geometry;
@@ -226,7 +228,19 @@ int parfis::CfgData::setPyCfgData()
     pyCfgData.cellSize = &cellSize;
     pyCfgData.periodicBoundary = &periodicBoundary;
     pyCfgData.cellCount = &cellCount;
+    // Reserve space in the PyVecContainer::pyStrVec for strings
+    auto sizeRes = 0;
+    sizeRes += specieNameVec.size();
+    sizeRes += gasNameVec.size();
+    sizeRes += gasCollisionNameVec.size();
+    sizeRes += gasCollisionFileNameVec.size();
+    PyVecContainer::pyStrVec.clear();
+    PyVecContainer::pyStrVec.reserve(sizeRes);
+    // Fill containter with pointer to strings
     pyCfgData.specieNameVec = specieNameVec;
+    pyCfgData.gasNameVec = gasNameVec;
+    pyCfgData.gasCollisionNameVec = gasCollisionNameVec;
+    pyCfgData.gasCollisionFileNameVec = gasCollisionFileNameVec;
     return 0;
 }
 
@@ -248,6 +262,23 @@ int parfis::SimData::setPySimData()
     pySimData.cellVec = cellVec;
     pySimData.nodeFlagVec = nodeFlagVec;
     pySimData.headIdVec = headIdVec;
+    pySimData.gasVec = gasVec;
+    // First set the wrapper data
+    pyGasCollisionVec.resize(gasCollisionVec.size());
+    for (auto i = 0; i < gasCollisionVec.size(); i++) {
+        pyGasCollisionVec[i] = gasCollisionVec[i];
+    }
+    // Get references
+    pySimData.pyGasCollisionVec = pyGasCollisionVec;
+
+    // First set the wrapper data
+    pyGasCollisionProbVec.resize(gasCollisionProbVec.size());
+    for (auto i = 0; i < gasCollisionProbVec.size(); i++) {
+        pyGasCollisionProbVec[i] = gasCollisionProbVec[i];
+    }
+    // Get references
+    pySimData.pyGasCollisionProbVec = pyGasCollisionProbVec;
+
     return 0;
 }
 
@@ -292,24 +323,128 @@ int parfis::Domain::initialize(const std::string& cstr)
  * 
  * @return int Zero on success
  */
-int parfis::FuncTable::loadData()
+int parfis::FuncTable::loadData(const std::string& fileName)
 {
-    if (fileName == nullptr)
-        return 1;
     std::ifstream infile(fileName);
     std::string line;
+    rowCnt = 1;
+    colCnt = 0;
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         if (line[0] == '#') {
             // Find nbins
-            if (line.find("bins") != std::string::npos)
+            if (line.find("bins") != std::string::npos) {
                 Global::setValueVec<int>(nbins, line, '[', ']');
+                int vecSize = 0;
+                for (auto nbin : nbins)
+                    vecSize += nbin;
+                xVec.resize(vecSize);
+                yVec.resize(vecSize);
+            }
             // Find ranges
             if (line.find("ranges") != std::string::npos)
                 Global::setValueVec<double>(ranges, line, '[', ']');
         }
         else {
-            
+            if (colCnt > xVec.size() - 1)
+                return 2;
+            // Else is pure data
+            xVec[colCnt] = Global::getNthElement<double>(line, 0);
+            yVec[colCnt] = Global::getNthElement<double>(line, 1);
+            colCnt++;
+        }
+    }
+    if (colCnt != xVec.size())
+        return 3;
+
+    return 0;
+}
+
+/**
+ * @brief Calculates the collision frequency.
+ * 
+ * @return int Zero on success
+ */
+int parfis::GasCollision::calculateColFreq(const Specie & spec, const Gas& gas)
+{
+    double vMaxSq = spec.maxVel*spec.maxVel;
+    double ivMaxSq = 1.0/vMaxSq;
+    double im = 1.0/spec.mass;
+    double dt = spec.dt;
+    // Probability data
+    freqFtab.nbins = xSecFtab.nbins;
+    freqFtab.ranges.resize(freqFtab.nbins.size());
+    freqFtab.rowCnt = xSecFtab.rowCnt;
+    freqFtab.colCnt = xSecFtab.colCnt;
+    for(auto i = 0; i < xSecFtab.ranges.size(); i++) {
+        freqFtab.ranges[i] = 
+            2.0*xSecFtab.ranges[i]*Const::eVJ*im*ivMaxSq;
+    }
+    freqFtab.xVec.resize(xSecFtab.xVec.size());
+    freqFtab.yVec.resize(xSecFtab.xVec.size());
+    for(auto i = 0; i < xSecFtab.xVec.size(); i++) {
+        freqFtab.xVec[i] = 2.0*xSecFtab.xVec[i]*Const::eVJ*im;
+        freqFtab.yVec[i] = 
+            gas.molDensity*Const::Na*xSecFtab.yVec[i]*1.0e-20*sqrt(freqFtab.xVec[i])*spec.dt;
+        freqFtab.xVec[i] *= ivMaxSq;
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Calculates collision probability from the cx
+ * 
+ * @return int Zero on success
+ */
+int parfis::SimData::calculateColProb(const CfgData * pCfgData) 
+{
+    // Calculate total collison data
+    for (size_t i = 0; i < pCfgData->specieNameVec.size(); i++) {
+        if (specieVec[i].gasCollisionVecId.size() == 0) continue;
+        gasCollisionProbVec.push_back({});
+        FuncTable * pft = &gasCollisionProbVec.back();
+        specieVec[i].gasCollisionProbId = gasCollisionProbVec.size() - 1;
+        pft->type = 1; // nonlinear tabulation
+        // Construct matrix dimensions here
+        pft->colCnt = specieVec[i].gasCollisionVecId.size();
+        for (size_t j = 0; j < pft->colCnt; j++) {
+            GasCollision * pGasCol = &gasCollisionVec[specieVec[i].gasCollisionVecId[j]];
+            // Initialize
+            if (j == 0) {
+                pft->nbins = pGasCol->freqFtab.nbins;
+                pft->ranges = pGasCol->freqFtab.ranges;
+                pft->rowCnt = pGasCol->freqFtab.xVec.size();
+                pft->xVec = pGasCol->freqFtab.xVec;
+                pft->yVec.resize(pft->rowCnt*pft->colCnt, 0);
+            }
+            for (auto k = 0; k < pft->rowCnt; k++) {
+                pft->yVec[k*pft->colCnt + j] = pGasCol->freqFtab.yVec[k];
+                if (j > 0)
+                    pft->yVec[k*pft->colCnt + j] += pft->yVec[k*pft->colCnt + j - 1];
+            }
+        }
+
+        auto jt = pft->colCnt - 1;
+        double prob;
+        for (size_t j = 0; j < pft->colCnt - 1; j++) {
+            for (auto k = 0; k < pft->rowCnt; k++) {
+                // Relative collision probabilities
+                prob = pft->yVec[k*pft->colCnt + j]/pft->yVec[k*pft->colCnt + jt];
+                if (prob != prob)
+                    prob = 0;
+                pft->yVec[k*pft->colCnt + j] = prob;
+            }
+        }
+        // Last column is a total collision probability
+        for (auto k = 0; k < pft->rowCnt; k++) {
+            pft->yVec[k*pft->colCnt + jt] = 1.0 - exp(-pft->yVec[k*pft->colCnt + jt]);
+        }
+        for (size_t j = 0; j < pft->colCnt - 1; j++) {
+            for (auto k = 0; k < pft->rowCnt; k++) {
+                // Scale the relative collision prob. to the total col. prob.
+                pft->yVec[k*pft->colCnt + j] *= pft->yVec[k*pft->colCnt + jt];
+            }
         }
     }
     return 0;

@@ -109,6 +109,9 @@ class Parfis:
 
         Parfis.lib.info.argtypes = None
         Parfis.lib.info.restype = c_char_p
+        
+        Parfis.lib.getConfig.argtypes = [c_uint32]
+        Parfis.lib.getConfig.restype = c_char_p
 
         Parfis.lib.newParfis.argtypes = [c_char_p]
         Parfis.lib.newParfis.restype = c_uint32
@@ -143,6 +146,9 @@ class Parfis:
         Parfis.lib.runCommandChain.argtypes = [c_uint32, c_char_p]
         Parfis.lib.runCommandChain.restype = c_int
 
+        Parfis.lib.setConfigFromFile.argtypes = [c_uint32, c_char_p]
+        Parfis.lib.setConfigFromFile.restype = c_int
+
     @staticmethod
     def unload_lib():
         print(f"Unload lib: {Parfis.libPath[len(Parfis.currPath)+1:]}")
@@ -163,8 +169,28 @@ class Parfis:
             raise NotImplementedError("Unknown platform.")
 
     @staticmethod
-    def info() -> str:
+    def info() -> int:
+        """ Wrapper for parfis::api::info()
+        
+        Returns:
+            str: Info about parfis lib
+        """
         return Parfis.lib.info().decode()
+    
+    @staticmethod
+    def getConfig(id: int) -> int:
+        """ Wrapper for parfis::api::getConfig(id). Returns the configuration 
+        by reading the loaded objects properties, not a copy of the 
+        configuration string. The returned string is formated in a manner that
+        the same string can be used as input string (or saved to file - as input file).
+        
+        Args: 
+            id (int): Parfis id.
+        
+        Returns:
+            str: Configuration string
+        """
+        return Parfis.lib.getConfig(id).decode()
     
     @staticmethod
     def newParfis(cfgStr: str  = "") -> int:
@@ -209,6 +235,10 @@ class Parfis:
     @staticmethod
     def runCommandChain(id: int, cmdStr: str) -> int:
         return Parfis.lib.runCommandChain(id, cmdStr.encode())
+
+    @staticmethod
+    def setConfigFromFile(id: int, fileName: str) -> int:
+        return Parfis.lib.setConfigFromFile(id, fileName.encode())
 
     
 def getAbsoluteCellId(cellCount: Vec3DBase, node: Vec3DBase) -> int:

@@ -86,6 +86,7 @@ class TestApi(unittest.TestCase):
         Parfis.loadCfgData(parId)
         Parfis.setPyCfgData(parId)
         ptrCfgData = Parfis.getPyCfgData(parId)
+        self.assertEqual(1,ptrCfgData.geometry)
         self.assertEqual(1.0,ptrCfgData.timestep)
         self.assertEqual((0.02, 0.02, 0.4),ptrCfgData.geometrySize[0].asTuple())
         self.assertEqual((0.001, 0.001, 0.001),ptrCfgData.cellSize[0].asTuple())

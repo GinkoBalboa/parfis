@@ -16,6 +16,13 @@
 /// Main namespace of the library
 namespace parfis 
 {
+    /// Collision type
+    enum struct Collision : int {
+        Total = -1,
+        Elastic = 0,
+        Inelastic = 1
+    };
+
     /// Global functions
     struct Global {
         /// Get current date and time in the format YYYY-MM-DD HH:mm:ss
@@ -35,6 +42,9 @@ namespace parfis
 
         template<class T>
         static int setValueVec(std::vector<T>& vecRef, const std::string& str, char bra, char ket);
+
+        template<class T>
+        static T getNthElement(const std::string& str, int n, char splitChar = ',');
 
         /// Convert double to string
         static std::string to_string(double num);

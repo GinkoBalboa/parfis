@@ -1,4 +1,4 @@
-name: Build and test Release
+name: Build and test
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
         required: true
         default: false
         type: boolean
-
+  
 jobs:
 
   build-and-gtest:
@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        config: [Release]
+        config: [Release, Debug]
         state_t: [float, double]
 
     name: Build and run gtestAll
@@ -47,6 +47,20 @@ jobs:
         cmake .. -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON -DPARFIS_STATE_TYPE_DOUBLE=ON
         cmake --build . --config Release
 
+    - if: ${{ matrix.config=='Debug' && matrix.state_t=='float' }}
+      name: Build Debug float
+      run: |
+        cd build
+        cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=OFF -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON
+        cmake --build . --config Debug
+
+    - if: ${{ matrix.config=='Debug' && matrix.state_t=='double' }}
+      name: Build Debug double
+      run: |
+        cd build
+        cmake .. -DBUILD_DEBUG=ON -DPARFIS_STATE_TYPE_DOUBLE=ON -DBUILD_GOOGLE_TEST=ON -DBUILD_GTESTALL=ON
+        cmake --build . --config Debug
+
     # Run gtestAll
     
     - if: ${{ matrix.config=='Release' && matrix.os=='ubuntu-latest'}} 
@@ -56,6 +70,14 @@ jobs:
     - if: ${{ matrix.config=='Release' && matrix.os=='windows-latest'}} 
       name: Run gtestAll.exe
       run: build/bin/gtestAll/gtestAll.exe
+
+    - if: ${{ matrix.config=='Debug' && matrix.os=='ubuntu-latest' }} 
+      name: Run gtestAlld
+      run: build/bin/gtestAll/gtestAlld
+
+    - if: ${{ matrix.config=='Debug' && matrix.os=='windows-latest' }} 
+      name: Run gtestAlld.exe
+      run: build/bin/gtestAll/gtestAlld.exe
 
     # Upload artifacts
 

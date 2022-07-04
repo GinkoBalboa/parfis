@@ -24,7 +24,7 @@ git_rev = '@GIT_REV@'
 
 project = 'Parfis'
 author = 'Ginko Balboa'
-copyright = f'2022, by {author}, {git_tag}-{git_rev}'
+copyright = f'2022, by {author}, ver:{version}, tag:{git_tag}, rev:{git_rev}'
 
 # Uncomment bellow block of code if you want to use |variable| in .rst files
 

@@ -15,9 +15,10 @@ option(BUILD_SPHINX "Build documentation using Sphinx." OFF)
 option(BUILD_GOOGLE_TEST "Build google test" OFF)
 option(BUILD_GTESTALL "Build gtestAll" OFF)
 option(COPY_LIB_PYTHON "Copy parfis lib for python module" OFF)
-option(NBSPHINX_EXECUTE "Should nbsphinx be executed when generating doc." ON)
+option(NBSPHINX_EXECUTE "Should nbsphinx be executed when generating doc." OFF)
 
 if(MSVC)
+    message("MSVC is set")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
@@ -59,6 +60,7 @@ endif()
 
 # Copy shared libs for the python-package
 if(BUILD_LIB AND COPY_LIB_PYTHON)
+    message("Copy lib to python")
     add_custom_command(TARGET parfis POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy 
         ${PARFIS_FILE_DIR}/${PARFIS_FILE_NAME} 
@@ -68,6 +70,7 @@ endif()
 
 # parfisApp
 if(BUILD_PARFISAPP)
+    message("Bulding parfisApp")
     file(GLOB_RECURSE PARFIS_APP_SOURCES ${parfis_SOURCE_DIR}/src/parfisApp/*.cpp ${parfis_SOURCE_DIR}/src/parfisApp/*.h)
     add_executable(parfisApp)
     target_sources(parfisApp PRIVATE ${PARFIS_APP_SOURCES})
@@ -104,11 +107,13 @@ if(BUILD_DOXYGEN OR BUILD_SPHINX)
 endif()
 
 # Sphinx
+message("BUILD_SPHINX=${BUILD_SPHINX}")
 if(BUILD_SPHINX)
     message("Building sphinx")
+    message("NBSPHINX_EXECUTE=${NBSPHINX_EXECUTE}")
     if(NBSPHINX_EXECUTE)
         set(NBSPHINX_EXECUTE_STR "always")
-    else()
+    else(NBSPHINX_EXECUTE)
         set(NBSPHINX_EXECUTE_STR "never")
     endif(NBSPHINX_EXECUTE)
     message("NBSPHINX_EXECUTE_STR=${NBSPHINX_EXECUTE_STR}")
@@ -152,7 +157,7 @@ endif()
 # gtestAll
 if(BUILD_GTESTALL)
     message("Build gtestAll")
-    include(${parfis_SOURCE_DIR}/test/CMakeLists.txt)
+    include(${parfis_SOURCE_DIR}/cpp_test/CMakeLists.txt)
 endif()
 
 message("VERSION = ${VERSION}")
