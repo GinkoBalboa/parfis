@@ -92,7 +92,7 @@ You can use the supplied conda environment `.yml` file to create an
 environment `parfis` from which you can perform all the compilation, google testing,
 pytesting and doc generation.
 
-To create a `parfis` environment, and run compilation with google testing run:
+To create a `parfis` environment run:
 
 ``` bash
 cd script
@@ -102,7 +102,7 @@ conda activate parfis
 
 To run python tests: 
 - Install the requred python modules from the requrements file in the script directory. 
-- Run local installation of parfis with pytest run
+- Run local installation of parfis.
 
 ``` bash
 pip install -r requirements.txt
