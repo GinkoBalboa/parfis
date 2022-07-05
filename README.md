@@ -98,7 +98,6 @@ To create a `parfis` environment, and run compilation with google testing run:
 cd script
 conda env create -n parfis --file ./parfisCondaEnv.yml
 conda activate parfis
-./buildDebug32_64_buildGoogleTest_and_gtestAll.sh
 ```
 
 To run python tests: 
@@ -107,7 +106,7 @@ To run python tests:
 
 ``` bash
 pip install -r requirements.txt
-./installParfisLocaly_and_runPythonTests.sh
+./installParfisLocally.sh
 ```
 
 Since the `requirements.txt` has all the needed modules to generate
