@@ -1,6 +1,6 @@
 # Change log
 
-## 0.0.7 (released 2022-07-04)
+## 0.0.7 (released 2022-07-05)
 
 Features:
   - **FuncTable** structure - to have nonlinear function tabulation. This is needed 
@@ -11,6 +11,7 @@ Changes:
   - Changed location of tests:
     * c++ tests are now in cpp_test
     * python tests are now in python_test
+  - Purged the scripts folder a little bit.
 
 Fixes:
   - Fixed multiple PyVec<std::string> objects in PyCfgData. This wasn't

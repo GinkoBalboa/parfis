@@ -41,21 +41,37 @@ The build configuration is generated with CMake. After obtaining the source from
 GitHub repo, run the CMake commands shown here.
 
 
-### Requirements
+### Simple build (no googletest)
 
-For building the dynamic library you will need cmake and cxx compiler. For running
-tests you will need to pull and build google test. On Linux the following commands
-will install cmake and cxx compiler, and the script will build the parfis lib in 
-debug mode and pull, build and run google test and gtest.
+For building the dynamic library you will need cmake and cxx compiler. For running cpp
+tests you will need to pull and build googletest. On Linux the following commands
+will install cmake and cxx compiler, and the scripts build the parfis lib for the two 
+versions of the state variable (float and double) and run the python tests:
 
 ``` bash
 sudo apt get install cmake
 sudo apt get install g++
 cd scripts
-./buildDebug32_64_buildGoogleTest_and_gtestAll.sh
+./buildParfis.sh 
+./buildParfis.sh float
+./installParfisLocally.sh
+./runPythonTests.sh
 ```
 
-### Building on Linux and Windows
+### Building with googletest
+
+If you plan to run googletests on the pure cpp library. You should install google test
+first and set the cmake script build you the tests from `cpp_test` folder. This is written
+in the following scripts (for debug mode and state type double).
+
+``` bash 
+cd scripts
+./buildGoogletest.sh
+./buildParfis.sh Debug gtestAll
+./runDebugGtestAll.sh
+```
+
+### Building on Linux and Windows from terminal
 
 Building on Linux and Windows is the same, presumably you have CMake installed:
 

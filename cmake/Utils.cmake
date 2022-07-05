@@ -189,7 +189,6 @@ function(set_version)
     string(STRIP "${GIT_TAG}" GIT_TAG)
     string(STRIP "${VERSION}" VERSION)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
-    message("VERSION_H=\n${VERSION_H}")
 
     set(BUILD_CONFIG_STR "Release")
     if(BUILD_DEBUG)
@@ -207,7 +206,7 @@ function(set_version)
 #endif // PARFIS_VERSION_H
 ")
 
-    message("VERSION_H=\n${VERSION_H}")
+    message("VERSION_H:\n${VERSION_H}")
     set(VERSION "${VERSION}" PARENT_SCOPE)
     set(GIT_TAG "${GIT_TAG}" PARENT_SCOPE)
     set(GIT_REV "${GIT_REV}${GIT_DIFF}" PARENT_SCOPE)

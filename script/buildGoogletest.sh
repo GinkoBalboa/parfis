@@ -6,10 +6,9 @@ if [[ $curdir != "script" ]]; then
   exit 1
 fi
 ./removeCMakeBuildFiles.sh
-./buildRelease32_64.sh
-cd ../python-package
-python -m pip install -e . --force-reinstall
 cd ../build
-rm -rf ./doc
-cmake .. -DBUILD_SPHINX=ON -DBUILD_LIB=OFF
+echo "Remove googletest files"
+rm -rf ./googletest* ./gtest* ./lib/googletest
+echo "Build googletest"
+cmake .. -DBUILD_LIB=OFF -DBUILD_GTESTALL=OFF -DBUILD_GOOGLE_TEST=ON
 cmake --build . --config Release

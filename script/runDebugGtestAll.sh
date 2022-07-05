@@ -5,6 +5,6 @@ if [[ $curdir != "script" ]]; then
   echo "You must call this script from the folder /parfis/script"
   exit 1
 fi
-./buildRelease32_64.sh
-./installParfisLocally.sh
-./buildDocOnly.sh
+echo "Run debug cpp tests"
+cd ..
+./build/bin/gtestAll/gtestAlld
