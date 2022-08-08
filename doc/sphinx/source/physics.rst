@@ -8,3 +8,4 @@ notebooks, from the folder ``parfis/doc/sphinx/source/physics_files`` of the sou
   :maxdepth: 1
 
   /physics_files/cylindrical_reflection.ipynb
+  /physics_files/scattering_after_collision.ipynb
