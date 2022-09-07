@@ -77,3 +77,6 @@ parfis.egg-info
 *.pdf
 *.html
 doc/sphinx/source/collisional_files/*csv
+
+# Some backup files
+*.svg.bkp
