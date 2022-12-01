@@ -125,8 +125,8 @@ set(CONFIG_END_H "\
     # No need to treat single quote in c++ inside double quotes string
     # string(REPLACE "\'" "\\\'" DEFAULT_CONFIG ${DEFAULT_CONFIG})
 
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h)
-        file(READ ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h OLD_CONFIG_H)        
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/parfis/config.h)
+        file(READ ${CMAKE_CURRENT_SOURCE_DIR}/src/parfis/config.h OLD_CONFIG_H)        
     else()
         set(OLD_CONFIG_H "")
     endif()
@@ -135,7 +135,7 @@ set(CONFIG_END_H "\
 
     if(NOT "${CONFIG_H}" STREQUAL "${OLD_CONFIG_H}")
         message("Creating new config.h")
-        file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/include/parfis/config.h "${CONFIG_START_H}${DEFAULT_CONFIG}${CONFIG_END_H}")
+        file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/src/parfis/config.h "${CONFIG_START_H}${DEFAULT_CONFIG}${CONFIG_END_H}")
     endif()
 
 endfunction(set_config_string)
@@ -211,13 +211,13 @@ function(set_version)
     set(GIT_TAG "${GIT_TAG}" PARENT_SCOPE)
     set(GIT_REV "${GIT_REV}${GIT_DIFF}" PARENT_SCOPE)
 
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h)
-        file(READ ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h OLD_VERSION_H)        
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/parfis/version.h)
+        file(READ ${CMAKE_CURRENT_SOURCE_DIR}/src/parfis/version.h OLD_VERSION_H)        
     else()
         set(OLD_VERSION_H "")
     endif()
     if(NOT "${VERSION_H}" STREQUAL "${OLD_VERSION_H}")
-        file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/include/parfis/version.h "${VERSION_H}")
+        file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/src/parfis/version.h "${VERSION_H}")
     endif()
 endfunction(set_version)
 

@@ -48,8 +48,8 @@ if (BUILD_LIB)
     set_target_properties(parfis PROPERTIES PUBLIC_HEADER "parfis.h")
     set_target_properties(parfis PROPERTIES FILE_DIR ${parfis_SOURCE_DIR}/build/lib/parfis)
     target_include_directories(parfis PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/parfis>
-        $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/parfis>
+        $<INSTALL_INTERFACE:lib/parfis>  # <prefix>/include
     )
     set_output_directory(parfis ${parfis_SOURCE_DIR}/build/lib/parfis)
     get_target_property(PARFIS_FILE_DIR parfis FILE_DIR)
@@ -75,8 +75,8 @@ if(BUILD_PARFISAPP)
     add_executable(parfisApp)
     target_sources(parfisApp PRIVATE ${PARFIS_APP_SOURCES})
     target_include_directories(parfisApp PUBLIC
-        $<BUILD_INTERFACE:${parfis_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:lib/parfis/include>  # <prefix>/include
+        $<BUILD_INTERFACE:${parfis_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:lib/parfis>  # <prefix>/include
     )
     set_output_directory(parfisApp ${parfis_SOURCE_DIR}/build/bin/parfisApp)
     set_properties(parfisApp EXECUTABLE "")
@@ -159,7 +159,7 @@ endif()
 # gtestAll
 if(BUILD_GTESTALL)
     message("Build gtestAll")
-    include(${parfis_SOURCE_DIR}/cpp_test/CMakeLists.txt)
+    include(${parfis_SOURCE_DIR}/tests/cpp_test/CMakeLists.txt)
 endif()
 
 message("VERSION = ${VERSION}")

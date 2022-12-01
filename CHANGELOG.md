@@ -1,5 +1,11 @@
 # Change log
 
+## 0.0.8 (released yyyy-mm-dd)
+
+Changes:
+  - Moved headers in `src` folder, moved tests in `tests` folder.
+  - Removed the `scripts` folder.
+
 ## 0.0.7 (released 2022-07-05)
 
 Features:

@@ -208,5 +208,5 @@ jobs:
       run: |
         pip install --force-reinstall -v --find-links=./python-package/dist/ --no-index parfis
         pip install -r ./python-package/requirements.txt
-        python ./python_test/runAll.py float
-        python ./python_test/runAll.py double
+        python ./tests/python_test/runAll.py float
+        python ./tests/python_test/runAll.py double
