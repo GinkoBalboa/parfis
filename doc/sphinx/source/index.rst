@@ -46,7 +46,7 @@ the :doc:`demo_files/simple_demo`.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorials:
+   :caption: Examples:
 
    demo
 

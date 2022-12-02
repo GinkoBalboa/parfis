@@ -6,7 +6,7 @@
 
 Parfis is an acronym for Particles and Field Simulator. Parfis is written in 
 C++ with Python bindings. The algorithm is based on the particle-in-cell 
-(PIC) method used for interacting many-particle systems. In the PIC method
+(PIC) method used for interacting many-particles systems. In the PIC method
 individual particles (or fluid elements) in a Lagrangian frame are tracked 
 in a continuous phase space, whereas moments of the distribution such as 
 densities and currents are computed simultaneously on Eulerian (stationary) 
@@ -53,4 +53,4 @@ cmake --build . --config Release
 ```
 python_test
 For more info on building from source check [build](https://www.parfis.com/build.html) section 
-from the doc web-size.
+from the doc web-site.
